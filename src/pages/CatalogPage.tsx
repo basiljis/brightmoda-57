@@ -1,0 +1,132 @@
+import { useState } from "react";
+import ProductCard from "@/components/ProductCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { products } from "@/data/products";
+import { Search, Filter, Grid, List } from "lucide-react";
+
+const CatalogPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Все");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const categories = ["Все", ...Array.from(new Set(products.map(p => p.category)))];
+  
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "Все" || product.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-4">Каталог товаров</h1>
+          <p className="text-muted-foreground">
+            Коллекция премиальной одежды из мериносовой шерсти
+          </p>
+        </div>
+
+        {/* Filters & Search */}
+        <div className="bg-card p-6 rounded-lg shadow-soft mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Поиск товаров..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Badge
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-elegant"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Badge>
+              ))}
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Info */}
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-muted-foreground">
+            Найдено {filteredProducts.length} товар{filteredProducts.length !== 1 && filteredProducts.length < 5 ? 'а' : 'ов'}
+          </p>
+          <Button variant="ghost" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Фильтры
+          </Button>
+        </div>
+
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Товары не найдены
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Попробуйте изменить поисковый запрос или фильтры
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("Все");
+              }}
+            >
+              Сбросить фильтры
+            </Button>
+          </div>
+        ) : (
+          <div className={`grid gap-6 ${
+            viewMode === "grid" 
+              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+              : "grid-cols-1"
+          }`}>
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CatalogPage;
