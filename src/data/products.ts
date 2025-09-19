@@ -13,6 +13,7 @@ export interface Product {
   materials: string;
   care: string[];
   sizes: string[];
+  relatedProducts?: number[];
 }
 
 export const products: Product[] = [
@@ -38,7 +39,8 @@ export const products: Product[] = [
       "Сушить горизонтально",
       "Гладить через влажную ткань"
     ],
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"]
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    relatedProducts: [2, 3]
   },
   {
     id: 2,
@@ -61,7 +63,8 @@ export const products: Product[] = [
       "Сушить в разложенном виде",
       "Хранить на вешалке"
     ],
-    sizes: ["S", "M", "L", "XL"]
+    sizes: ["S", "M", "L", "XL"],
+    relatedProducts: [1, 4]
   },
   {
     id: 3,
@@ -84,7 +87,8 @@ export const products: Product[] = [
       "Не отжимать",
       "Сушить вертикально"
     ],
-    sizes: ["XS", "S", "M", "L", "XL"]
+    sizes: ["XS", "S", "M", "L", "XL"],
+    relatedProducts: [1, 4]
   },
   {
     id: 4,
@@ -107,6 +111,7 @@ export const products: Product[] = [
       "Сушить горизонтально",
       "Гладить с изнаночной стороны"
     ],
-    sizes: ["S", "M", "L", "XL", "XXL"]
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    relatedProducts: [2, 3]
   }
 ];

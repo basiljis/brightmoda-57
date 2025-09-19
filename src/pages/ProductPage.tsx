@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Heart, ShoppingBag, ArrowLeft, Star, Truck, Shield, RotateCcw } from "lucide-react";
 import { products } from "@/data/products";
 import { useState } from "react";
+import RelatedProducts from "@/components/RelatedProducts";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -209,6 +210,14 @@ const ProductPage = () => {
             </ul>
           </div>
         </div>
+
+        {/* Related Products */}
+        {product.relatedProducts && product.relatedProducts.length > 0 && (
+          <RelatedProducts 
+            productIds={product.relatedProducts} 
+            currentProductId={product.id}
+          />
+        )}
       </div>
     </div>
   );
