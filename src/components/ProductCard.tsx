@@ -24,67 +24,41 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="group bg-card rounded-lg overflow-hidden shadow-soft hover:shadow-elegant transition-elegant border border-border">
-      <div className="relative overflow-hidden">
-        <Link to={`/product/${product.id}`}>
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        </Link>
-        
-        {/* Favorite Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`absolute top-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background transition-elegant ${
-            isFavorited ? "text-red-500" : "text-muted-foreground"
-          }`}
-          onClick={toggleFavorite}
-        >
-          <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
-        </Button>
-
-        {/* Discount Badge */}
-        {product.originalPrice && (
-          <div className="absolute top-3 left-3 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-medium">
-            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+    <div className="group cursor-pointer">
+      <Link to={`/product/${product.id}`}>
+        <div className="relative overflow-hidden bg-card rounded-none shadow-soft hover:shadow-elegant transition-all duration-300">
+          <div className="aspect-square">
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <div className="mb-2">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">
-            {product.category}
-          </p>
-        </div>
-        
-        <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-foreground mb-2 hover:text-primary transition-elegant line-clamp-2">
-            {product.name}
-          </h3>
-        </Link>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-foreground">
-              {product.price.toLocaleString('ru-RU')} ₽
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                {product.originalPrice.toLocaleString('ru-RU')} ₽
+          
+          <div className="p-6 space-y-3">
+            <h3 className="font-light text-lg text-foreground tracking-wide group-hover:text-primary transition-colors">
+              {product.name}
+            </h3>
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xl font-light text-foreground tracking-wide">
+                {product.price.toLocaleString()} ₽
               </span>
-            )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={toggleFavorite}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-2"
+              >
+                <Heart 
+                  className={`h-4 w-4 transition-colors ${
+                    isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'
+                  }`}
+                />
+              </Button>
+            </div>
           </div>
-
-          <Button variant="hero" size="sm">
-            <ShoppingBag className="h-4 w-4 mr-2" />
-            В корзину
-          </Button>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };
