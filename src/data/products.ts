@@ -7,6 +7,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
+  hoverImage?: string;
   category: string;
   description: string;
   features: string[];
@@ -15,6 +16,9 @@ export interface Product {
   sizes: string[];
   colors?: { name: string; image: string }[];
   relatedProducts?: number[];
+  isNew?: boolean;
+  isPreorder?: boolean;
+  isFeatured?: boolean;
 }
 
 export const products: Product[] = [
@@ -24,7 +28,10 @@ export const products: Product[] = [
     price: 12900,
     originalPrice: 15900,
     image: sweatearBeige,
+    hoverImage: cardiganCream,
     category: "Свитеры",
+    isNew: true,
+    isFeatured: true,
     description: "Элегантный свитер из 100% шерсти мериноса. Невероятно мягкий и теплый, идеально подходит для прохладной погоды. Классический крой позволяет носить как в повседневной жизни, так и в офисе.",
     features: [
       "100% шерсть мериноса премиум качества",
@@ -52,7 +59,10 @@ export const products: Product[] = [
     name: "Кардиган oversize из мериноса",
     price: 18500,
     image: cardiganCream,
+    hoverImage: sweatearBeige,
     category: "Кардиганы",
+    isPreorder: true,
+    isFeatured: true,
     description: "Стильный кардиган свободного кроя из тончайшей мериносовой шерсти. Универсальная модель, которая прекрасно сочетается с любым гардеробом. Идеален для создания элегантных образов.",
     features: [
       "Свободный силуэт oversize",
@@ -79,7 +89,10 @@ export const products: Product[] = [
     name: "Водолазка базовая из мериноса",
     price: 9900,
     image: sweatearBeige,
+    hoverImage: cardiganCream,
     category: "Водолазки",
+    isNew: true,
+    isFeatured: true,
     description: "Базовая водолазка из мериносовой шерсти - незаменимая вещь в гардеробе. Тонкий материал позволяет носить её под пиджаки и жакеты, создавая многослойные образы.",
     features: [
       "Облегающий силуэт",

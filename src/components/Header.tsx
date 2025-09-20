@@ -11,9 +11,11 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import logo from "@/assets/logo.png";
+import { products } from "@/data/products";
 
 const Header = () => {
   const location = useLocation();
+  const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
@@ -36,8 +38,8 @@ const Header = () => {
                   КАТАЛОГ
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="grid w-[600px] gap-6 p-6">
-                    <div className="grid grid-cols-2 gap-6">
+                  <div className="grid w-[800px] gap-6 p-6">
+                    <div className="grid grid-cols-3 gap-6">
                       {/* Одежда */}
                       <div className="space-y-3">
                         <h4 className="text-sm font-medium tracking-wide text-foreground/80">ОДЕЖДА</h4>
@@ -117,6 +119,44 @@ const Header = () => {
                               </Link>
                             </NavigationMenuLink>
                           </div>
+                        </div>
+                      </div>
+                      
+                      {/* Новинки */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
+                        <div className="space-y-4">
+                          {featuredProducts.map((product) => (
+                            <NavigationMenuLink asChild key={product.id}>
+                              <Link to={`/product/${product.id}`} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                <div className="relative">
+                                  <img 
+                                    src={product.image} 
+                                    alt={product.name}
+                                    className="w-12 h-12 object-cover rounded"
+                                  />
+                                  {product.isNew && (
+                                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs px-1 rounded">
+                                      NEW
+                                    </span>
+                                  )}
+                                  {product.isPreorder && (
+                                    <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
+                                      PRE
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-foreground truncate">
+                                    {product.name}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {product.price.toLocaleString()} ₽
+                                  </p>
+                                </div>
+                              </Link>
+                            </NavigationMenuLink>
+                          ))}
                         </div>
                       </div>
                     </div>

@@ -23,6 +23,7 @@ const getColorValue = (colorName: string) => {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,26 +38,35 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="group cursor-pointer">
+    <div 
+      className="group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Link to={`/product/${product.id}`}>
         <div className="relative overflow-hidden bg-card rounded-none shadow-soft hover:shadow-elegant transition-all duration-300">
+          {/* Labels */}
+          {(product.isNew || product.isPreorder) && (
+            <div className="absolute top-3 left-3 z-10">
+              {product.isNew && (
+                <span className="bg-background text-foreground text-xs font-medium px-2 py-1 rounded-sm">
+                  NEW
+                </span>
+              )}
+              {product.isPreorder && (
+                <span className="bg-background text-foreground text-xs font-medium px-2 py-1 rounded-sm">
+                  ПРЕДЗАКАЗ
+                </span>
+              )}
+            </div>
+          )}
+          
           <div className="aspect-square relative">
             <img 
-              src={product.image} 
+              src={isHovered && product.hoverImage ? product.hoverImage : product.image}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
             />
-            
-            {/* Add to Cart Button - показывается при наведении */}
-            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <Button
-                onClick={handleAddToCart}
-                className="bg-background text-foreground hover:bg-background/90 transition-all duration-200 animate-fade-in"
-              >
-                <ShoppingBag className="h-4 w-4 mr-2" />
-                Добавить в корзину
-              </Button>
-            </div>
           </div>
           
           <div className="p-6 space-y-3">
@@ -107,6 +117,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </div>
       </Link>
+      
+      {/* Add to Cart Button - показывается под карточкой при наведении */}
+      <div className={`mt-3 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
+        <Button
+          onClick={handleAddToCart}
+          className="w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200"
+          variant="outline"
+        >
+          <ShoppingBag className="h-4 w-4 mr-2" />
+          Добавить в корзину
+        </Button>
+      </div>
     </div>
   );
 };
