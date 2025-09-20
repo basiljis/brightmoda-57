@@ -2,47 +2,95 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  category: string;
-}
+import { Product } from "@/data/products";
 
 interface ProductCardProps {
   product: Product;
 }
 
+const getColorValue = (colorName: string) => {
+  const colorMap: { [key: string]: string } = {
+    beige: "#F5F5DC",
+    cream: "#FFFDD0", 
+    black: "#000000",
+    navy: "#000080",
+    grey: "#808080",
+    white: "#FFFFFF",
+    brown: "#8B4513"
+  };
+  return colorMap[colorName] || "#CCCCCC";
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
-  const toggleFavorite = () => {
+  const toggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsFavorited(!isFavorited);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Add to cart logic here
   };
 
   return (
     <div className="group cursor-pointer">
       <Link to={`/product/${product.id}`}>
         <div className="relative overflow-hidden bg-card rounded-none shadow-soft hover:shadow-elegant transition-all duration-300">
-          <div className="aspect-square">
+          <div className="aspect-square relative">
             <img 
               src={product.image} 
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
+            
+            {/* Add to Cart Button - показывается при наведении */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <Button
+                onClick={handleAddToCart}
+                className="bg-background text-foreground hover:bg-background/90 transition-all duration-200 animate-fade-in"
+              >
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Добавить в корзину
+              </Button>
+            </div>
           </div>
           
           <div className="p-6 space-y-3">
-            <h3 className="font-light text-lg text-foreground tracking-wide group-hover:text-primary transition-colors">
-              {product.name}
-            </h3>
+            <div className="space-y-2">
+              <h3 className="font-light text-lg text-foreground tracking-wide group-hover:text-primary transition-colors">
+                {product.name}
+              </h3>
+              
+              {/* Color circles - показываются если есть цвета */}
+              {product.colors && product.colors.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  {product.colors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="w-4 h-4 rounded-full border border-border/30"
+                      style={{ backgroundColor: getColorValue(color.name) }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center justify-between pt-2">
-              <span className="text-xl font-light text-foreground tracking-wide">
-                {product.price.toLocaleString()} ₽
-              </span>
+              <div className="flex flex-col">
+                {product.originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {product.originalPrice.toLocaleString()} ₽
+                  </span>
+                )}
+                <span className="text-xl font-light text-foreground tracking-wide">
+                  {product.price.toLocaleString()} ₽
+                </span>
+              </div>
               <Button
                 size="sm"
                 variant="ghost"

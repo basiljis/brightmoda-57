@@ -69,6 +69,9 @@ export const products: Product[] = [
       "Хранить на вешалке"
     ],
     sizes: ["S", "M", "L", "XL"],
+    colors: [
+      { name: "cream", image: cardiganCream }
+    ],
     relatedProducts: [1, 4]
   },
   {
@@ -93,6 +96,11 @@ export const products: Product[] = [
       "Сушить вертикально"
     ],
     sizes: ["XS", "S", "M", "L", "XL"],
+    colors: [
+      { name: "beige", image: sweatearBeige },
+      { name: "black", image: sweatearBeige },
+      { name: "navy", image: sweatearBeige }
+    ],
     relatedProducts: [1, 4]
   },
   {
@@ -117,6 +125,10 @@ export const products: Product[] = [
       "Гладить с изнаночной стороны"
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "cream", image: cardiganCream },
+      { name: "grey", image: cardiganCream }
+    ],
     relatedProducts: [2, 3]
   }
 ];
