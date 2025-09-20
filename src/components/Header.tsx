@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, User, Search } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Header = () => {
   const location = useLocation();
@@ -10,8 +11,12 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-xl font-light tracking-widest text-foreground hover:opacity-70 transition-opacity">
-            MERINO
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img 
+              src={logo} 
+              alt="BRIGHT" 
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Navigation */}
