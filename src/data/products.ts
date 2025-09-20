@@ -13,6 +13,7 @@ export interface Product {
   materials: string;
   care: string[];
   sizes: string[];
+  colors?: { name: string; image: string }[];
   relatedProducts?: number[];
 }
 
@@ -40,6 +41,10 @@ export const products: Product[] = [
       "Гладить через влажную ткань"
     ],
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "beige", image: sweatearBeige },
+      { name: "cream", image: cardiganCream }
+    ],
     relatedProducts: [2, 3]
   },
   {

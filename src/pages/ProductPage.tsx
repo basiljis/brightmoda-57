@@ -1,17 +1,29 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Heart, ShoppingBag, ArrowLeft, Star, Truck, Shield, RotateCcw } from "lucide-react";
+import { Heart, ChevronDown, Minus, Plus } from "lucide-react";
 import { products } from "@/data/products";
 import { useState } from "react";
 import RelatedProducts from "@/components/RelatedProducts";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ProductPage = () => {
   const { id } = useParams();
   const product = products.find(p => p.id === Number(id));
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   if (!product) {
     return (
@@ -28,195 +40,215 @@ const ProductPage = () => {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert("Пожалуйста, выберите размер");
+      alert("Please select a size");
       return;
     }
-    // Here would be cart logic
-    alert(`Добавлено в корзину: ${product.name}, размер ${selectedSize}`);
+    alert(`Added to cart: ${product.name}, size ${selectedSize}, quantity ${quantity}`);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Breadcrumb */}
-      <div className="container mx-auto px-4 py-6">
-        <Link to="/catalog" className="flex items-center text-muted-foreground hover:text-primary transition-elegant">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Вернуться к каталогу
-        </Link>
-      </div>
-
-      <div className="container mx-auto px-4 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="space-y-4">
-            <div className="relative bg-card rounded-lg overflow-hidden shadow-soft">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-[600px] object-cover"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`absolute top-4 right-4 bg-background/80 backdrop-blur-sm hover:bg-background transition-elegant ${
-                  isFavorited ? "text-red-500" : "text-muted-foreground"
-                }`}
-                onClick={() => setIsFavorited(!isFavorited)}
-              >
-                <Heart className={`h-6 w-6 ${isFavorited ? "fill-current" : ""}`} />
-              </Button>
+      <div className="container mx-auto px-8 py-8">
+        <div className="grid lg:grid-cols-2 gap-16">
+          {/* Product Images */}
+          <div className="space-y-0">
+            <div className="grid grid-cols-2 gap-4 h-[800px]">
+              {/* Flat lay image */}
+              <div className="bg-muted">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Model image */}
+              <div className="bg-muted">
+                <img
+                  src={product.image}
+                  alt={`${product.name} на модели`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-8 max-w-lg">
+            {/* Product Title */}
             <div>
-              <Badge variant="outline" className="mb-3">
-                {product.category}
-              </Badge>
-              <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              <h1 className="text-2xl font-normal tracking-wide uppercase text-foreground mb-2">
                 {product.name}
               </h1>
-              
-              {/* Price */}
-              <div className="flex items-center gap-4 mb-6">
-                <span className="text-3xl font-bold text-foreground">
-                  {product.price.toLocaleString('ru-RU')} ₽
-                </span>
-                {product.originalPrice && (
-                  <>
-                    <span className="text-xl text-muted-foreground line-through">
-                      {product.originalPrice.toLocaleString('ru-RU')} ₽
-                    </span>
-                    <Badge variant="destructive">
-                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                    </Badge>
-                  </>
-                )}
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <span className="text-muted-foreground">(127 отзывов)</span>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Описание</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground mb-6">
                 {product.description}
               </p>
+              <div className="text-xl font-normal text-foreground">
+                ${product.price}
+              </div>
             </div>
 
-            {/* Size Selection */}
+            {/* Color Selection */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Размер</h3>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <Button
-                    key={size}
-                    variant={selectedSize === size ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedSize(size)}
-                    className="min-w-12"
+              <div className="text-sm font-medium text-foreground mb-3 tracking-wide">
+                COLOR {product.colors?.[selectedColor]?.name?.toUpperCase() || "CHERRY/CREAM"}
+              </div>
+              <div className="flex gap-2">
+                {(product.colors || [
+                  { name: "cherry", image: product.image },
+                  { name: "blue", image: product.image }
+                ]).map((color, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedColor(index)}
+                    className={`w-16 h-16 border-2 transition-all ${
+                      selectedColor === index 
+                        ? "border-foreground" 
+                        : "border-border hover:border-muted-foreground"
+                    }`}
                   >
-                    {size}
-                  </Button>
+                    <img
+                      src={color.image}
+                      alt={color.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Size Selection */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-medium text-foreground tracking-wide">SIZE</div>
+                <button className="text-sm underline text-muted-foreground hover:text-foreground">
+                  SIZE GUIDE
+                </button>
+              </div>
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger className="w-full h-12 text-sm">
+                  <SelectValue placeholder="XXS ONLY 1 LEFT" />
+                </SelectTrigger>
+                <SelectContent>
+                  {product.sizes.map((size) => (
+                    <SelectItem key={size} value={size} className="text-sm">
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Add to Cart */}
             <div className="space-y-4">
               <Button
-                size="lg"
-                className="w-full"
                 onClick={handleAddToCart}
+                className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 text-sm font-medium tracking-wide"
               >
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                Добавить в корзину
+                ADD TO CART ${product.price}
               </Button>
               
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" size="sm">
-                  <Heart className="h-4 w-4 mr-1" />
-                  В избранное
-                </Button>
-                <Button variant="outline" size="sm">
-                  Таблица размеров
-                </Button>
-                <Button variant="outline" size="sm">
-                  Поделиться
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                onClick={() => setIsFavorited(!isFavorited)}
+                className="w-full h-12 border border-border hover:bg-muted"
+              >
+                <Heart className={`h-4 w-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
+                ADD TO WISHLIST
+              </Button>
             </div>
 
-            {/* Features */}
-            <div className="bg-card p-6 rounded-lg space-y-4">
-              <div className="flex items-center gap-3">
-                <Truck className="h-5 w-5 text-primary" />
-                <span className="text-sm">Бесплатная доставка от 5000 ₽</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-primary" />
-                <span className="text-sm">Возврат в течение 30 дней</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-primary" />
-                <span className="text-sm">Гарантия качества</span>
-              </div>
+            {/* Collapsible Sections */}
+            <div className="space-y-0 border-t border-border">
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide hover:bg-muted/50 transition-colors">
+                  DESCRIPTION
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <p>{product.description}</p>
+                    <p className="mt-4">Unisex product</p>
+                    <p>Oversized fit</p>
+                    <p>Bandana collar</p>
+                    <p>Buttoned cuffs</p>
+                    <p>Mother of pearl buttons</p>
+                    <p>Horizontal Ami De Coeur silver plate under back gusset</p>
+                    <p>Center back length 87.2 (size XS)</p>
+                    <p>Center back length 90.2 (size M)</p>
+                    <p>Made in Bulgaria (with love)</p>
+                    <p className="mt-4 font-medium">REF: UTP801.CO0133.693</p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
+                  SIZE & FIT
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p>Model is 5'9" and wears size S</p>
+                    <p>Oversized fit - size down for a more fitted look</p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
+                  COMPOSITION & CARE GUIDE
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p className="mb-2">{product.materials}</p>
+                    <div className="space-y-1">
+                      {product.care.map((instruction, index) => (
+                        <p key={index}>{instruction}</p>
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
+                  RESPONSIBILITY
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p>Ethically made with sustainable materials</p>
+                    <p>Fair trade certified</p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
+                  SHIPPING & RETURNS
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p>Free shipping on orders over $200</p>
+                    <p>30-day return policy</p>
+                    <p>Express shipping available</p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-          </div>
-        </div>
-
-        <Separator className="my-12" />
-
-        {/* Product Details */}
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-card p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Особенности</h3>
-            <ul className="space-y-2">
-              {product.features.map((feature, index) => (
-                <li key={index} className="text-sm text-muted-foreground flex items-start">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-card p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Материал</h3>
-            <p className="text-sm text-muted-foreground">
-              {product.materials}
-            </p>
-          </div>
-
-          <div className="bg-card p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Уход</h3>
-            <ul className="space-y-2">
-              {product.care.map((instruction, index) => (
-                <li key={index} className="text-sm text-muted-foreground flex items-start">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  {instruction}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
         {/* Related Products */}
         {product.relatedProducts && product.relatedProducts.length > 0 && (
-          <RelatedProducts 
-            productIds={product.relatedProducts} 
-            currentProductId={product.id}
-          />
+          <div className="mt-24">
+            <RelatedProducts 
+              productIds={product.relatedProducts} 
+              currentProductId={product.id}
+            />
+          </div>
         )}
       </div>
     </div>
