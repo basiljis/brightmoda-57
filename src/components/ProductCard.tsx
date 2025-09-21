@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Product } from "@/data/products";
 
@@ -125,7 +125,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           className="w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200"
           variant="outline"
         >
-          <ShoppingBag className="h-4 w-4 mr-2" />
+          <ShoppingCart className="h-4 w-4 mr-2" />
           Добавить в корзину
         </Button>
       </div>

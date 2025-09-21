@@ -1,127 +1,184 @@
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { User, Settings, ShoppingBag, Heart, MapPin, Phone, Mail } from "lucide-react";
+import { User, Package, Heart, MapPin, Phone, Mail, Calendar, LogOut } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const ProfilePage = () => {
-  // Примечание: для полноценной работы потребуется аутентификация через Supabase
-  
-  const orderHistory = [
-    {
-      id: "ORD-001",
-      date: "2024-01-15",
-      status: "Доставлен",
-      total: 12900,
-      items: 2
-    },
-    {
-      id: "ORD-002", 
-      date: "2024-01-10",
-      status: "В пути",
-      total: 18500,
-      items: 1
+  const { user, signOut, loading } = useAuth();
+  const { toast } = useToast();
+  const [profile, setProfile] = useState<any>(null);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+      loadOrders();
     }
-  ];
+  }, [user]);
+
+  const loadProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Выход выполнен",
+      description: "Вы успешно вышли из аккаунта",
+    });
+  };
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <User className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Личный кабинет</h1>
-              <p className="text-muted-foreground">Управляйте своим аккаунтом</p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Profile Info */}
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Личная информация</h2>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Редактировать
-                </Button>
-              </div>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">Имя</Label>
-                  <Input id="firstName" defaultValue="Анна" className="mt-1" />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 justify-between">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Личная информация
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Выйти
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Полное имя</Label>
+                  <Input 
+                    id="name" 
+                    defaultValue={profile?.full_name || ''} 
+                    className="bg-muted"
+                  />
                 </div>
-                <div>
-                  <Label htmlFor="lastName">Фамилия</Label>
-                  <Input id="lastName" defaultValue="Петрова" className="mt-1" />
-                </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="anna@example.com" className="mt-1" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    defaultValue={profile?.email || user?.email || ''} 
+                    className="bg-muted"
+                    disabled
+                  />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="phone">Телефон</Label>
-                  <Input id="phone" defaultValue="+7 (999) 123-45-67" className="mt-1" />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    defaultValue={profile?.phone || ''} 
+                    className="bg-muted"
+                    placeholder="+7 (999) 123-45-67"
+                  />
                 </div>
-              </div>
-
-              <div className="mt-6">
-                <Button>Сохранить изменения</Button>
-              </div>
+                <Button className="mt-4">
+                  Сохранить изменения
+                </Button>
+              </CardContent>
             </Card>
 
             {/* Order History */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">История заказов</h2>
-                <Button variant="outline" size="sm">
-                  Все заказы
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {orderHistory.map((order) => (
-                  <div key={order.id} className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium">#{order.id}</span>
-                        <Badge variant={order.status === "Доставлен" ? "default" : "secondary"}>
-                          {order.status}
-                        </Badge>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  История заказов
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {orders.length > 0 ? orders.map((order: any) => (
+                    <div key={order.id} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">Заказ #{order.id.slice(0, 8)}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{order.total_amount} руб.</p>
+                          <Badge 
+                            variant={order.status === 'completed' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {order.status === 'pending' ? 'В обработке' : 
+                             order.status === 'completed' ? 'Выполнен' : order.status}
+                          </Badge>
+                        </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">{order.date}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">
-                        {order.items} товар{order.items > 1 ? 'а' : ''}
-                      </span>
-                      <span className="font-semibold">
-                        {order.total.toLocaleString('ru-RU')} ₽
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  )) : (
+                    <p className="text-center text-muted-foreground py-8">У вас пока нет заказов</p>
+                  )}
+                </div>
+              </CardContent>
             </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Быстрые действия</h3>
-              <div className="space-y-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Быстрые действия</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <Button variant="outline" className="w-full justify-start">
-                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  <Package className="h-4 w-4 mr-2" />
                   Мои заказы
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
@@ -132,47 +189,38 @@ const ProfilePage = () => {
                   <MapPin className="h-4 w-4 mr-2" />
                   Адреса доставки
                 </Button>
-              </div>
-            </Card>
-
-            {/* Contact Info */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Контактная информация</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>anna@example.com</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>+7 (999) 123-45-67</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>Москва, Россия</span>
-                </div>
-              </div>
+              </CardContent>
             </Card>
 
             {/* Account Status */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Статус аккаунта</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Статус:</span>
-                  <Badge>Активен</Badge>
+            <Card>
+              <CardHeader>
+                <CardTitle>Статус аккаунта</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Общее количество заказов</span>
+                    <span className="font-semibold">{orders.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Общая сумма покупок</span>
+                    <span className="font-semibold">
+                      {orders.reduce((sum: number, order: any) => sum + parseFloat(order.total_amount || 0), 0)} ₽
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Статус клиента</span>
+                    <Badge>{profile?.role === 'admin' ? 'Администратор' : 'Клиент'}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Дата регистрации</span>
+                    <span className="text-sm">
+                      {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('ru-RU') : '—'}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Заказов:</span>
-                  <span>{orderHistory.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Общая сумма:</span>
-                  <span>
-                    {orderHistory.reduce((sum, order) => sum + order.total, 0).toLocaleString('ru-RU')} ₽
-                  </span>
-                </div>
-              </div>
+              </CardContent>
             </Card>
           </div>
         </div>

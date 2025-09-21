@@ -194,7 +194,7 @@ const Header = () => {
                 <Heart className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/profile">
+            <Link to="/auth">
               <Button variant="ghost" size="sm">
                 <User className="h-4 w-4" />
               </Button>

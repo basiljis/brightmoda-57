@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      delivery_settings: {
+        Row: {
+          cdek_client_id: string | null
+          cdek_client_secret: string | null
+          created_at: string
+          default_city_code: number | null
+          default_city_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cdek_client_id?: string | null
+          cdek_client_secret?: string | null
+          created_at?: string
+          default_city_code?: number | null
+          default_city_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cdek_client_id?: string | null
+          cdek_client_secret?: string | null
+          created_at?: string
+          default_city_code?: number | null
+          default_city_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          delivery_info: Json | null
+          id: string
+          items: Json
+          status: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_info?: Json | null
+          id?: string
+          items: Json
+          status?: string | null
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_info?: Json | null
+          id?: string
+          items?: Json
+          status?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          colors: string[] | null
+          created_at: string
+          description: string | null
+          dimensions: Json | null
+          id: string
+          images: string[] | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          name: string
+          price: number
+          sizes: string[] | null
+          stock_quantity: number | null
+          subcategory: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          dimensions?: Json | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name: string
+          price: number
+          sizes?: string[] | null
+          stock_quantity?: number | null
+          subcategory?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          dimensions?: Json | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name?: string
+          price?: number
+          sizes?: string[] | null
+          stock_quantity?: number | null
+          subcategory?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +175,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +302,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "user"],
+    },
   },
 } as const

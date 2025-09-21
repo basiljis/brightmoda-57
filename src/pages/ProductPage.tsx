@@ -82,9 +82,9 @@ const ProductPage = () => {
               <p className="text-sm text-muted-foreground mb-6">
                 {product.description}
               </p>
-              <div className="text-xl font-normal text-foreground">
-                ${product.price}
-              </div>
+                <div className="text-xl font-normal text-foreground">
+                  {product.price.toLocaleString()} ₽
+                </div>
             </div>
 
             {/* Color Selection */}
@@ -144,7 +144,7 @@ const ProductPage = () => {
                 onClick={handleAddToCart}
                 className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 text-sm font-medium tracking-wide"
               >
-                ADD TO CART ${product.price}
+                ДОБАВИТЬ В КОРЗИНУ {product.price} ₽
               </Button>
               
               <Button
@@ -153,7 +153,7 @@ const ProductPage = () => {
                 className="w-full h-12 border border-border hover:bg-muted"
               >
                 <Heart className={`h-4 w-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
-                ADD TO WISHLIST
+                ДОБАВИТЬ В ИЗБРАННОЕ
               </Button>
             </div>
 
@@ -161,7 +161,7 @@ const ProductPage = () => {
             <div className="space-y-0 border-t border-border">
               <Collapsible>
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide hover:bg-muted/50 transition-colors">
-                  DESCRIPTION
+                  ОПИСАНИЕ
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
@@ -183,7 +183,7 @@ const ProductPage = () => {
 
               <Collapsible>
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
-                  SIZE & FIT
+                  РАЗМЕР И ПОСАДКА
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
@@ -196,7 +196,7 @@ const ProductPage = () => {
 
               <Collapsible>
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
-                  COMPOSITION & CARE GUIDE
+                  СОСТАВ И УХОД
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
@@ -213,7 +213,7 @@ const ProductPage = () => {
 
               <Collapsible>
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
-                  RESPONSIBILITY
+                  ОТВЕТСТВЕННОСТЬ
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
@@ -226,7 +226,7 @@ const ProductPage = () => {
 
               <Collapsible>
                 <CollapsibleTrigger className="flex w-full items-center justify-between py-4 text-left text-sm font-medium tracking-wide border-t border-border hover:bg-muted/50 transition-colors">
-                  SHIPPING & RETURNS
+                  ДОСТАВКА И ВОЗВРАТ
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
