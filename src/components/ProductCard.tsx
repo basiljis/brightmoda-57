@@ -45,6 +45,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { addToCart } = useCart();
 
+  // Получаем максимум 2 изображения для карточки
+  const getDisplayImages = () => {
+    const images: string[] = [];
+    
+    // Для данных из Supabase (массив images)
+    if ((product as any).images && Array.isArray((product as any).images)) {
+      images.push(...(product as any).images.slice(0, 2));
+    }
+    // Для статических данных (image + hoverImage)
+    else if (product.image) {
+      images.push(product.image);
+      if (product.hoverImage) {
+        images.push(product.hoverImage);
+      }
+    }
+    
+    // Фильтруем пустые строки и берем максимум 2
+    return images.filter(img => img && img.trim() !== '').slice(0, 2);
+  };
+
+  const displayImages = getDisplayImages();
+  const currentImage = displayImages.length > 0 
+    ? (isHovered && displayImages[1] ? displayImages[1] : displayImages[0])
+    : '/placeholder.svg'; // Fallback изображение
+  const hasMultipleImages = displayImages.length > 1;
+
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -83,10 +109,28 @@ const ProductCard = ({ product }: ProductCardProps) => {
           
           <div className="aspect-square relative">
             <img 
-              src={isHovered && product.hoverImage ? product.hoverImage : product.image}
+              src={currentImage}
               alt={product.name}
               className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
             />
+            
+            {/* Индикатор множественных изображений */}
+            {hasMultipleImages && (
+              <div className="absolute bottom-3 right-3 z-10">
+                <div className="flex space-x-1">
+                  {displayImages.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        (index === 0 && !isHovered) || (index === 1 && isHovered)
+                          ? 'bg-white shadow-md' 
+                          : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="p-6 space-y-3">
