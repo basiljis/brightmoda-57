@@ -23,6 +23,23 @@ const getColorValue = (colorName: string) => {
   return colorMap[colorName] || "#CCCCCC";
 };
 
+// Функция для получения hex кода цвета из разных форматов данных
+const getColorHex = (color: any) => {
+  // Если это объект с hex_code (данные из Supabase)
+  if (color.hex_code) {
+    return color.hex_code;
+  }
+  // Если это объект с name (статические данные)
+  if (color.name) {
+    return getColorValue(color.name);
+  }
+  // Если это просто строка (название цвета)
+  if (typeof color === 'string') {
+    return getColorValue(color);
+  }
+  return "#CCCCCC";
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { isFavorited, toggleFavorite } = useFavorites();
@@ -85,8 +102,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
                     <div
                       key={index}
                       className="w-4 h-4 rounded-full border border-border/30"
-                      style={{ backgroundColor: getColorValue(color.name) }}
-                      title={color.name}
+                      style={{ backgroundColor: getColorHex(color) }}
+                      title={typeof color === 'string' ? color : color.name}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              {/* Color circles для данных из Supabase (product_colors) */}
+              {(product as any).product_colors && (product as any).product_colors.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  {(product as any).product_colors.map((pc: any, index: number) => (
+                    <div
+                      key={index}
+                      className="w-4 h-4 rounded-full border border-border/30"
+                      style={{ backgroundColor: pc.colors.hex_code }}
+                      title={pc.colors.name}
                     />
                   ))}
                 </div>
