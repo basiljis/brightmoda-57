@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, X, Plus } from 'lucide-react';
+import { Upload, X, Plus, MoveUp, MoveDown } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -169,6 +169,16 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
 
   const removeExistingImage = (index: number) => {
     setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const moveImage = (dragIndex: number, hoverIndex: number) => {
+    setExistingImages(prev => {
+      const newImages = [...prev];
+      const draggedImage = newImages[dragIndex];
+      newImages.splice(dragIndex, 1);
+      newImages.splice(hoverIndex, 0, draggedImage);
+      return newImages;
+    });
   };
 
   const addVideoUrl = () => {
@@ -452,25 +462,57 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
           {/* Existing Images */}
           {existingImages.length > 0 && (
             <div className="space-y-2">
-              <Label>Текущие изображения</Label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Label>Текущие изображения (перетащите для изменения порядка)</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {existingImages.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={image}
-                      alt={`Existing ${index + 1}`}
-                      className="w-full h-24 object-cover rounded border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeExistingImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+                  <div key={index} className="relative group bg-gray-50 p-2 rounded border">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={image}
+                        alt={`Existing ${index + 1}`}
+                        className="w-16 h-16 object-cover rounded border"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Изображение {index + 1}</p>
+                        <p className="text-xs text-gray-500">Основное фото для карточки товара</p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => moveImage(index, index - 1)}
+                            className="p-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-600"
+                            title="Переместить вверх"
+                          >
+                            <MoveUp className="h-3 w-3" />
+                          </button>
+                        )}
+                        {index < existingImages.length - 1 && (
+                          <button
+                            type="button"
+                            onClick={() => moveImage(index, index + 1)}
+                            className="p-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-600"
+                            title="Переместить вниз"
+                          >
+                            <MoveDown className="h-3 w-3" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(index)}
+                          className="p-1 bg-red-100 hover:bg-red-200 rounded text-red-600"
+                          title="Удалить изображение"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Первое изображение будет использоваться как основное фото товара в каталоге
+              </p>
             </div>
           )}
 

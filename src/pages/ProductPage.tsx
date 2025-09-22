@@ -2,8 +2,11 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ChevronDown, Minus, Plus } from "lucide-react";
 import { products } from "@/data/products";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RelatedProducts from "@/components/RelatedProducts";
+import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/hooks/useCart";
+import { useFavorites } from "@/hooks/useFavorites";
 import {
   Collapsible,
   CollapsibleContent,
@@ -19,11 +22,62 @@ import {
 
 const ProductPage = () => {
   const { id } = useParams();
-  const product = products.find(p => p.id === Number(id));
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState(0);
-  const [isFavorited, setIsFavorited] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
+  const { isFavorited, toggleFavorite } = useFavorites();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            *,
+            categories (name, slug),
+            subcategories (name, slug),
+            product_colors (
+              colors (id, name, hex_code)
+            ),
+            product_sizes (
+              sizes (id, name)
+            )
+          `)
+          .eq('id', id)
+          .eq('is_active', true)
+          .single();
+
+        if (error) {
+          console.error('Error fetching product:', error);
+          return;
+        }
+
+        setProduct(data);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg">Загрузка...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -39,12 +93,15 @@ const ProductPage = () => {
   }
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
-      alert("Please select a size");
+    if (product.product_sizes?.length > 0 && !selectedSize) {
+      alert("Выберите размер");
       return;
     }
-    // Import useCart hook at the top and use addToCart function
-    alert(`Added to cart: ${product.name}, size ${selectedSize}, quantity ${quantity}`);
+    addToCart(product.id, quantity, selectedSize);
+  };
+
+  const handleToggleFavorite = () => {
+    toggleFavorite(product.id);
   };
 
   return (
@@ -53,24 +110,37 @@ const ProductPage = () => {
         <div className="grid lg:grid-cols-2 gap-16">
           {/* Product Images */}
           <div className="space-y-0">
-            <div className="grid grid-cols-2 gap-4 h-[800px]">
-              {/* Flat lay image */}
-              <div className="bg-muted">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+            {product.images && product.images.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 h-[800px]">
+                {product.images.slice(0, 2).map((image: string, index: number) => (
+                  <div key={index} className="bg-muted">
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+                {product.images.length === 1 && (
+                  <div className="bg-muted">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
-              {/* Model image */}
-              <div className="bg-muted">
-                <img
-                  src={product.image}
-                  alt={`${product.name} на модели`}
-                  className="w-full h-full object-cover"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4 h-[800px]">
+                <div className="bg-muted flex items-center justify-center">
+                  <span className="text-muted-foreground">Изображение недоступно</span>
+                </div>
+                <div className="bg-muted flex items-center justify-center">
+                  <span className="text-muted-foreground">Изображение недоступно</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Product Info */}
@@ -89,55 +159,52 @@ const ProductPage = () => {
             </div>
 
             {/* Color Selection */}
-            <div>
-              <div className="text-sm font-medium text-foreground mb-3 tracking-wide">
-                COLOR {product.colors?.[selectedColor]?.name?.toUpperCase() || "CHERRY/CREAM"}
-              </div>
-              <div className="flex gap-2">
-                {(product.colors || [
-                  { name: "cherry", image: product.image },
-                  { name: "blue", image: product.image }
-                ]).map((color, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedColor(index)}
-                    className={`w-16 h-16 border-2 transition-all ${
-                      selectedColor === index 
-                        ? "border-foreground" 
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                  >
-                    <img
-                      src={color.image}
-                      alt={color.name}
-                      className="w-full h-full object-cover"
+            {product.product_colors && product.product_colors.length > 0 && (
+              <div>
+                <div className="text-sm font-medium text-foreground mb-3 tracking-wide">
+                  ЦВЕТ {product.product_colors[selectedColor]?.colors?.name?.toUpperCase()}
+                </div>
+                <div className="flex gap-2">
+                  {product.product_colors.map((pc: any, index: number) => (
+                    <button
+                      key={pc.colors.id}
+                      onClick={() => setSelectedColor(index)}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${
+                        selectedColor === index 
+                          ? "border-foreground scale-110" 
+                          : "border-border hover:border-muted-foreground"
+                      }`}
+                      style={{ backgroundColor: pc.colors.hex_code }}
+                      title={pc.colors.name}
                     />
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Size Selection */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-medium text-foreground tracking-wide">SIZE</div>
-                <button className="text-sm underline text-muted-foreground hover:text-foreground">
-                  SIZE GUIDE
-                </button>
+            {product.product_sizes && product.product_sizes.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm font-medium text-foreground tracking-wide">РАЗМЕР</div>
+                  <button className="text-sm underline text-muted-foreground hover:text-foreground">
+                    РАЗМЕРНАЯ СЕТКА
+                  </button>
+                </div>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger className="w-full h-12 text-sm">
+                    <SelectValue placeholder="Выберите размер" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {product.product_sizes.map((ps: any) => (
+                      <SelectItem key={ps.sizes.id} value={ps.sizes.name} className="text-sm">
+                        {ps.sizes.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={selectedSize} onValueChange={setSelectedSize}>
-                <SelectTrigger className="w-full h-12 text-sm">
-                  <SelectValue placeholder="XXS ONLY 1 LEFT" />
-                </SelectTrigger>
-                <SelectContent>
-                  {product.sizes.map((size) => (
-                    <SelectItem key={size} value={size} className="text-sm">
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            )}
 
             {/* Add to Cart */}
             <div className="space-y-4">
@@ -150,11 +217,11 @@ const ProductPage = () => {
               
               <Button
                 variant="ghost"
-                onClick={() => setIsFavorited(!isFavorited)}
+                onClick={handleToggleFavorite}
                 className="w-full h-12 border border-border hover:bg-muted"
               >
-                <Heart className={`h-4 w-4 mr-2 ${isFavorited ? "fill-current" : ""}`} />
-                ДОБАВИТЬ В ИЗБРАННОЕ
+                <Heart className={`h-4 w-4 mr-2 ${isFavorited(product.id) ? "fill-current text-red-500" : ""}`} />
+                {isFavorited(product.id) ? "УДАЛИТЬ ИЗ ИЗБРАННОГО" : "ДОБАВИТЬ В ИЗБРАННОЕ"}
               </Button>
             </div>
 
@@ -202,11 +269,12 @@ const ProductPage = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground">
-                    <p className="mb-2">{product.materials}</p>
+                    <p className="mb-2">100% мериносовая шерсть</p>
                     <div className="space-y-1">
-                      {product.care.map((instruction, index) => (
-                        <p key={index}>{instruction}</p>
-                      ))}
+                      <p>Деликатная стирка при 30°C</p>
+                      <p>Не отбеливать</p>
+                      <p>Сушить горизонтально</p>
+                      <p>Гладить через влажную ткань</p>
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -243,14 +311,12 @@ const ProductPage = () => {
         </div>
 
         {/* Related Products */}
-        {product.relatedProducts && product.relatedProducts.length > 0 && (
-          <div className="mt-24">
-            <RelatedProducts 
-              productIds={product.relatedProducts} 
-              currentProductId={product.id}
-            />
-          </div>
-        )}
+        <div className="mt-24">
+          <RelatedProducts 
+            productIds={[]} 
+            currentProductId={product.id}
+          />
+        </div>
       </div>
     </div>
   );
