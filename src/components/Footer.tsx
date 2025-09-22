@@ -181,7 +181,10 @@ const Footer = () => {
               О НАС
             </h3>
             <div className="space-y-3">
-              {aboutSections.slice(0, 5).map((section) => (
+              {aboutSections
+                .filter(section => section.section_name === 'title')
+                .slice(0, 5)
+                .map((section) => (
                 <Link 
                   key={section.id}
                   to="/about" 
