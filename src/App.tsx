@@ -19,6 +19,7 @@ import AdminPage from "./pages/AdminPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
 import CategoryPage from "./components/CategoryPage";
+import CartPage from "./pages/CartPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/catalog" element={<CatalogPage />} />
                 <Route path="/product/:id" element={<ProductPage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/cart" element={<CartPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/admin" element={<AdminPage />} />

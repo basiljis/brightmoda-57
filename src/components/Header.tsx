@@ -240,7 +240,7 @@ const Header = () => {
                 </Button>
               </Link>
             )}
-            <Link to="/profile?tab=cart">
+            <Link to="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingBag className="h-4 w-4" />
                 {cartCount > 0 && (
