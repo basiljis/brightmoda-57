@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Heart, MapPin, Phone, Mail, Calendar, LogOut } from "lucide-react";
+import { User, Package, Heart, MapPin, Phone, Mail, Calendar, LogOut, Settings } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const ProfilePage = () => {
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading, isAdmin } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState([]);
@@ -189,6 +189,14 @@ const ProfilePage = () => {
                   <MapPin className="h-4 w-4 mr-2" />
                   Адреса доставки
                 </Button>
+                {isAdmin && (
+                  <Button variant="outline" className="w-full justify-start" asChild>
+                    <a href="/admin">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Панель администратора
+                    </a>
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
