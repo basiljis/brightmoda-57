@@ -1,7 +1,97 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  category_id: string;
+}
+
+interface PageContent {
+  id: string;
+  section_name: string;
+  content_value: string;
+  display_order: number;
+}
+
 const Footer = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
+
+  useEffect(() => {
+    loadCategories();
+    loadSubcategories();
+    loadAboutSections();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, slug')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadSubcategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subcategories')
+        .select('id, name, slug, category_id')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setSubcategories(data || []);
+    } catch (error) {
+      console.error('Error loading subcategories:', error);
+    }
+  };
+
+  const loadAboutSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('id, section_name, content_value, display_order')
+        .eq('page_name', 'about_us')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setAboutSections(data || []);
+    } catch (error) {
+      console.error('Error loading about sections:', error);
+    }
+  };
+
+  const getSectionDisplayName = (sectionName: string) => {
+    const sectionNames: { [key: string]: string } = {
+      'title': 'О компании',
+      'history': 'История бренда',
+      'quality': 'Качество материалов',
+      'ecology': 'Экологичность',
+      'career': 'Карьера',
+      'mission': 'Наша миссия',
+      'values': 'Наши ценности'
+    };
+    return sectionNames[sectionName] || sectionName;
+  };
   return (
     <footer className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-12">
@@ -30,15 +120,15 @@ const Footer = () => {
               <Link to="/catalog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Все изделия
               </Link>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Свитеры
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Кардиганы
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Водолазки
-              </div>
+              {categories.slice(0, 4).map((category) => (
+                <Link 
+                  key={category.id}
+                  to={`/catalog?category=${category.slug}`} 
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {category.name}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -69,18 +159,18 @@ const Footer = () => {
               О НАС
             </h3>
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                История бренда
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Качество материалов
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Экологичность
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Карьера
-              </div>
+              <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                О компании
+              </Link>
+              {aboutSections.slice(0, 4).map((section) => (
+                <Link 
+                  key={section.id}
+                  to="/about" 
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {getSectionDisplayName(section.section_name)}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
