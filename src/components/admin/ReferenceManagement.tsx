@@ -54,33 +54,41 @@ export default function ReferenceManagement() {
   const [sizes, setSizes] = useState<Size[]>([]);
 
   const [categoryForm, setCategoryForm] = useState({
+    id: '',
     name: '',
     slug: '',
     description: '',
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
+    isEditing: false
   });
 
   const [subcategoryForm, setSubcategoryForm] = useState({
+    id: '',
     category_id: '',
     name: '',
     slug: '',
     description: '',
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
+    isEditing: false
   });
 
   const [colorForm, setColorForm] = useState({
+    id: '',
     name: '',
     hex_code: '#000000',
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
+    isEditing: false
   });
 
   const [sizeForm, setSizeForm] = useState({
+    id: '',
     name: '',
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
+    isEditing: false
   });
 
   useEffect(() => {
@@ -166,34 +174,89 @@ export default function ReferenceManagement() {
     try {
       const slug = categoryForm.slug || generateSlug(categoryForm.name);
       
-      const { error } = await supabase.from('categories').insert({
-        name: categoryForm.name,
-        slug,
-        description: categoryForm.description,
-        is_active: categoryForm.is_active,
-        sort_order: categoryForm.sort_order
-      });
+      if (categoryForm.isEditing) {
+        const { error } = await supabase.from('categories').update({
+          name: categoryForm.name,
+          slug,
+          description: categoryForm.description,
+          is_active: categoryForm.is_active,
+          sort_order: categoryForm.sort_order
+        }).eq('id', categoryForm.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Категория добавлена",
-        description: "Категория успешно добавлена",
-      });
+        toast({
+          title: "Категория обновлена",
+          description: "Категория успешно обновлена",
+        });
+      } else {
+        const { error } = await supabase.from('categories').insert({
+          name: categoryForm.name,
+          slug,
+          description: categoryForm.description,
+          is_active: categoryForm.is_active,
+          sort_order: categoryForm.sort_order
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Категория добавлена",
+          description: "Категория успешно добавлена",
+        });
+      }
 
       setCategoryForm({
+        id: '',
         name: '',
         slug: '',
         description: '',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
+        isEditing: false
       });
 
       loadCategories();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось добавить категорию",
+        description: categoryForm.isEditing ? "Не удалось обновить категорию" : "Не удалось добавить категорию",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setCategoryForm({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      description: category.description || '',
+      is_active: category.is_active,
+      sort_order: category.sort_order,
+      isEditing: true
+    });
+  };
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить категорию "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) throw error;
+
+      toast({
+        title: "Категория удалена",
+        description: "Категория успешно удалена",
+      });
+
+      loadCategories();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить категорию",
         variant: "destructive",
       });
     }
@@ -205,36 +268,93 @@ export default function ReferenceManagement() {
     try {
       const slug = subcategoryForm.slug || generateSlug(subcategoryForm.name);
       
-      const { error } = await supabase.from('subcategories').insert({
-        category_id: subcategoryForm.category_id,
-        name: subcategoryForm.name,
-        slug,
-        description: subcategoryForm.description,
-        is_active: subcategoryForm.is_active,
-        sort_order: subcategoryForm.sort_order
-      });
+      if (subcategoryForm.isEditing) {
+        const { error } = await supabase.from('subcategories').update({
+          category_id: subcategoryForm.category_id,
+          name: subcategoryForm.name,
+          slug,
+          description: subcategoryForm.description,
+          is_active: subcategoryForm.is_active,
+          sort_order: subcategoryForm.sort_order
+        }).eq('id', subcategoryForm.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Подкатегория добавлена",
-        description: "Подкатегория успешно добавлена",
-      });
+        toast({
+          title: "Подкатегория обновлена",
+          description: "Подкатегория успешно обновлена",
+        });
+      } else {
+        const { error } = await supabase.from('subcategories').insert({
+          category_id: subcategoryForm.category_id,
+          name: subcategoryForm.name,
+          slug,
+          description: subcategoryForm.description,
+          is_active: subcategoryForm.is_active,
+          sort_order: subcategoryForm.sort_order
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Подкатегория добавлена",
+          description: "Подкатегория успешно добавлена",
+        });
+      }
 
       setSubcategoryForm({
+        id: '',
         category_id: '',
         name: '',
         slug: '',
         description: '',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
+        isEditing: false
       });
 
       loadSubcategories();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось добавить подкатегорию",
+        description: subcategoryForm.isEditing ? "Не удалось обновить подкатегорию" : "Не удалось добавить подкатегорию",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditSubcategory = (subcategory: Subcategory) => {
+    setSubcategoryForm({
+      id: subcategory.id,
+      category_id: subcategory.category_id,
+      name: subcategory.name,
+      slug: subcategory.slug,
+      description: subcategory.description || '',
+      is_active: subcategory.is_active,
+      sort_order: subcategory.sort_order,
+      isEditing: true
+    });
+  };
+
+  const handleDeleteSubcategory = async (id: string, name: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить подкатегорию "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('subcategories').delete().eq('id', id);
+      if (error) throw error;
+
+      toast({
+        title: "Подкатегория удалена",
+        description: "Подкатегория успешно удалена",
+      });
+
+      loadSubcategories();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить подкатегорию",
         variant: "destructive",
       });
     }
@@ -244,32 +364,85 @@ export default function ReferenceManagement() {
     e.preventDefault();
     
     try {
-      const { error } = await supabase.from('colors').insert({
-        name: colorForm.name,
-        hex_code: colorForm.hex_code,
-        is_active: colorForm.is_active,
-        sort_order: colorForm.sort_order
-      });
+      if (colorForm.isEditing) {
+        const { error } = await supabase.from('colors').update({
+          name: colorForm.name,
+          hex_code: colorForm.hex_code,
+          is_active: colorForm.is_active,
+          sort_order: colorForm.sort_order
+        }).eq('id', colorForm.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Цвет добавлен",
-        description: "Цвет успешно добавлен",
-      });
+        toast({
+          title: "Цвет обновлен",
+          description: "Цвет успешно обновлен",
+        });
+      } else {
+        const { error } = await supabase.from('colors').insert({
+          name: colorForm.name,
+          hex_code: colorForm.hex_code,
+          is_active: colorForm.is_active,
+          sort_order: colorForm.sort_order
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Цвет добавлен",
+          description: "Цвет успешно добавлен",
+        });
+      }
 
       setColorForm({
+        id: '',
         name: '',
         hex_code: '#000000',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
+        isEditing: false
       });
 
       loadColors();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось добавить цвет",
+        description: colorForm.isEditing ? "Не удалось обновить цвет" : "Не удалось добавить цвет",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditColor = (color: Color) => {
+    setColorForm({
+      id: color.id,
+      name: color.name,
+      hex_code: color.hex_code,
+      is_active: color.is_active,
+      sort_order: color.sort_order,
+      isEditing: true
+    });
+  };
+
+  const handleDeleteColor = async (id: string, name: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить цвет "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('colors').delete().eq('id', id);
+      if (error) throw error;
+
+      toast({
+        title: "Цвет удален",
+        description: "Цвет успешно удален",
+      });
+
+      loadColors();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить цвет",
         variant: "destructive",
       });
     }
@@ -279,30 +452,81 @@ export default function ReferenceManagement() {
     e.preventDefault();
     
     try {
-      const { error } = await supabase.from('sizes').insert({
-        name: sizeForm.name,
-        is_active: sizeForm.is_active,
-        sort_order: sizeForm.sort_order
-      });
+      if (sizeForm.isEditing) {
+        const { error } = await supabase.from('sizes').update({
+          name: sizeForm.name,
+          is_active: sizeForm.is_active,
+          sort_order: sizeForm.sort_order
+        }).eq('id', sizeForm.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Размер добавлен",
-        description: "Размер успешно добавлен",
-      });
+        toast({
+          title: "Размер обновлен",
+          description: "Размер успешно обновлен",
+        });
+      } else {
+        const { error } = await supabase.from('sizes').insert({
+          name: sizeForm.name,
+          is_active: sizeForm.is_active,
+          sort_order: sizeForm.sort_order
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Размер добавлен",
+          description: "Размер успешно добавлен",
+        });
+      }
 
       setSizeForm({
+        id: '',
         name: '',
         is_active: true,
-        sort_order: 0
+        sort_order: 0,
+        isEditing: false
       });
 
       loadSizes();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: "Не удалось добавить размер",
+        description: sizeForm.isEditing ? "Не удалось обновить размер" : "Не удалось добавить размер",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditSize = (size: Size) => {
+    setSizeForm({
+      id: size.id,
+      name: size.name,
+      is_active: size.is_active,
+      sort_order: size.sort_order,
+      isEditing: true
+    });
+  };
+
+  const handleDeleteSize = async (id: string, name: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить размер "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('sizes').delete().eq('id', id);
+      if (error) throw error;
+
+      toast({
+        title: "Размер удален",
+        description: "Размер успешно удален",
+      });
+
+      loadSizes();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить размер",
         variant: "destructive",
       });
     }
@@ -338,8 +562,8 @@ export default function ReferenceManagement() {
         <TabsContent value="categories" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Добавить категорию</CardTitle>
-              <CardDescription>Создайте новую категорию товаров</CardDescription>
+              <CardTitle>{categoryForm.isEditing ? 'Редактировать категорию' : 'Добавить категорию'}</CardTitle>
+              <CardDescription>{categoryForm.isEditing ? 'Измените данные категории' : 'Создайте новую категорию товаров'}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCategorySubmit} className="space-y-4">
@@ -397,8 +621,26 @@ export default function ReferenceManagement() {
 
                 <Button type="submit" className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
-                  Добавить категорию
+                  {categoryForm.isEditing ? 'Обновить категорию' : 'Добавить категорию'}
                 </Button>
+                {categoryForm.isEditing && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setCategoryForm({
+                      id: '',
+                      name: '',
+                      slug: '',
+                      description: '',
+                      is_active: true,
+                      sort_order: 0,
+                      isEditing: false
+                    })}
+                  >
+                    Отмена
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -426,6 +668,20 @@ export default function ReferenceManagement() {
                           {category.is_active ? 'Активна' : 'Неактивна'}
                         </span>
                         <span className="text-xs text-muted-foreground">#{category.sort_order}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditCategory(category)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteCategory(category.id, category.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -438,8 +694,8 @@ export default function ReferenceManagement() {
         <TabsContent value="subcategories" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Добавить подкатегорию</CardTitle>
-              <CardDescription>Создайте новую подкатегорию товаров</CardDescription>
+              <CardTitle>{subcategoryForm.isEditing ? 'Редактировать подкатегорию' : 'Добавить подкатегорию'}</CardTitle>
+              <CardDescription>{subcategoryForm.isEditing ? 'Измените данные подкатегории' : 'Создайте новую подкатегорию товаров'}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubcategorySubmit} className="space-y-4">
@@ -513,8 +769,27 @@ export default function ReferenceManagement() {
 
                 <Button type="submit" className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
-                  Добавить подкатегорию
+                  {subcategoryForm.isEditing ? 'Обновить подкатегорию' : 'Добавить подкатегорию'}
                 </Button>
+                {subcategoryForm.isEditing && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setSubcategoryForm({
+                      id: '',
+                      category_id: '',
+                      name: '',
+                      slug: '',
+                      description: '',
+                      is_active: true,
+                      sort_order: 0,
+                      isEditing: false
+                    })}
+                  >
+                    Отмена
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -544,6 +819,20 @@ export default function ReferenceManagement() {
                           {subcategory.is_active ? 'Активна' : 'Неактивна'}
                         </span>
                         <span className="text-xs text-muted-foreground">#{subcategory.sort_order}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditSubcategory(subcategory)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteSubcategory(subcategory.id, subcategory.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -556,8 +845,8 @@ export default function ReferenceManagement() {
         <TabsContent value="colors" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Добавить цвет</CardTitle>
-              <CardDescription>Создайте новый цвет для товаров</CardDescription>
+              <CardTitle>{colorForm.isEditing ? 'Редактировать цвет' : 'Добавить цвет'}</CardTitle>
+              <CardDescription>{colorForm.isEditing ? 'Измените данные цвета' : 'Создайте новый цвет для товаров'}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleColorSubmit} className="space-y-4">
@@ -615,8 +904,25 @@ export default function ReferenceManagement() {
 
                 <Button type="submit" className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
-                  Добавить цвет
+                  {colorForm.isEditing ? 'Обновить цвет' : 'Добавить цвет'}
                 </Button>
+                {colorForm.isEditing && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setColorForm({
+                      id: '',
+                      name: '',
+                      hex_code: '#000000',
+                      is_active: true,
+                      sort_order: 0,
+                      isEditing: false
+                    })}
+                  >
+                    Отмена
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -639,6 +945,22 @@ export default function ReferenceManagement() {
                         <p className="text-sm text-muted-foreground">{color.hex_code}</p>
                       </div>
                       <div className="text-right">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditColor(color)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteColor(color.id, color.name)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <span className={`px-2 py-1 rounded text-xs ${
                           color.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
@@ -657,8 +979,8 @@ export default function ReferenceManagement() {
         <TabsContent value="sizes" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Добавить размер</CardTitle>
-              <CardDescription>Создайте новый размер для товаров</CardDescription>
+              <CardTitle>{sizeForm.isEditing ? 'Редактировать размер' : 'Добавить размер'}</CardTitle>
+              <CardDescription>{sizeForm.isEditing ? 'Измените данные размера' : 'Создайте новый размер для товаров'}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSizeSubmit} className="space-y-4">
@@ -696,8 +1018,24 @@ export default function ReferenceManagement() {
 
                 <Button type="submit" className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
-                  Добавить размер
+                  {sizeForm.isEditing ? 'Обновить размер' : 'Добавить размер'}
                 </Button>
+                {sizeForm.isEditing && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setSizeForm({
+                      id: '',
+                      name: '',
+                      is_active: true,
+                      sort_order: 0,
+                      isEditing: false
+                    })}
+                  >
+                    Отмена
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>

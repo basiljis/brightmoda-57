@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2 } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
+import ProductEdit from '@/components/admin/ProductEdit';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -34,6 +35,8 @@ const AdminPage = () => {
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -101,6 +104,46 @@ const AdminPage = () => {
 
   const handleProductAdded = () => {
     loadProducts();
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleProductUpdated = () => {
+    loadProducts();
+    setEditingProduct(null);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить товар "${productName}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Товар удален",
+        description: "Товар успешно удален из каталога",
+      });
+
+      loadProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить товар",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeliverySettingsSubmit = async (e: React.FormEvent) => {
@@ -234,24 +277,42 @@ const AdminPage = () => {
                           </div>
                         )}
                       </div>
-                      <div className="text-right text-sm ml-4">
-                        <p>Склад: {product.stock_quantity || 0}</p>
-                        <div className="flex flex-col gap-1 mt-2">
-                          {product.is_featured && (
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                              Рекомендуемый
-                            </span>
-                          )}
-                          {product.is_new && (
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                              Новинка
-                            </span>
-                          )}
-                          {product.is_preorder && (
-                            <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
-                              Предзаказ
-                            </span>
-                          )}
+                      <div className="flex flex-col gap-2">
+                        <div className="text-right text-sm">
+                          <p>Склад: {product.stock_quantity || 0}</p>
+                          <div className="flex flex-col gap-1 mt-2">
+                            {product.is_featured && (
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                Рекомендуемый
+                              </span>
+                            )}
+                            {product.is_new && (
+                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                Новинка
+                              </span>
+                            )}
+                            {product.is_preorder && (
+                              <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
+                                Предзаказ
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditProduct(product)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteProduct(product.id, product.name)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -300,6 +361,13 @@ const AdminPage = () => {
               </div>
             </CardContent>
           </Card>
+          
+          <ProductEdit
+            product={editingProduct}
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            onProductUpdated={handleProductUpdated}
+          />
         </TabsContent>
 
         <TabsContent value="settings">
