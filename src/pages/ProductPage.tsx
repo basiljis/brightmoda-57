@@ -1,12 +1,20 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, ChevronDown, Minus, Plus } from "lucide-react";
+import { Heart, ChevronDown, Minus, Plus, ChevronRight } from "lucide-react";
 import { products } from "@/data/products";
 import { useState, useEffect } from "react";
 import RelatedProducts from "@/components/RelatedProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Collapsible,
   CollapsibleContent,
@@ -107,6 +115,63 @@ const ProductPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-8 py-8">
+        {/* Breadcrumbs */}
+        {product && (
+          <div className="mb-8">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/">Главная</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/catalog">Каталог</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                {product.categories && (
+                  <>
+                    <BreadcrumbSeparator>
+                      <ChevronRight className="h-4 w-4" />
+                    </BreadcrumbSeparator>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link to={`/catalog?category=${product.categories.slug}`}>
+                          {product.categories.name}
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </>
+                )}
+                {product.subcategories && (
+                  <>
+                    <BreadcrumbSeparator>
+                      <ChevronRight className="h-4 w-4" />
+                    </BreadcrumbSeparator>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link to={`/catalog?category=${product.categories?.slug}&subcategory=${product.subcategories.slug}`}>
+                          {product.subcategories.name}
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </>
+                )}
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{product.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        )}
+        
         <div className="grid lg:grid-cols-2 gap-16">
           {/* Product Images */}
           <div className="space-y-0">

@@ -16,12 +16,14 @@ import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart"; 
+import { useFavorites } from "@/hooks/useFavorites";
 import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const location = useLocation();
   const { user, isAdmin } = useAuth();
   const { getCartItemsCount } = useCart();
+  const { favorites } = useFavorites();
   const [collections, setCollections] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -207,8 +209,13 @@ const Header = () => {
               <Search className="h-4 w-4" />
             </Button>
             <Link to="/favorites">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="relative">
                 <Heart className="h-4 w-4" />
+                {favorites.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {favorites.length}
+                  </span>
+                )}
               </Button>
             </Link>
             {user ? (
