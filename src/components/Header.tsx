@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, ShoppingBag, User, Search } from "lucide-react";
+import { Heart, ShoppingBag, User, Search, Settings } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/navigation-menu";
 import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const location = useLocation();
+  const { user, isAdmin } = useAuth();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
   return (
@@ -194,11 +196,28 @@ const Header = () => {
                 <Heart className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/auth">
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4" />
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">
+                  <User className="h-4 w-4" />
+                </Button>
+              </Link>
+            )}
             <Button variant="ghost" size="sm">
               <ShoppingBag className="h-4 w-4" />
             </Button>

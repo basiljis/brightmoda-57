@@ -16,6 +16,14 @@ import { Package, Settings, ShoppingCart } from 'lucide-react';
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
+  }
+
+  if (!user || !isAdmin) {
+    return <Navigate to="/auth" replace />;
+  }
   
   // Product form state
   const [productForm, setProductForm] = useState({
@@ -512,7 +520,7 @@ const AdminPage = () => {
                         ...deliverySettings, 
                         default_city_code: parseInt(e.target.value)
                       })}
-                    />
+                     />
                   </div>
 
                   <div className="space-y-2">
@@ -536,7 +544,7 @@ const AdminPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+     </div>
   );
 };
 
