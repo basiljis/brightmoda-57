@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, User, Search, Settings } from "lucide-react";
+import { SearchModal } from "@/components/SearchModal";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -23,6 +24,7 @@ const Header = () => {
   const { getCartItemsCount } = useCart();
   const [collections, setCollections] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
   useEffect(() => {
@@ -196,7 +198,12 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="hidden sm:flex">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="hidden sm:flex"
+              onClick={() => setIsSearchOpen(true)}
+            >
               <Search className="h-4 w-4" />
             </Button>
             <Link to="/favorites">
@@ -239,6 +246,11 @@ const Header = () => {
           </div>
         </div>
       </div>
+      
+      <SearchModal 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+      />
     </header>
   );
 };

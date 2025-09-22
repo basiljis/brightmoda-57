@@ -25,12 +25,16 @@ const CatalogPage = () => {
     // Set initial filters from URL
     const categoryParam = searchParams.get('category');
     const subcategoryParam = searchParams.get('subcategory');
+    const searchParam = searchParams.get('search');
     
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
     if (subcategoryParam) {
       setSelectedSubcategory(subcategoryParam);
+    }
+    if (searchParam) {
+      setSearchTerm(searchParam);
     }
   }, [searchParams]);
 
