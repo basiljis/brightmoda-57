@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -191,10 +191,10 @@ const ProfilePage = () => {
                 </Button>
                 {isAdmin && (
                   <Button variant="outline" className="w-full justify-start" asChild>
-                    <a href="/admin">
+                    <Link to="/admin">
                       <Settings className="h-4 w-4 mr-2" />
                       Панель администратора
-                    </a>
+                    </Link>
                   </Button>
                 )}
               </CardContent>
