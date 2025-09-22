@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, User, Search, Settings } from "lucide-react";
@@ -13,11 +14,32 @@ import {
 import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const location = useLocation();
   const { user, isAdmin } = useAuth();
+  const [collections, setCollections] = useState([]);
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
+
+  useEffect(() => {
+    loadCollections();
+  }, []);
+
+  const loadCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (error) throw error;
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Error loading collections:', error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
@@ -110,16 +132,13 @@ const Header = () => {
                         <div className="space-y-3">
                           <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
                           <div className="grid gap-2">
-                            <NavigationMenuLink asChild>
-                              <Link to="/collections/stepanova" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Stepanova
-                              </Link>
-                            </NavigationMenuLink>
-                            <NavigationMenuLink asChild>
-                              <Link to="/collections/henri" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Henri
-                              </Link>
-                            </NavigationMenuLink>
+                            {collections.map((collection) => (
+                              <NavigationMenuLink asChild key={collection.id}>
+                                <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                  {collection.name}
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
                           </div>
                         </div>
                       </div>

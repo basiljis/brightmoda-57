@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CollectionManagement from './CollectionManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Palette, Tag, Shapes, Layers } from 'lucide-react';
+import { Plus, Edit, Trash2, Palette, Tag, Shapes, Layers, Package } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -45,6 +46,17 @@ interface Size {
   sort_order: number;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image_url?: string;
+  show_on_homepage: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
+
 export default function ReferenceManagement() {
   const { toast } = useToast();
   
@@ -52,6 +64,7 @@ export default function ReferenceManagement() {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
   const [categoryForm, setCategoryForm] = useState({
     id: '',
@@ -91,6 +104,18 @@ export default function ReferenceManagement() {
     isEditing: false
   });
 
+  const [collectionForm, setCollectionForm] = useState({
+    id: '',
+    name: '',
+    slug: '',
+    description: '',
+    image_url: '',
+    show_on_homepage: false,
+    is_active: true,
+    sort_order: 0,
+    isEditing: false
+  });
+
   useEffect(() => {
     loadAllReferences();
   }, []);
@@ -100,7 +125,8 @@ export default function ReferenceManagement() {
       loadCategories(),
       loadSubcategories(),
       loadColors(),
-      loadSizes()
+      loadSizes(),
+      loadCollections()
     ]);
   };
 
@@ -157,6 +183,20 @@ export default function ReferenceManagement() {
       setSizes(data || []);
     } catch (error) {
       console.error('Error loading sizes:', error);
+    }
+  };
+
+  const loadCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Error loading collections:', error);
     }
   };
 
@@ -532,6 +572,109 @@ export default function ReferenceManagement() {
     }
   };
 
+  // Collections handlers
+  const handleCollectionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const slug = collectionForm.slug || generateSlug(collectionForm.name);
+      
+      if (collectionForm.isEditing) {
+        const { error } = await supabase.from('collections').update({
+          name: collectionForm.name,
+          slug,
+          description: collectionForm.description,
+          image_url: collectionForm.image_url,
+          show_on_homepage: collectionForm.show_on_homepage,
+          is_active: collectionForm.is_active,
+          sort_order: collectionForm.sort_order
+        }).eq('id', collectionForm.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Коллекция обновлена",
+          description: "Коллекция успешно обновлена",
+        });
+      } else {
+        const { error } = await supabase.from('collections').insert({
+          name: collectionForm.name,
+          slug,
+          description: collectionForm.description,
+          image_url: collectionForm.image_url,
+          show_on_homepage: collectionForm.show_on_homepage,
+          is_active: collectionForm.is_active,
+          sort_order: collectionForm.sort_order
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Коллекция добавлена",
+          description: "Коллекция успешно добавлена",
+        });
+      }
+
+      setCollectionForm({
+        id: '',
+        name: '',
+        slug: '',
+        description: '',
+        image_url: '',
+        show_on_homepage: false,
+        is_active: true,
+        sort_order: 0,
+        isEditing: false
+      });
+
+      loadCollections();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: collectionForm.isEditing ? "Не удалось обновить коллекцию" : "Не удалось добавить коллекцию",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditCollection = (collection: Collection) => {
+    setCollectionForm({
+      id: collection.id,
+      name: collection.name,
+      slug: collection.slug,
+      description: collection.description || '',
+      image_url: collection.image_url || '',
+      show_on_homepage: collection.show_on_homepage,
+      is_active: collection.is_active,
+      sort_order: collection.sort_order,
+      isEditing: true
+    });
+  };
+
+  const handleDeleteCollection = async (id: string, name: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить коллекцию "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('collections').delete().eq('id', id);
+      if (error) throw error;
+
+      toast({
+        title: "Коллекция удалена",
+        description: "Коллекция успешно удалена",
+      });
+
+      loadCollections();
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить коллекцию",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="mb-8">
@@ -540,7 +683,7 @@ export default function ReferenceManagement() {
       </div>
 
       <Tabs defaultValue="categories" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="categories" className="flex items-center gap-2">
             <Layers className="h-4 w-4" />
             Категории
@@ -548,6 +691,10 @@ export default function ReferenceManagement() {
           <TabsTrigger value="subcategories" className="flex items-center gap-2">
             <Tag className="h-4 w-4" />
             Подкатегории
+          </TabsTrigger>
+          <TabsTrigger value="collections" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Коллекции
           </TabsTrigger>
           <TabsTrigger value="colors" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
@@ -840,6 +987,10 @@ export default function ReferenceManagement() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="collections" className="space-y-6">
+          <CollectionManagement />
         </TabsContent>
 
         <TabsContent value="colors" className="space-y-6">

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
@@ -7,17 +8,35 @@ import womenCollection from "@/assets/women-collection.jpg";
 import categoryClothing from "@/assets/category-clothing.jpg";
 import categoryInterior from "@/assets/category-interior.jpg";
 import { ArrowRight, Star, Shield, Truck } from "lucide-react";
-import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const HomePage = () => {
-  const featuredProducts = products.slice(0, 4);
   const [scrollY, setScrollY] = useState(0);
+  const [collections, setCollections] = useState([]);
+  const featuredProducts = products.slice(0, 4);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
+    loadCollections();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const loadCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('show_on_homepage', true)
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (error) throw error;
+      setCollections(data || []);
+    } catch (error) {
+      console.error('Error loading collections:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,6 +117,48 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Collections */}
+      {collections.length > 0 && (
+        <section className="py-24 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-light text-foreground mb-6 tracking-wide">
+                Коллекции
+              </h2>
+              <div className="w-16 h-px bg-foreground mx-auto"></div>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {collections.map((collection) => (
+                <Link key={collection.id} to={`/collections/${collection.slug}`} className="group">
+                  <div className="aspect-[4/5] bg-muted rounded-lg overflow-hidden mb-4">
+                    {collection.image_url ? (
+                      <img 
+                        src={collection.image_url} 
+                        alt={collection.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted"></div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-light text-foreground mb-2 tracking-wide">
+                      {collection.name}
+                    </h3>
+                    {collection.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {collection.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Products */}
       <section className="py-24">

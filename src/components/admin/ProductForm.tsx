@@ -35,6 +35,12 @@ interface Size {
   name: string;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -53,6 +59,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   
   const [productForm, setProductForm] = useState({
@@ -62,6 +69,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
     price: '',
     category_id: '',
     subcategory_id: '',
+    collection_id: '',
     weight: '',
     dimensions: { length: '', width: '', height: '' },
     stock_quantity: '',
@@ -101,11 +109,12 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
 
   const loadReferences = async () => {
     try {
-      const [categoriesRes, subcategoriesRes, colorsRes, sizesRes, productsRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, colorsRes, sizesRes, collectionsRes, productsRes] = await Promise.all([
         supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('subcategories').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('colors').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('sizes').select('*').eq('is_active', true).order('sort_order'),
+        supabase.from('collections').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('products').select('id, name, category_id').order('name')
       ]);
 
@@ -113,6 +122,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (colorsRes.data) setColors(colorsRes.data);
       if (sizesRes.data) setSizes(sizesRes.data);
+      if (collectionsRes.data) setCollections(collectionsRes.data);
       if (productsRes.data) setProducts(productsRes.data);
     } catch (error) {
       console.error('Error loading references:', error);
@@ -199,6 +209,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
           price: parseFloat(productForm.price),
           category_id: productForm.category_id || null,
           subcategory_id: productForm.subcategory_id || null,
+          collection_id: productForm.collection_id || null,
           weight: productForm.weight ? parseInt(productForm.weight) : null,
           dimensions: {
             length: productForm.dimensions.length ? parseInt(productForm.dimensions.length) : null,
@@ -283,6 +294,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
         price: '',
         category_id: '',
         subcategory_id: '',
+        collection_id: '',
         weight: '',
         dimensions: { length: '', width: '', height: '' },
         stock_quantity: '',
@@ -401,6 +413,25 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="collection">Коллекция</Label>
+            <Select 
+              value={productForm.collection_id}
+              onValueChange={(value) => setProductForm({...productForm, collection_id: value})}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите коллекцию (необязательно)" />
+              </SelectTrigger>
+              <SelectContent>
+                {collections.map((collection) => (
+                  <SelectItem key={collection.id} value={collection.id}>
+                    {collection.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Colors */}

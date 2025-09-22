@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          show_on_homepage: boolean | null
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          show_on_homepage?: boolean | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          show_on_homepage?: boolean | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       colors: {
         Row: {
           created_at: string
@@ -331,6 +370,7 @@ export type Database = {
         Row: {
           category: string | null
           category_id: string | null
+          collection_id: string | null
           colors: string[] | null
           created_at: string
           description: string | null
@@ -354,6 +394,7 @@ export type Database = {
         Insert: {
           category?: string | null
           category_id?: string | null
+          collection_id?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null
@@ -377,6 +418,7 @@ export type Database = {
         Update: {
           category?: string | null
           category_id?: string | null
+          collection_id?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null
@@ -403,6 +445,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
             referencedColumns: ["id"]
           },
           {
