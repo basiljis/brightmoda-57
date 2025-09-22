@@ -22,49 +22,82 @@ const ProductImportExport = () => {
     const templateData = [
       {
         name: 'Кардиган базовый',
-        description: 'Стильный кардиган из натуральной шерсти',
+        description: 'Стильный кардиган из натуральной мериносовой шерсти премиум класса. Идеально подходит для прохладной погоды.',
         price: 5990,
         category: 'cardigans',
-        subcategory: '',
+        subcategory: 'basic',
         collection: 'winter-collection',
-        colors: 'beige|cream',
+        colors: 'beige|cream|grey',
         sizes: 'S|M|L|XL',
-        images: 'https://example.com/image1.jpg|https://example.com/image2.jpg',
+        images: 'https://example.com/cardigan-front.jpg|https://example.com/cardigan-back.jpg|https://example.com/cardigan-details.jpg',
         sku: 'CARD-001',
-        weight: 300,
-        stock_quantity: 10,
+        weight: 350,
+        stock_quantity: 15,
         is_featured: true,
         is_new: false,
-        is_preorder: false
+        is_preorder: false,
+        video_urls: 'https://example.com/cardigan-video.mp4',
+        size_fit_info: 'Свободная посадка. Для облегающей посадки рекомендуем выбрать размер меньше.',
+        composition_care_info: '100% мериносовая шерсть. Ручная стирка в прохладной воде до 30°C. Сушить горизонтально.',
+        responsibility_info: 'Произведено из экологически чистой шерсти. Упаковка из переработанных материалов.',
+        delivery_return_info: 'Доставка 1-3 рабочих дня. Возврат в течение 14 дней в первоначальном состоянии.'
       },
       {
         name: 'Свитер оверсайз',
-        description: 'Уютный свитер свободного кроя',
+        description: 'Уютный свитер свободного кроя из мягкого кашемира. Создан для максимального комфорта.',
         price: 7500,
         category: 'sweaters',
-        subcategory: '',
+        subcategory: 'oversized',
         collection: 'autumn-collection',
-        colors: 'grey|black',
-        sizes: 'XS|S|M',
-        images: 'https://example.com/sweater1.jpg',
+        colors: 'grey|black|navy',
+        sizes: 'XS|S|M|L',
+        images: 'https://example.com/sweater-main.jpg|https://example.com/sweater-side.jpg',
         sku: 'SWTR-002',
         weight: 400,
-        stock_quantity: 5,
+        stock_quantity: 8,
         is_featured: false,
         is_new: true,
-        is_preorder: false
+        is_preorder: false,
+        video_urls: '',
+        size_fit_info: 'Свободный крой. Подходит для создания многослойных образов.',
+        composition_care_info: '80% кашемир, 20% шелк. Деликатная стирка или химчистка.',
+        responsibility_info: 'Кашемир получен от коз, выращенных в экологически чистых районах Монголии.',
+        delivery_return_info: 'Бесплатная доставка при заказе от 10 000 руб. Обмен возможен в течение 30 дней.'
+      },
+      {
+        name: 'Платье миди',
+        description: 'Элегантное платье А-силуэта из натурального льна. Универсальная модель для офиса и прогулок.',
+        price: 4200,
+        category: 'dresses',
+        subcategory: 'midi',
+        collection: 'spring-collection', 
+        colors: 'white|beige|olive',
+        sizes: 'XS|S|M|L|XL',
+        images: 'https://example.com/dress-front.jpg',
+        sku: 'DRSS-003',
+        weight: 280,
+        stock_quantity: 0,
+        is_featured: false,
+        is_new: false,
+        is_preorder: true,
+        video_urls: '',
+        size_fit_info: 'Классическая посадка по фигуре. Длина миди - до середины икры.',
+        composition_care_info: '100% лен. Машинная стирка при 40°C. Гладить во влажном состоянии.',
+        responsibility_info: 'Лен выращен без использования пестицидов. Натуральные красители.',
+        delivery_return_info: 'Предзаказ: доставка через 2-3 недели. Полная предоплата.'
       }
     ];
 
     const csv = Papa.unparse(templateData, {
-      header: true
+      header: true,
+      delimiter: ';' // Используем точку с запятой для лучшей совместимости с Excel
     });
 
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'products_template.csv');
+    link.setAttribute('download', 'products_template_with_instructions.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -72,7 +105,7 @@ const ProductImportExport = () => {
     
     toast({
       title: "Шаблон скачан",
-      description: "Шаблон для импорта товаров успешно скачан"
+      description: "Подробный шаблон для импорта товаров с примерами заполнения успешно скачан"
     });
   };
 
@@ -494,13 +527,36 @@ const ProductImportExport = () => {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Важные правила заполнения:</strong>
-              <ul className="mt-2 list-disc list-inside space-y-1 text-sm">
-                <li>Цвета, размеры и изображения разделяйте символом "|"</li>
-                <li>Категории, подкатегории и коллекции указывайте по slug (английские названия)</li>
-                <li>Логические поля (is_featured, is_new, is_preorder) - только true/false</li>
-                <li>Цены и числовые поля - только цифры</li>
+              <strong>Правила заполнения CSV файла:</strong>
+              <ul className="mt-3 list-disc list-inside space-y-2 text-sm">
+                <li><strong>name</strong> - Название товара (обязательно)</li>
+                <li><strong>description</strong> - Описание товара</li>
+                <li><strong>price</strong> - Цена в рублях (обязательно, только цифры)</li>
+                <li><strong>category</strong> - Slug категории (например: cardigans, sweaters, dresses)</li>
+                <li><strong>subcategory</strong> - Slug подкатегории (например: basic, oversized)</li>
+                <li><strong>collection</strong> - Slug коллекции (например: winter-collection)</li>
+                <li><strong>colors</strong> - Цвета через "|" (например: beige|cream|grey)</li>
+                <li><strong>sizes</strong> - Размеры через "|" (например: S|M|L|XL)</li>
+                <li><strong>images</strong> - URL изображений через "|"</li>
+                <li><strong>sku</strong> - Артикул (уникальный код товара)</li>
+                <li><strong>weight</strong> - Вес в граммах (только цифры)</li>
+                <li><strong>stock_quantity</strong> - Количество на складе (только цифры)</li>
+                <li><strong>is_featured, is_new, is_preorder</strong> - только true или false</li>
+                <li><strong>video_urls</strong> - URL видео (необязательно)</li>
+                <li><strong>size_fit_info</strong> - Информация о размере и посадке</li>
+                <li><strong>composition_care_info</strong> - Состав и уход за товаром</li>
+                <li><strong>responsibility_info</strong> - Экологичность и ответственное производство</li>
+                <li><strong>delivery_return_info</strong> - Условия доставки и возврата</li>
               </ul>
+              <div className="mt-3 p-3 bg-amber-50 rounded border-l-4 border-amber-400">
+                <p className="text-sm font-medium text-amber-800">💡 Рекомендации:</p>
+                <p className="text-sm text-amber-700 mt-1">
+                  1. Сначала скачайте справочники, чтобы узнать правильные slug для категорий, коллекций, цветов и размеров<br/>
+                  2. Используйте Excel или Google Sheets для редактирования<br/>
+                  3. Сохраняйте файл в формате CSV с разделителем ";" (точка с запятой)<br/>
+                  4. Проверьте кодировку UTF-8 для корректного отображения русских символов
+                </p>
+              </div>
             </AlertDescription>
           </Alert>
           <Button 

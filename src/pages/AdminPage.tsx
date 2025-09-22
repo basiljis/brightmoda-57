@@ -714,6 +714,59 @@ const AdminPage = () => {
                   </div>
                 </div>
 
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">6. Импорт и экспорт товаров</h3>
+                  <div className="pl-4 space-y-3">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded">
+                      <h4 className="font-semibold text-green-800 mb-2">📋 Шаблон для заполнения</h4>
+                      <p className="text-sm text-green-700 mb-2">
+                        Перед массовой загрузкой товаров обязательно скачайте и изучите шаблон в разделе <strong>"Импорт/Экспорт"</strong>
+                      </p>
+                      <div className="text-sm text-green-700 space-y-1">
+                        <p><strong>Обязательные поля:</strong></p>
+                        <ul className="list-disc list-inside ml-2 space-y-0.5">
+                          <li>name - название товара</li>
+                          <li>price - цена в рублях</li>
+                          <li>category - slug категории</li>
+                          <li>images - хотя бы одно изображение</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                      <h4 className="font-semibold text-blue-800 mb-2">🔧 Правила заполнения CSV</h4>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• <strong>Разделители:</strong> Используйте символ "|" для перечисления (цвета|размеры|изображения)</li>
+                        <li>• <strong>Справочники:</strong> Сначала скачайте справочники для получения правильных slug</li>
+                        <li>• <strong>Логические поля:</strong> Только true или false (is_featured, is_new, is_preorder)</li>
+                        <li>• <strong>Кодировка:</strong> Сохраняйте файл в UTF-8 для корректного отображения русского текста</li>
+                        <li>• <strong>Формат:</strong> CSV с разделителем ";" (точка с запятой) для Excel</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-3 bg-orange-50 border border-orange-200 rounded">
+                      <h4 className="font-semibold text-orange-800 mb-2">📊 Порядок действий при импорте</h4>
+                      <ol className="text-sm text-orange-700 space-y-1 list-decimal list-inside">
+                        <li>Скачайте справочники (категории, цвета, размеры, коллекции)</li>
+                        <li>Скачайте шаблон CSV файла с примерами</li>
+                        <li>Заполните данные по образцу, используя slug из справочников</li>
+                        <li>Проверьте обязательные поля и форматирование</li>
+                        <li>Сохраните файл в формате CSV (UTF-8, разделитель ";")</li>
+                        <li>Загрузите файл через раздел "Импорт/Экспорт"</li>
+                      </ol>
+                    </div>
+                    
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded">
+                      <h4 className="font-semibold text-purple-800 mb-2">💾 Функции экспорта</h4>
+                      <ul className="text-sm text-purple-700 space-y-1">
+                        <li>• <strong>Экспорт товаров:</strong> Скачайте все товары в CSV для редактирования</li>
+                        <li>• <strong>Справочники:</strong> Выгрузите текущие категории, цвета, размеры</li>
+                        <li>• <strong>Резервные копии:</strong> Регулярно создавайте экспорты для безопасности</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
                   <h4 className="font-semibold text-blue-800">💡 Рекомендации</h4>
                   <ul className="mt-2 text-sm text-blue-700 space-y-1">
@@ -721,6 +774,8 @@ const AdminPage = () => {
                     <li>• Ведите единообразие в названиях и описаниях</li>
                     <li>• Используйте качественные изображения для лучшей конверсии</li>
                     <li>• Своевременно обновляйте статусы заказов</li>
+                    <li>• Создавайте резервные копии данных через экспорт</li>
+                    <li>• Тестируйте импорт на небольших файлах перед массовой загрузкой</li>
                   </ul>
                 </div>
 
@@ -730,6 +785,8 @@ const AdminPage = () => {
                     <li>• Удаление категорий повлияет на все связанные товары</li>
                     <li>• Изменения в справочниках отражаются на сайте мгновенно</li>
                     <li>• Сохраняйте резервные копии перед массовыми изменениями</li>
+                    <li>• При ошибках импорта проверьте формат файла и обязательные поля</li>
+                    <li>• Дублирующиеся артикулы (SKU) могут вызвать ошибки импорта</li>
                   </ul>
                 </div>
               </CardContent>
