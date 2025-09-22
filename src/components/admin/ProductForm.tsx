@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Upload, X, Plus } from 'lucide-react';
 
 interface Category {
@@ -53,6 +54,7 @@ interface ProductFormProps {
 
 export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -94,6 +96,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const [selectedRecommendationCategory, setSelectedRecommendationCategory] = useState<string>('');
 
   useEffect(() => {
+    console.log('ProductForm: Loading references...');
     loadReferences();
   }, []);
 
@@ -134,8 +137,14 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Image upload handler triggered');
     const files = Array.from(e.target.files || []);
-    setUploadedImages(prev => [...prev, ...files]);
+    console.log('Files selected:', files.length, files.map(f => f.name));
+    setUploadedImages(prev => {
+      const newImages = [...prev, ...files];
+      console.log('Updated uploaded images array:', newImages.length, 'files');
+      return newImages;
+    });
   };
 
   const removeImage = (index: number) => {
@@ -164,11 +173,23 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   };
 
   const uploadImages = async (): Promise<string[]> => {
+    console.log('Starting image upload process...');
+    console.log('User:', user?.id);
+    console.log('Is Admin:', isAdmin);
+    
+    if (!user || !isAdmin) {
+      console.error('User is not authenticated or not an admin');
+      throw new Error('Для загрузки изображений необходимо быть авторизованным администратором');
+    }
+    
     const imageUrls: string[] = [];
     
     for (const file of uploadedImages) {
+      console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      console.log('Generated filename:', fileName);
       
       const { data, error } = await supabase.storage
         .from('product-images')
@@ -176,28 +197,39 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
 
       if (error) {
         console.error('Error uploading image:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
 
+      console.log('Upload successful, data:', data);
+      
       const { data: urlData } = supabase.storage
         .from('product-images')
         .getPublicUrl(fileName);
 
+      console.log('Public URL obtained:', urlData.publicUrl);
       imageUrls.push(urlData.publicUrl);
     }
 
+    console.log('All images uploaded successfully:', imageUrls);
     return imageUrls;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
+    console.log('Uploaded images count:', uploadedImages.length);
     setUploading(true);
     
     try {
       // Upload images first
       let imageUrls: string[] = [];
       if (uploadedImages.length > 0) {
+        console.log('Starting image upload process...');
         imageUrls = await uploadImages();
+        console.log('Images uploaded successfully:', imageUrls);
+      } else {
+        console.log('No images to upload');
       }
 
       // Filter out empty video URLs
@@ -343,6 +375,14 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {!user || !isAdmin ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800">
+                ⚠️ Для добавления товаров необходимо войти в систему как администратор.
+              </p>
+            </div>
+          ) : null}
+          
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -784,8 +824,8 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={uploading}>
-            {uploading ? 'Добавление...' : 'Добавить товар'}
+          <Button type="submit" className="w-full" disabled={uploading || !user || !isAdmin}>
+            {uploading ? 'Добавление...' : !user || !isAdmin ? 'Войдите как администратор' : 'Добавить товар'}
           </Button>
         </form>
       </CardContent>
