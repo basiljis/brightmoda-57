@@ -16,6 +16,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactsPage from "./pages/ContactsPage";
 import AuthPage from "./pages/AuthPage";
 import AdminPage from "./pages/AdminPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfUsePage from "./pages/TermsOfUsePage";
 import CategoryPage from "./components/CategoryPage";
 import NotFound from "./pages/NotFound";
 
@@ -63,7 +65,8 @@ const App = () => (
                 <Route path="/contacts" element={<ContactsPage />} />
                 
                 {/* Legal Pages */}
-                <Route path="/privacy-policy" element={<CategoryPage title="Политика конфиденциальности" />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms-of-use" element={<TermsOfUsePage />} />
                 <Route path="/public-offer" element={<CategoryPage title="Публичная оферта" />} />
                 <Route path="/shipping-payment" element={<CategoryPage title="Доставка и оплата" />} />
                 <Route path="/returns-exchange" element={<CategoryPage title="Возврат и обмен" />} />

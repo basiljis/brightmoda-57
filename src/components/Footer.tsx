@@ -27,11 +27,13 @@ const Footer = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
+  const [supportSections, setSupportSections] = useState<PageContent[]>([]);
 
   useEffect(() => {
     loadCategories();
     loadSubcategories();
     loadAboutSections();
+    loadSupportSections();
   }, []);
 
   const loadCategories = async () => {
@@ -80,6 +82,22 @@ const Footer = () => {
     }
   };
 
+  const loadSupportSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('id, section_name, content_value, display_order')
+        .eq('page_name', 'support')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setSupportSections(data || []);
+    } catch (error) {
+      console.error('Error loading support sections:', error);
+    }
+  };
+
   const getSectionDisplayName = (sectionName: string) => {
     const sectionNames: { [key: string]: string } = {
       'title': 'О компании',
@@ -88,7 +106,11 @@ const Footer = () => {
       'ecology': 'Экологичность',
       'career': 'Карьера',
       'mission': 'Наша миссия',
-      'values': 'Наши ценности'
+      'values': 'Наши ценности',
+      'delivery': 'Доставка и возврат',
+      'size_guide': 'Таблица размеров',
+      'care': 'Уход за изделиями',
+      'contacts': 'Контакты'
     };
     return sectionNames[sectionName] || sectionName;
   };
@@ -138,18 +160,18 @@ const Footer = () => {
               ПОДДЕРЖКА
             </h3>
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Доставка и возврат
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Таблица размеров
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                Уход за изделиями
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              <Link to="/contacts" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Контакты
-              </div>
+              </Link>
+              {supportSections.slice(0, 4).map((section) => (
+                <Link 
+                  key={section.id}
+                  to="/contacts" 
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {getSectionDisplayName(section.section_name)}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -182,12 +204,12 @@ const Footer = () => {
               © 2024 BRIGHT. Все права защищены.
             </div>
             <div className="flex space-x-6">
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Политика конфиденциальности
-              </div>
-              <div className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              </Link>
+              <Link to="/terms-of-use" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Условия использования
-              </div>
+              </Link>
             </div>
           </div>
         </div>

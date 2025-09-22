@@ -30,7 +30,10 @@ interface PageContent {
 
 const PAGE_OPTIONS = [
   { value: 'about_us', label: 'О нас' },
-  { value: 'contacts', label: 'Контакты' }
+  { value: 'contacts', label: 'Контакты' },
+  { value: 'support', label: 'Поддержка' },
+  { value: 'privacy_policy', label: 'Политика конфиденциальности' },
+  { value: 'terms_of_use', label: 'Условия использования' }
 ];
 
 const CONTENT_TYPE_OPTIONS = [
