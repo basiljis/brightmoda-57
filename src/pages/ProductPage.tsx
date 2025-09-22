@@ -43,6 +43,7 @@ const ProductPage = () => {
       alert("Please select a size");
       return;
     }
+    // Import useCart hook at the top and use addToCart function
     alert(`Added to cart: ${product.name}, size ${selectedSize}, quantity ${quantity}`);
   };
 

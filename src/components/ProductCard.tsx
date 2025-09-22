@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Product } from "@/data/products";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useCart } from "@/hooks/useCart";
 
 interface ProductCardProps {
   product: Product;
@@ -22,19 +24,20 @@ const getColorValue = (colorName: string) => {
 };
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const [isFavorited, setIsFavorited] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { isFavorited, toggleFavorite } = useFavorites();
+  const { addToCart } = useCart();
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    toggleFavorite(String(product.id));
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Add to cart logic here
+    addToCart(String(product.id));
   };
 
   return (
@@ -104,12 +107,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={toggleFavorite}
+                onClick={handleToggleFavorite}
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-2"
               >
                 <Heart 
                   className={`h-4 w-4 transition-colors ${
-                    isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'
+                    isFavorited(String(product.id)) ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'
                   }`}
                 />
               </Button>

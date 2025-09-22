@@ -1,12 +1,49 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
 import { Heart, ArrowLeft } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const FavoritesPage = () => {
-  // В реальном приложении здесь была бы логика получения избранных товаров
-  const favoriteProducts = products.slice(0, 2);
+  const { user } = useAuth();
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadFavorites();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const loadFavorites = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select(`
+          product:products (
+            id,
+            name,
+            price,
+            images,
+            category,
+            is_new,
+            is_featured
+          )
+        `)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      setFavoriteProducts(data?.map(fav => fav.product).filter(Boolean) || []);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +65,26 @@ const FavoritesPage = () => {
         </div>
 
         {/* Content */}
-        {favoriteProducts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="text-lg">Загрузка...</div>
+          </div>
+        ) : !user ? (
+          <div className="text-center py-16">
+            <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              Войдите в аккаунт
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Чтобы видеть избранные товары, необходимо войти в систему
+            </p>
+            <Link to="/auth">
+              <Button variant="premium" size="lg">
+                Войти в аккаунт
+              </Button>
+            </Link>
+          </div>
+        ) : favoriteProducts.length === 0 ? (
           <div className="text-center py-16">
             <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-semibold text-foreground mb-2">

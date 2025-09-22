@@ -14,11 +14,13 @@ import {
 import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart"; 
 import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const location = useLocation();
   const { user, isAdmin } = useAuth();
+  const { getCartItemsCount } = useCart();
   const [collections, setCollections] = useState([]);
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
@@ -237,9 +239,16 @@ const Header = () => {
                 </Button>
               </Link>
             )}
-            <Button variant="ghost" size="sm">
-              <ShoppingBag className="h-4 w-4" />
-            </Button>
+            <Link to="/profile?tab=cart">
+              <Button variant="ghost" size="sm" className="relative">
+                <ShoppingBag className="h-4 w-4" />
+                {getCartItemsCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {getCartItemsCount()}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
