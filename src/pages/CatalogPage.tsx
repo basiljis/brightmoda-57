@@ -1,25 +1,126 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { products } from "@/data/products";
 import { Search, Filter, Grid, List } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const CatalogPage = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Все");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  const categories = ["Все", ...Array.from(new Set(products.map(p => p.category)))];
   
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+    
+    // Set initial filters from URL
+    const categoryParam = searchParams.get('category');
+    const subcategoryParam = searchParams.get('subcategory');
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+  }, [searchParams]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load products
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (productsError) throw productsError;
+      setProducts(productsData || []);
+
+      // Load categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (categoriesError) throw categoriesError;
+      setCategories(categoriesData || []);
+
+      // Load subcategories
+      const { data: subcategoriesData, error: subcategoriesError } = await supabase
+        .from('subcategories')
+        .select(`
+          *,
+          categories(name, slug)
+        `)
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (subcategoriesError) throw subcategoriesError;
+      setSubcategories(subcategoriesData || []);
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+  // Find current category and subcategory objects
+  const currentCategory = categories.find(cat => cat.slug === selectedCategory);
+  const currentSubcategory = subcategories.find(sub => sub.slug === selectedSubcategory);
+  
+  // Filter products based on current filters
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Все" || product.category === selectedCategory;
+                         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesSearch && matchesCategory;
+    let matchesCategory = true;
+    if (selectedCategory !== "Все" && currentCategory) {
+      matchesCategory = product.category_id === currentCategory.id;
+    }
+    
+    let matchesSubcategory = true;
+    if (selectedSubcategory && currentSubcategory) {
+      matchesSubcategory = product.subcategory_id === currentSubcategory.id;
+    }
+    
+    return matchesSearch && matchesCategory && matchesSubcategory;
   });
+
+  // Get filtered subcategories for current category
+  const availableSubcategories = selectedCategory !== "Все" && currentCategory
+    ? subcategories.filter(sub => sub.categories?.slug === selectedCategory)
+    : [];
+
+  const allCategories = ["Все", ...categories.map(cat => cat.slug)];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Загрузка товаров...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,17 +149,48 @@ const CatalogPage = () => {
 
             {/* Category Filter */}
             <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Badge
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-elegant"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </Badge>
-              ))}
+              {allCategories.map((categorySlug) => {
+                const category = categories.find(cat => cat.slug === categorySlug);
+                const displayName = categorySlug === "Все" ? "Все" : category?.name || categorySlug;
+                
+                return (
+                  <Badge
+                    key={categorySlug}
+                    variant={selectedCategory === categorySlug ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-elegant"
+                    onClick={() => {
+                      setSelectedCategory(categorySlug);
+                      setSelectedSubcategory(""); // Reset subcategory when category changes
+                    }}
+                  >
+                    {displayName}
+                  </Badge>
+                );
+              })}
             </div>
+
+            {/* Subcategory Filter */}
+            {availableSubcategories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={!selectedSubcategory ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-elegant"
+                  onClick={() => setSelectedSubcategory("")}
+                >
+                  Все подкатегории
+                </Badge>
+                {availableSubcategories.map((subcategory) => (
+                  <Badge
+                    key={subcategory.id}
+                    variant={selectedSubcategory === subcategory.slug ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-elegant"
+                    onClick={() => setSelectedSubcategory(subcategory.slug)}
+                  >
+                    {subcategory.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {/* View Toggle */}
             <div className="flex items-center gap-2">
@@ -108,6 +240,7 @@ const CatalogPage = () => {
               onClick={() => {
                 setSearchTerm("");
                 setSelectedCategory("Все");
+                setSelectedSubcategory("");
               }}
             >
               Сбросить фильтры
@@ -120,7 +253,17 @@ const CatalogPage = () => {
               : "grid-cols-1"
           }`}>
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard 
+                key={product.id} 
+                product={{
+                  ...product,
+                  image: product.images?.[0] || '/placeholder.svg',
+                  images: product.images || [],
+                  isNew: product.is_new || false,
+                  isFeatured: product.is_featured || false,
+                  isPreorder: product.is_preorder || false
+                }} 
+              />
             ))}
           </div>
         )}

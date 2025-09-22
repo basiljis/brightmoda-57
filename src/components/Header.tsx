@@ -22,24 +22,53 @@ const Header = () => {
   const { user, isAdmin } = useAuth();
   const { getCartItemsCount } = useCart();
   const [collections, setCollections] = useState([]);
+  const [categories, setCategories] = useState([]);
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
   useEffect(() => {
-    loadCollections();
+    loadData();
   }, []);
 
-  const loadCollections = async () => {
+  const loadData = async () => {
     try {
-      const { data, error } = await supabase
+      // Load collections
+      const { data: collectionsData, error: collectionsError } = await supabase
         .from('collections')
         .select('*')
         .eq('is_active', true)
         .order('sort_order');
       
-      if (error) throw error;
-      setCollections(data || []);
+      if (collectionsError) throw collectionsError;
+      setCollections(collectionsData || []);
+
+      // Load categories with subcategories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select(`
+          *,
+          subcategories(
+            id,
+            name,
+            slug,
+            is_active,
+            sort_order
+          )
+        `)
+        .eq('is_active', true)
+        .eq('subcategories.is_active', true)
+        .order('sort_order');
+      
+      if (categoriesError) throw categoriesError;
+      
+      // Sort subcategories within each category
+      const processedCategories = categoriesData?.map(category => ({
+        ...category,
+        subcategories: category.subcategories?.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)) || []
+      })) || [];
+      
+      setCategories(processedCategories);
     } catch (error) {
-      console.error('Error loading collections:', error);
+      console.error('Error loading data:', error);
     }
   };
 
@@ -66,71 +95,29 @@ const Header = () => {
                 <NavigationMenuContent>
                   <div className="grid w-[800px] gap-6 p-6">
                     <div className="grid grid-cols-3 gap-6">
-                      {/* Одежда */}
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-medium tracking-wide text-foreground/80">ОДЕЖДА</h4>
-                        <div className="grid gap-2">
-                          <NavigationMenuLink asChild>
-                            <Link to="/cardigans" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Кардиганы
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/vests" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Жилетки
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/t-shirts" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Футболки
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/skirts" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Юбки
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/pants" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Брюки
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/scarves" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Шарфы
-                            </Link>
-                          </NavigationMenuLink>
-                          <NavigationMenuLink asChild>
-                            <Link to="/hats" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                              Головные уборы
-                            </Link>
-                          </NavigationMenuLink>
-                        </div>
-                      </div>
-                      
-                      {/* Интерьер и коллекции */}
-                      <div className="space-y-6">
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-medium tracking-wide text-foreground/80">ИНТЕРЬЕР</h4>
+                      {/* Dynamic Categories */}
+                      {categories.map((category) => (
+                        <div key={category.id} className="space-y-3">
+                          <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
+                            {category.name}
+                          </h4>
                           <div className="grid gap-2">
-                            <NavigationMenuLink asChild>
-                              <Link to="/blankets" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Пледы
-                              </Link>
-                            </NavigationMenuLink>
-                            <NavigationMenuLink asChild>
-                              <Link to="/pillows" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Подушки
-                              </Link>
-                            </NavigationMenuLink>
-                            <NavigationMenuLink asChild>
-                              <Link to="/pillowcases" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Наволочки
-                              </Link>
-                            </NavigationMenuLink>
+                            {category.subcategories?.map((subcategory) => (
+                              <NavigationMenuLink asChild key={subcategory.id}>
+                                <Link 
+                                  to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
+                                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {subcategory.name}
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
                           </div>
                         </div>
-                        
+                      ))}
+                      
+                      {/* Collections Section */}
+                      {collections.length > 0 && (
                         <div className="space-y-3">
                           <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
                           <div className="grid gap-2">
@@ -143,7 +130,7 @@ const Header = () => {
                             ))}
                           </div>
                         </div>
-                      </div>
+                      )}
                       
                       {/* Новинки */}
                       <div className="space-y-3">
