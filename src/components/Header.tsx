@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Header = () => {
   const location = useLocation();
   const { user, isAdmin } = useAuth();
-  const { getCartItemsCount } = useCart();
+  const { cartCount } = useCart();
   const { favorites } = useFavorites();
   const [collections, setCollections] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -243,9 +243,9 @@ const Header = () => {
             <Link to="/profile?tab=cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingBag className="h-4 w-4" />
-                {getCartItemsCount() > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {getCartItemsCount()}
+                    {cartCount}
                   </span>
                 )}
               </Button>

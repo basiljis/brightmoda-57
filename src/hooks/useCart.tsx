@@ -193,6 +193,7 @@ export const useCart = () => {
     updateQuantity,
     clearCart,
     getCartItemsCount,
-    loadCartItems
+    loadCartItems,
+    cartCount: getCartItemsCount()
   };
 };
