@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 
@@ -137,7 +137,7 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Товары
@@ -153,6 +153,10 @@ const AdminPage = () => {
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Настройки
+          </TabsTrigger>
+          <TabsTrigger value="instructions" className="flex items-center gap-2">
+            <HelpCircle className="h-4 w-4" />
+            Инструкции
           </TabsTrigger>
         </TabsList>
 
@@ -370,6 +374,88 @@ const AdminPage = () => {
               </form>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="instructions">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Руководство администратора</CardTitle>
+                <CardDescription>Подробные инструкции по управлению системой</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">1. Управление товарами</h3>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm">• <strong>Добавление товара:</strong> Заполните все обязательные поля: название, описание, цена, категория</p>
+                    <p className="text-sm">• <strong>Артикул (SKU):</strong> Уникальный код товара для внутреннего учёта</p>
+                    <p className="text-sm">• <strong>Предзаказ:</strong> Отметьте товары, доступные только по предзаказу</p>
+                    <p className="text-sm">• <strong>Фотографии:</strong> Загрузите качественные изображения товара (рекомендуемый размер: 800x800px)</p>
+                    <p className="text-sm">• <strong>Видео:</strong> Добавьте ссылки на видеообзоры товара (YouTube, Vimeo)</p>
+                    <p className="text-sm">• <strong>Цвета и размеры:</strong> Выберите доступные варианты из справочников</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">2. Справочники</h3>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm">• <strong>Категории:</strong> Основные разделы товаров (Одежда, Интерьер и т.д.)</p>
+                    <p className="text-sm">• <strong>Подкатегории:</strong> Детализация внутри категорий (Кардиганы, Жилеты и т.д.)</p>
+                    <p className="text-sm">• <strong>Цвета:</strong> Управление цветовой палитрой с HEX-кодами</p>
+                    <p className="text-sm">• <strong>Размеры:</strong> Размерная сетка товаров (S, M, L, XL и т.д.)</p>
+                    <p className="text-sm">• <strong>Порядок отображения:</strong> Настройка последовательности элементов на сайте</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">3. Управление заказами</h3>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm">• <strong>Статусы заказов:</strong> Отслеживание этапов выполнения</p>
+                    <p className="text-sm">• <strong>Обработка:</strong> Проверка и подтверждение новых заказов</p>
+                    <p className="text-sm">• <strong>История:</strong> Полная информация о всех транзакциях</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">4. Настройки доставки</h3>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm">• <strong>СДЭК интеграция:</strong> Настройка API для расчёта стоимости доставки</p>
+                    <p className="text-sm">• <strong>Client ID/Secret:</strong> Получите в личном кабинете СДЭК</p>
+                    <p className="text-sm">• <strong>Город по умолчанию:</strong> Базовый город для расчётов (код 270 - Москва)</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">5. Структура сайта</h3>
+                  <div className="pl-4 space-y-2">
+                    <p className="text-sm">• Категории автоматически отображаются в главном меню</p>
+                    <p className="text-sm">• Подкатегории создают подменю и отдельные страницы</p>
+                    <p className="text-sm">• Активные справочники влияют на фильтры в каталоге</p>
+                    <p className="text-sm">• Порядок сортировки определяет последовательность на сайте</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+                  <h4 className="font-semibold text-blue-800">💡 Рекомендации</h4>
+                  <ul className="mt-2 text-sm text-blue-700 space-y-1">
+                    <li>• Регулярно проверяйте актуальность товаров и их наличие</li>
+                    <li>• Ведите единообразие в названиях и описаниях</li>
+                    <li>• Используйте качественные изображения для лучшей конверсии</li>
+                    <li>• Своевременно обновляйте статусы заказов</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                  <h4 className="font-semibold text-amber-800">⚠️ Важные моменты</h4>
+                  <ul className="mt-2 text-sm text-amber-700 space-y-1">
+                    <li>• Удаление категорий повлияет на все связанные товары</li>
+                    <li>• Изменения в справочниках отражаются на сайте мгновенно</li>
+                    <li>• Сохраняйте резервные копии перед массовыми изменениями</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
