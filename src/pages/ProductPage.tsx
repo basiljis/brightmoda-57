@@ -7,6 +7,7 @@ import RelatedProducts from "@/components/RelatedProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
+import { ImageLightbox } from "@/components/ImageLightbox";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,6 +36,8 @@ const ProductPage = () => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const { addToCart } = useCart();
   const { isFavorited, toggleFavorite } = useFavorites();
 
@@ -55,6 +58,13 @@ const ProductPage = () => {
             ),
             product_sizes (
               sizes (id, name)
+            ),
+            product_color_images (
+              id,
+              color_id,
+              image_url,
+              sort_order,
+              colors (name, hex_code)
             )
           `)
           .eq('id', id)
@@ -110,6 +120,37 @@ const ProductPage = () => {
 
   const handleToggleFavorite = () => {
     toggleFavorite(product.id);
+  };
+
+  // Получаем изображения для выбранного цвета
+  const getImagesForSelectedColor = () => {
+    if (!product.product_color_images || product.product_color_images.length === 0) {
+      // Fallback на старые изображения если нет цветных
+      return product.images || [];
+    }
+
+    const selectedColorData = product.product_colors?.[selectedColor];
+    if (!selectedColorData) {
+      // Возвращаем все изображения если цвет не выбран
+      return product.product_color_images
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((img: any) => img.image_url);
+    }
+
+    // Фильтруем изображения по выбранному цвету
+    const colorImages = product.product_color_images
+      .filter((img: any) => img.color_id === selectedColorData.colors.id)
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((img: any) => img.image_url);
+
+    return colorImages.length > 0 ? colorImages : product.images || [];
+  };
+
+  const currentImages = getImagesForSelectedColor();
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   return (
@@ -173,43 +214,31 @@ const ProductPage = () => {
         )}
         
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Product Images */}
-          <div className="space-y-0">
-            {product.images && product.images.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 h-[800px]">
-                {product.images.slice(0, 2).map((image: string, index: number) => (
-                  <div key={index} className="bg-muted">
-                    <img
-                      src={image}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                {product.images.length === 1 && (
-                  <div className="bg-muted">
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-              </div>
+          {/* Product Images - Vertical Layout */}
+          <div className="space-y-4 max-h-[80vh] overflow-y-auto">
+            {currentImages && currentImages.length > 0 ? (
+              currentImages.map((image: string, index: number) => (
+                <div 
+                  key={index} 
+                  className="aspect-square bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openLightbox(index)}
+                >
+                  <img
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))
             ) : (
-              <div className="grid grid-cols-2 gap-4 h-[800px]">
-                <div className="bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground">Изображение недоступно</span>
-                </div>
-                <div className="bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground">Изображение недоступно</span>
-                </div>
+              <div className="aspect-square bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground">Изображение недоступно</span>
               </div>
             )}
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-8 max-w-lg">
+          {/* Product Info - Sticky */}
+          <div className="lg:sticky lg:top-8 space-y-8 max-w-lg h-fit">
             {/* Product Title */}
             <div>
               <h1 className="text-2xl font-normal tracking-wide uppercase text-foreground mb-2">
@@ -391,6 +420,14 @@ const ProductPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Image Lightbox */}
+        <ImageLightbox
+          images={currentImages}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
 
         {/* Related Products */}
         <div className="mt-24">

@@ -45,19 +45,43 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { addToCart } = useCart();
 
-  // Получаем максимум 2 изображения для карточки
+  // Получаем изображения для выбранного цвета в карточке товара
   const getDisplayImages = () => {
     const images: string[] = [];
     
-    // Для данных из Supabase (массив images)
-    if ((product as any).images && Array.isArray((product as any).images)) {
-      images.push(...(product as any).images.slice(0, 2));
+    // Проверяем цветные изображения из Supabase
+    if ((product as any).product_color_images && Array.isArray((product as any).product_color_images)) {
+      const colorImages = (product as any).product_color_images as any[];
+      if (colorImages.length > 0) {
+        // Группируем по цветам и берем первое изображение каждого цвета для превью
+        const imagesByColor = colorImages.reduce((acc: any, img: any) => {
+          if (!acc[img.color_id]) {
+            acc[img.color_id] = [];
+          }
+          acc[img.color_id].push(img);
+          return acc;
+        }, {});
+        
+        // Берем первое изображение первого доступного цвета
+        const firstColorId = Object.keys(imagesByColor)[0];
+        if (firstColorId && imagesByColor[firstColorId].length > 0) {
+          images.push(...imagesByColor[firstColorId]
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+            .map((img: any) => img.image_url)
+            .slice(0, 2));
+        }
+      }
     }
-    // Для статических данных (image + hoverImage)
-    else if (product.image) {
-      images.push(product.image);
-      if (product.hoverImage) {
-        images.push(product.hoverImage);
+    
+    // Fallback на обычные изображения
+    if (images.length === 0) {
+      if ((product as any).images && Array.isArray((product as any).images)) {
+        images.push(...(product as any).images.slice(0, 2));
+      } else if (product.image) {
+        images.push(product.image);
+        if (product.hoverImage) {
+          images.push(product.hoverImage);
+        }
       }
     }
     

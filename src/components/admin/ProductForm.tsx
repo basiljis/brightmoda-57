@@ -88,6 +88,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [colorImages, setColorImages] = useState<{[colorId: string]: File[]}>({});
   const [uploading, setUploading] = useState(false);
   
   // Recommendation settings
@@ -145,6 +146,20 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       console.log('Updated uploaded images array:', newImages.length, 'files');
       return newImages;
     });
+  };
+
+  const handleColorImageUpload = (colorId: string, files: File[]) => {
+    setColorImages(prev => ({
+      ...prev,
+      [colorId]: [...(prev[colorId] || []), ...files]
+    }));
+  };
+
+  const removeColorImage = (colorId: string, index: number) => {
+    setColorImages(prev => ({
+      ...prev,
+      [colorId]: prev[colorId]?.filter((_, i) => i !== index) || []
+    }));
   };
 
   const removeImage = (index: number) => {
@@ -213,6 +228,48 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
 
     console.log('All images uploaded successfully:', imageUrls);
     return imageUrls;
+  };
+
+  const uploadColorImages = async (productId: string): Promise<void> => {
+    console.log('Uploading color images for product:', productId);
+    
+    for (const [colorId, files] of Object.entries(colorImages)) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${productId}-${colorId}-${i}-${Date.now()}.${fileExt}`;
+        
+        console.log('Uploading color image:', fileName);
+        
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file);
+
+        if (error) {
+          console.error('Error uploading color image:', error);
+          throw error;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(fileName);
+
+        // Save to product_color_images table
+        const { error: insertError } = await supabase
+          .from('product_color_images')
+          .insert({
+            product_id: productId,
+            color_id: colorId,
+            image_url: urlData.publicUrl,
+            sort_order: i
+          });
+
+        if (insertError) {
+          console.error('Error saving color image:', insertError);
+          throw insertError;
+        }
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -296,6 +353,12 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
         if (sizesError) throw sizesError;
       }
 
+      // Insert color images
+      if (Object.keys(colorImages).length > 0 && productData) {
+        console.log('Uploading color images...');
+        await uploadColorImages(productData.id);
+      }
+
       // Insert product recommendations
       if (recommendationType !== 'none' && productData) {
         if (recommendationType === 'products' && selectedRecommendationProducts.length > 0) {
@@ -350,6 +413,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       setSelectedColors([]);
       setSelectedSizes([]);
       setUploadedImages([]);
+      setColorImages({});
       setRecommendationType('none');
       setSelectedRecommendationProducts([]);
       setSelectedRecommendationCategory('');
@@ -542,9 +606,77 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
             </div>
           </div>
 
-          {/* Images */}
+          {/* Color Images */}
+          {selectedColors.length > 0 && (
+            <div className="space-y-4">
+              <Label>Изображения по цветам</Label>
+              {selectedColors.map((colorId) => {
+                const color = colors.find(c => c.id === colorId);
+                if (!color) return null;
+                
+                return (
+                  <div key={colorId} className="border rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div 
+                        className="w-4 h-4 rounded-full border"
+                        style={{ backgroundColor: color.hex_code }}
+                      />
+                      <Label className="font-medium">{color.name}</Label>
+                    </div>
+                    
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                      <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                        <div className="mt-2">
+                          <label htmlFor={`color-images-${colorId}`} className="cursor-pointer">
+                            <span className="text-sm text-gray-600">
+                              Загрузите изображения для {color.name.toLowerCase()}
+                            </span>
+                            <input
+                              id={`color-images-${colorId}`}
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                handleColorImageUpload(colorId, files);
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {colorImages[colorId] && colorImages[colorId].length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+                        {colorImages[colorId].map((file, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`${color.name} ${index + 1}`}
+                              className="w-full h-20 object-cover rounded border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeColorImage(colorId, index)}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* General Images */}
           <div className="space-y-2">
-            <Label htmlFor="images">Изображения товара</Label>
+            <Label htmlFor="images">Общие изображения товара</Label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
               <div className="text-center">
                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
