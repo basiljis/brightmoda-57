@@ -173,6 +173,52 @@ export type Database = {
           },
         ]
       }
+      product_recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          recommended_for_category_id: string | null
+          recommended_for_product_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          recommended_for_category_id?: string | null
+          recommended_for_product_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          recommended_for_category_id?: string | null
+          recommended_for_product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_recommendations_recommended_for_category_id_fkey"
+            columns: ["recommended_for_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_recommendations_recommended_for_product_id_fkey"
+            columns: ["recommended_for_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_sizes: {
         Row: {
           id: string

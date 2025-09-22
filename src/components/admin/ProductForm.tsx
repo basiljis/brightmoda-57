@@ -35,6 +35,12 @@ interface Size {
   name: string;
 }
 
+interface Product {
+  id: string;
+  name: string;
+  category_id: string;
+}
+
 interface ProductFormProps {
   onProductAdded: () => void;
 }
@@ -47,6 +53,7 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   
   const [productForm, setProductForm] = useState({
     name: '',
@@ -68,6 +75,11 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  
+  // Recommendation settings
+  const [recommendationType, setRecommendationType] = useState<'none' | 'products' | 'category'>('none');
+  const [selectedRecommendationProducts, setSelectedRecommendationProducts] = useState<string[]>([]);
+  const [selectedRecommendationCategory, setSelectedRecommendationCategory] = useState<string>('');
 
   useEffect(() => {
     loadReferences();
@@ -89,17 +101,19 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
 
   const loadReferences = async () => {
     try {
-      const [categoriesRes, subcategoriesRes, colorsRes, sizesRes] = await Promise.all([
+      const [categoriesRes, subcategoriesRes, colorsRes, sizesRes, productsRes] = await Promise.all([
         supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('subcategories').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('colors').select('*').eq('is_active', true).order('sort_order'),
-        supabase.from('sizes').select('*').eq('is_active', true).order('sort_order')
+        supabase.from('sizes').select('*').eq('is_active', true).order('sort_order'),
+        supabase.from('products').select('id, name, category_id').order('name')
       ]);
 
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (subcategoriesRes.data) setSubcategories(subcategoriesRes.data);
       if (colorsRes.data) setColors(colorsRes.data);
       if (sizesRes.data) setSizes(sizesRes.data);
+      if (productsRes.data) setProducts(productsRes.data);
     } catch (error) {
       console.error('Error loading references:', error);
     }
@@ -231,6 +245,31 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
         if (sizesError) throw sizesError;
       }
 
+      // Insert product recommendations
+      if (recommendationType !== 'none' && productData) {
+        if (recommendationType === 'products' && selectedRecommendationProducts.length > 0) {
+          const recommendationInserts = selectedRecommendationProducts.map(productId => ({
+            product_id: productData.id,
+            recommended_for_product_id: productId
+          }));
+
+          const { error: recommendationsError } = await supabase
+            .from('product_recommendations')
+            .insert(recommendationInserts);
+
+          if (recommendationsError) throw recommendationsError;
+        } else if (recommendationType === 'category' && selectedRecommendationCategory) {
+          const { error: recommendationError } = await supabase
+            .from('product_recommendations')
+            .insert({
+              product_id: productData.id,
+              recommended_for_category_id: selectedRecommendationCategory
+            });
+
+          if (recommendationError) throw recommendationError;
+        }
+      }
+
       toast({
         title: "Товар добавлен",
         description: "Товар успешно добавлен в каталог",
@@ -255,6 +294,9 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       setSelectedColors([]);
       setSelectedSizes([]);
       setUploadedImages([]);
+      setRecommendationType('none');
+      setSelectedRecommendationProducts([]);
+      setSelectedRecommendationCategory('');
 
       onProductAdded();
     } catch (error) {
@@ -557,6 +599,67 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
               value={productForm.stock_quantity}
               onChange={(e) => setProductForm({...productForm, stock_quantity: e.target.value})}
             />
+          </div>
+
+          {/* Recommendations */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Показывать как рекомендуемый товар</Label>
+              <Select value={recommendationType} onValueChange={(value: 'none' | 'products' | 'category') => setRecommendationType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тип рекомендации" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Не показывать как рекомендуемый</SelectItem>
+                  <SelectItem value="products">К выбранным товарам</SelectItem>
+                  <SelectItem value="category">Ко всей категории</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {recommendationType === 'products' && (
+              <div className="space-y-2">
+                <Label>Выберите товары</Label>
+                <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                  {products.map((product) => (
+                    <div key={product.id} className="flex items-center space-x-2 py-1">
+                      <Checkbox
+                        id={`rec-product-${product.id}`}
+                        checked={selectedRecommendationProducts.includes(product.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedRecommendationProducts(prev => [...prev, product.id]);
+                          } else {
+                            setSelectedRecommendationProducts(prev => prev.filter(id => id !== product.id));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`rec-product-${product.id}`} className="text-sm">
+                        {product.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {recommendationType === 'category' && (
+              <div className="space-y-2">
+                <Label>Выберите категорию</Label>
+                <Select value={selectedRecommendationCategory} onValueChange={setSelectedRecommendationCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите категорию" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {/* Flags */}
