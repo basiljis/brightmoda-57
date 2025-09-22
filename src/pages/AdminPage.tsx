@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2 } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
 import LookbookManagement from '@/components/admin/LookbookManagement';
 import PageContentManagement from '@/components/admin/PageContentManagement';
+import ProductImportExport from '@/components/admin/ProductImportExport';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -182,10 +183,14 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Товары
+          </TabsTrigger>
+          <TabsTrigger value="import-export" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            Импорт/Экспорт
           </TabsTrigger>
           <TabsTrigger value="references" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
@@ -331,6 +336,10 @@ const AdminPage = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="import-export">
+          <ProductImportExport />
         </TabsContent>
 
         <TabsContent value="references">
