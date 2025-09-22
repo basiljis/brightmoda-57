@@ -54,6 +54,10 @@ interface Product {
   video_urls?: string[];
   product_colors?: any[];
   product_sizes?: any[];
+  size_fit_info?: string;
+  composition_care_info?: string;
+  responsibility_info?: string;
+  delivery_return_info?: string;
 }
 
 interface ProductEditProps {
@@ -85,7 +89,11 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
     is_featured: false,
     is_new: false,
     is_preorder: false,
-    video_urls: ['']
+    video_urls: [''],
+    size_fit_info: '',
+    composition_care_info: '',
+    responsibility_info: '',
+    delivery_return_info: ''
   });
 
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -119,7 +127,11 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
         is_featured: product.is_featured || false,
         is_new: product.is_new || false,
         is_preorder: product.is_preorder || false,
-        video_urls: product.video_urls?.length ? product.video_urls : ['']
+        video_urls: product.video_urls?.length ? product.video_urls : [''],
+        size_fit_info: product.size_fit_info || '',
+        composition_care_info: product.composition_care_info || '',
+        responsibility_info: product.responsibility_info || '',
+        delivery_return_info: product.delivery_return_info || ''
       });
 
       setExistingImages(product.images || []);
@@ -263,7 +275,11 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
           is_new: productForm.is_new,
           is_preorder: productForm.is_preorder,
           images: imageUrls,
-          video_urls: videoUrls
+          video_urls: videoUrls,
+          size_fit_info: productForm.size_fit_info || null,
+          composition_care_info: productForm.composition_care_info || null,
+          responsibility_info: productForm.responsibility_info || null,
+          delivery_return_info: productForm.delivery_return_info || null
         })
         .eq('id', product.id);
 
@@ -570,6 +586,55 @@ export default function ProductEdit({ product, isOpen, onClose, onProductUpdated
               value={productForm.stock_quantity}
               onChange={(e) => setProductForm({...productForm, stock_quantity: e.target.value})}
             />
+          </div>
+
+          {/* Additional Product Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Дополнительная информация о товаре</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="size_fit_info">Размер и посадка</Label>
+              <Textarea
+                id="size_fit_info"
+                value={productForm.size_fit_info}
+                onChange={(e) => setProductForm({...productForm, size_fit_info: e.target.value})}
+                placeholder="Информация о размере и посадке товара"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="composition_care_info">Состав и уход</Label>
+              <Textarea
+                id="composition_care_info"
+                value={productForm.composition_care_info}
+                onChange={(e) => setProductForm({...productForm, composition_care_info: e.target.value})}
+                placeholder="Информация о составе материалов и уходе за товаром"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="responsibility_info">Ответственность</Label>
+              <Textarea
+                id="responsibility_info"
+                value={productForm.responsibility_info}
+                onChange={(e) => setProductForm({...productForm, responsibility_info: e.target.value})}
+                placeholder="Информация об экологичности и ответственном производстве"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="delivery_return_info">Доставка и возврат</Label>
+              <Textarea
+                id="delivery_return_info"
+                value={productForm.delivery_return_info}
+                onChange={(e) => setProductForm({...productForm, delivery_return_info: e.target.value})}
+                placeholder="Информация о доставке и условиях возврата"
+                rows={3}
+              />
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-6">

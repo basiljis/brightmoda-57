@@ -62,6 +62,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          size_chart_image_url: string | null
           slug: string
           sort_order: number | null
           updated_at: string
@@ -72,6 +73,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          size_chart_image_url?: string | null
           slug: string
           sort_order?: number | null
           updated_at?: string
@@ -82,6 +84,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          size_chart_image_url?: string | null
           slug?: string
           sort_order?: number | null
           updated_at?: string
@@ -484,7 +487,9 @@ export type Database = {
           category_id: string | null
           collection_id: string | null
           colors: string[] | null
+          composition_care_info: string | null
           created_at: string
+          delivery_return_info: string | null
           description: string | null
           dimensions: Json | null
           id: string
@@ -495,6 +500,8 @@ export type Database = {
           is_preorder: boolean
           name: string
           price: number
+          responsibility_info: string | null
+          size_fit_info: string | null
           sizes: string[] | null
           sku: string | null
           stock_quantity: number | null
@@ -509,7 +516,9 @@ export type Database = {
           category_id?: string | null
           collection_id?: string | null
           colors?: string[] | null
+          composition_care_info?: string | null
           created_at?: string
+          delivery_return_info?: string | null
           description?: string | null
           dimensions?: Json | null
           id?: string
@@ -520,6 +529,8 @@ export type Database = {
           is_preorder?: boolean
           name: string
           price: number
+          responsibility_info?: string | null
+          size_fit_info?: string | null
           sizes?: string[] | null
           sku?: string | null
           stock_quantity?: number | null
@@ -534,7 +545,9 @@ export type Database = {
           category_id?: string | null
           collection_id?: string | null
           colors?: string[] | null
+          composition_care_info?: string | null
           created_at?: string
+          delivery_return_info?: string | null
           description?: string | null
           dimensions?: Json | null
           id?: string
@@ -545,6 +558,8 @@ export type Database = {
           is_preorder?: boolean
           name?: string
           price?: number
+          responsibility_info?: string | null
+          size_fit_info?: string | null
           sizes?: string[] | null
           sku?: string | null
           stock_quantity?: number | null

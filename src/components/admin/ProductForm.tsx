@@ -76,7 +76,11 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
     is_featured: false,
     is_new: false,
     is_preorder: false,
-    video_urls: ['']
+    video_urls: [''],
+    size_fit_info: '',
+    composition_care_info: '',
+    responsibility_info: '',
+    delivery_return_info: ''
   });
 
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -221,7 +225,11 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
           is_new: productForm.is_new,
           is_preorder: productForm.is_preorder,
           images: imageUrls,
-          video_urls: videoUrls
+          video_urls: videoUrls,
+          size_fit_info: productForm.size_fit_info || null,
+          composition_care_info: productForm.composition_care_info || null,
+          responsibility_info: productForm.responsibility_info || null,
+          delivery_return_info: productForm.delivery_return_info || null
         })
         .select()
         .single();
@@ -301,7 +309,11 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
         is_featured: false,
         is_new: false,
         is_preorder: false,
-        video_urls: ['']
+        video_urls: [''],
+        size_fit_info: '',
+        composition_care_info: '',
+        responsibility_info: '',
+        delivery_return_info: ''
       });
       setSelectedColors([]);
       setSelectedSizes([]);
@@ -691,6 +703,55 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
                 </Select>
               </div>
             )}
+          </div>
+
+          {/* Additional Product Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Дополнительная информация о товаре</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="size_fit_info">Размер и посадка</Label>
+              <Textarea
+                id="size_fit_info"
+                value={productForm.size_fit_info}
+                onChange={(e) => setProductForm({...productForm, size_fit_info: e.target.value})}
+                placeholder="Информация о размере и посадке товара"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="composition_care_info">Состав и уход</Label>
+              <Textarea
+                id="composition_care_info"
+                value={productForm.composition_care_info}
+                onChange={(e) => setProductForm({...productForm, composition_care_info: e.target.value})}
+                placeholder="Информация о составе материалов и уходе за товаром"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="responsibility_info">Ответственность</Label>
+              <Textarea
+                id="responsibility_info"
+                value={productForm.responsibility_info}
+                onChange={(e) => setProductForm({...productForm, responsibility_info: e.target.value})}
+                placeholder="Информация об экологичности и ответственном производстве"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="delivery_return_info">Доставка и возврат</Label>
+              <Textarea
+                id="delivery_return_info"
+                value={productForm.delivery_return_info}
+                onChange={(e) => setProductForm({...productForm, delivery_return_info: e.target.value})}
+                placeholder="Информация о доставке и условиях возврата"
+                rows={3}
+              />
+            </div>
           </div>
 
           {/* Flags */}

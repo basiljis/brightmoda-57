@@ -19,6 +19,7 @@ interface Category {
   description?: string;
   is_active: boolean;
   sort_order: number;
+  size_chart_image_url?: string;
 }
 
 interface Subcategory {
@@ -73,6 +74,7 @@ export default function ReferenceManagement() {
     description: '',
     is_active: true,
     sort_order: 0,
+    size_chart_image_url: '',
     isEditing: false
   });
 
@@ -220,7 +222,8 @@ export default function ReferenceManagement() {
           slug,
           description: categoryForm.description,
           is_active: categoryForm.is_active,
-          sort_order: categoryForm.sort_order
+          sort_order: categoryForm.sort_order,
+          size_chart_image_url: categoryForm.size_chart_image_url || null
         }).eq('id', categoryForm.id);
 
         if (error) throw error;
@@ -235,7 +238,8 @@ export default function ReferenceManagement() {
           slug,
           description: categoryForm.description,
           is_active: categoryForm.is_active,
-          sort_order: categoryForm.sort_order
+          sort_order: categoryForm.sort_order,
+          size_chart_image_url: categoryForm.size_chart_image_url || null
         });
 
         if (error) throw error;
@@ -253,6 +257,7 @@ export default function ReferenceManagement() {
         description: '',
         is_active: true,
         sort_order: 0,
+        size_chart_image_url: '',
         isEditing: false
       });
 
@@ -274,6 +279,7 @@ export default function ReferenceManagement() {
       description: category.description || '',
       is_active: category.is_active,
       sort_order: category.sort_order,
+      size_chart_image_url: category.size_chart_image_url || '',
       isEditing: true
     });
   };
@@ -745,6 +751,16 @@ export default function ReferenceManagement() {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="cat-size-chart">URL размерной сетки</Label>
+                  <Input
+                    id="cat-size-chart"
+                    value={categoryForm.size_chart_image_url}
+                    onChange={(e) => setCategoryForm({...categoryForm, size_chart_image_url: e.target.value})}
+                    placeholder="https://example.com/size-chart.jpg"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="cat-sort">Порядок сортировки</Label>
@@ -782,6 +798,7 @@ export default function ReferenceManagement() {
                       description: '',
                       is_active: true,
                       sort_order: 0,
+                      size_chart_image_url: '',
                       isEditing: false
                     })}
                   >

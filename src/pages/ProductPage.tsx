@@ -235,16 +235,9 @@ const ProductPage = () => {
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground space-y-2">
                     <p>{product.description}</p>
-                    <p className="mt-4">Unisex product</p>
-                    <p>Oversized fit</p>
-                    <p>Bandana collar</p>
-                    <p>Buttoned cuffs</p>
-                    <p>Mother of pearl buttons</p>
-                    <p>Horizontal Ami De Coeur silver plate under back gusset</p>
-                    <p>Center back length 87.2 (size XS)</p>
-                    <p>Center back length 90.2 (size M)</p>
-                    <p>Made in Bulgaria (with love)</p>
-                    <p className="mt-4 font-medium">REF: UTP801.CO0133.693</p>
+                    {product.sku && (
+                      <p className="mt-4 font-medium">REF: {product.sku}</p>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -256,8 +249,14 @@ const ProductPage = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground">
-                    <p>Model is 5'9" and wears size S</p>
-                    <p>Oversized fit - size down for a more fitted look</p>
+                    {product.size_fit_info ? (
+                      <p>{product.size_fit_info}</p>
+                    ) : (
+                      <>
+                        <p>Model is 5'9" and wears size S</p>
+                        <p>Oversized fit - size down for a more fitted look</p>
+                      </>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -269,13 +268,19 @@ const ProductPage = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground">
-                    <p className="mb-2">100% мериносовая шерсть</p>
-                    <div className="space-y-1">
-                      <p>Деликатная стирка при 30°C</p>
-                      <p>Не отбеливать</p>
-                      <p>Сушить горизонтально</p>
-                      <p>Гладить через влажную ткань</p>
-                    </div>
+                    {product.composition_care_info ? (
+                      <p>{product.composition_care_info}</p>
+                    ) : (
+                      <>
+                        <p className="mb-2">100% мериносовая шерсть</p>
+                        <div className="space-y-1">
+                          <p>Деликатная стирка при 30°C</p>
+                          <p>Не отбеливать</p>
+                          <p>Сушить горизонтально</p>
+                          <p>Гладить через влажную ткань</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -287,8 +292,14 @@ const ProductPage = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground">
-                    <p>Ethically made with sustainable materials</p>
-                    <p>Fair trade certified</p>
+                    {product.responsibility_info ? (
+                      <p>{product.responsibility_info}</p>
+                    ) : (
+                      <>
+                        <p>Ethically made with sustainable materials</p>
+                        <p>Fair trade certified</p>
+                      </>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -300,9 +311,15 @@ const ProductPage = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pb-4">
                   <div className="text-sm text-muted-foreground">
-                    <p>Free shipping on orders over $200</p>
-                    <p>30-day return policy</p>
-                    <p>Express shipping available</p>
+                    {product.delivery_return_info ? (
+                      <p>{product.delivery_return_info}</p>
+                    ) : (
+                      <>
+                        <p>Free shipping on orders over $200</p>
+                        <p>30-day return policy</p>
+                        <p>Express shipping available</p>
+                      </>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
