@@ -181,16 +181,13 @@ const Footer = () => {
               О НАС
             </h3>
             <div className="space-y-3">
-              <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                О компании
-              </Link>
-              {aboutSections.slice(0, 4).map((section) => (
+              {aboutSections.slice(0, 5).map((section) => (
                 <Link 
                   key={section.id}
                   to="/about" 
                   className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {getSectionDisplayName(section.section_name)}
+                  {section.content_value}
                 </Link>
               ))}
             </div>
