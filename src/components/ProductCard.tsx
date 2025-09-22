@@ -163,22 +163,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 {product.name}
               </h3>
               
-              {/* Color circles - показываются если есть цвета */}
-              {product.colors && product.colors.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  {product.colors.map((color, index) => (
-                    <div
-                      key={index}
-                      className="w-4 h-4 rounded-full border border-border/30"
-                      style={{ backgroundColor: getColorHex(color) }}
-                      title={typeof color === 'string' ? color : color.name}
-                    />
-                  ))}
-                </div>
-              )}
-              
-              {/* Color circles для данных из Supabase (product_colors) */}
-              {(product as any).product_colors && (product as any).product_colors.length > 0 && (
+              {/* Color circles - приоритет данным из Supabase */}
+              {((product as any).product_colors && (product as any).product_colors.length > 0) ? (
                 <div className="flex items-center space-x-2">
                   {(product as any).product_colors.map((pc: any, index: number) => (
                     <div
@@ -189,6 +175,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
                     />
                   ))}
                 </div>
+              ) : (
+                product.colors && product.colors.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    {product.colors.map((color, index) => (
+                      <div
+                        key={index}
+                        className="w-4 h-4 rounded-full border border-border/30"
+                        style={{ backgroundColor: getColorHex(color) }}
+                        title={typeof color === 'string' ? color : color.name}
+                      />
+                    ))}
+                  </div>
+                )
               )}
             </div>
             
