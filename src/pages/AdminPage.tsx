@@ -12,6 +12,8 @@ import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2 } f
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
+import LookbookManagement from '@/components/admin/LookbookManagement';
+import PageContentManagement from '@/components/admin/PageContentManagement';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -180,7 +182,7 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Товары
@@ -188,6 +190,14 @@ const AdminPage = () => {
           <TabsTrigger value="references" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Справочники
+          </TabsTrigger>
+          <TabsTrigger value="lookbook" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Lookbook
+          </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Контент
           </TabsTrigger>
           <TabsTrigger value="orders" className="flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
@@ -325,6 +335,14 @@ const AdminPage = () => {
 
         <TabsContent value="references">
           <ReferenceManagement />
+        </TabsContent>
+
+        <TabsContent value="lookbook">
+          <LookbookManagement />
+        </TabsContent>
+
+        <TabsContent value="content">
+          <PageContentManagement />
         </TabsContent>
 
         <TabsContent value="orders">

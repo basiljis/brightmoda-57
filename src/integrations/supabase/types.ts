@@ -107,6 +107,45 @@ export type Database = {
         }
         Relationships: []
       }
+      lookbook_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          season: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          season?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          season?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -137,6 +176,42 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      page_content: {
+        Row: {
+          content_type: string
+          content_value: string
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          page_name: string
+          section_name: string
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          content_value: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          page_name: string
+          section_name: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          content_value?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          page_name?: string
+          section_name?: string
+          updated_at?: string
         }
         Relationships: []
       }
