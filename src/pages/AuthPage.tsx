@@ -65,7 +65,7 @@ const AuthPage = () => {
             title: "Вход выполнен",
             description: "Добро пожаловать!",
           });
-          navigate('/');
+          navigate('/profile');
         }
       }
     } catch (error) {
