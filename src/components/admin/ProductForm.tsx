@@ -272,10 +272,11 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, publish: boolean = true) => {
     e.preventDefault();
     console.log('Form submission started');
     console.log('Uploaded images count:', uploadedImages.length);
+    console.log('Publish mode:', publish);
     setUploading(true);
     
     try {
@@ -318,7 +319,8 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
           size_fit_info: productForm.size_fit_info || null,
           composition_care_info: productForm.composition_care_info || null,
           responsibility_info: productForm.responsibility_info || null,
-          delivery_return_info: productForm.delivery_return_info || null
+          delivery_return_info: productForm.delivery_return_info || null,
+          is_active: publish
         })
         .select()
         .single();
@@ -385,8 +387,8 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
       }
 
       toast({
-        title: "Товар добавлен",
-        description: "Товар успешно добавлен в каталог",
+        title: publish ? "Товар опубликован" : "Товар сохранен как черновик",
+        description: publish ? "Товар успешно добавлен и опубликован в каталоге" : "Товар сохранен как черновик",
       });
 
       // Reset form
@@ -450,12 +452,15 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Название товара</Label>
+              <Label htmlFor="name" className="text-foreground">
+                Название товара <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="name"
                 value={productForm.name}
                 onChange={(e) => setProductForm({...productForm, name: e.target.value})}
                 required
+                className={`${!productForm.name.trim() ? 'border-destructive focus-visible:ring-destructive' : ''}`}
               />
             </div>
             
@@ -481,7 +486,9 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Цена (руб.)</Label>
+            <Label htmlFor="price" className="text-foreground">
+              Цена (руб.) <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="price"
               type="number"
@@ -489,15 +496,18 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
               value={productForm.price}
               onChange={(e) => setProductForm({...productForm, price: e.target.value})}
               required
+              className={`${!productForm.price.trim() ? 'border-destructive focus-visible:ring-destructive' : ''}`}
             />
           </div>
 
           {/* Categories */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Категория</Label>
-              <Select onValueChange={(value) => setProductForm({...productForm, category_id: value})}>
-                <SelectTrigger>
+              <Label htmlFor="category" className="text-foreground">
+                Категория <span className="text-destructive">*</span>
+              </Label>
+              <Select value={productForm.category_id} onValueChange={(value) => setProductForm({...productForm, category_id: value})}>
+                <SelectTrigger className={`${!productForm.category_id ? 'border-destructive' : ''}`}>
                   <SelectValue placeholder="Выберите категорию" />
                 </SelectTrigger>
                 <SelectContent>
@@ -676,7 +686,9 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
 
           {/* General Images */}
           <div className="space-y-2">
-            <Label htmlFor="images">Общие изображения товара</Label>
+            <Label htmlFor="images" className="text-foreground">
+              Общие изображения товара <span className="text-destructive">*</span>
+            </Label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
               <div className="text-center">
                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
@@ -956,9 +968,25 @@ export default function ProductForm({ onProductAdded }: ProductFormProps) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={uploading || !user || !isAdmin}>
-            {uploading ? 'Добавление...' : !user || !isAdmin ? 'Войдите как администратор' : 'Добавить товар'}
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1" 
+              disabled={uploading || !user || !isAdmin}
+              onClick={(e) => handleSubmit(e, false)}
+            >
+              {uploading ? 'Сохранение...' : !user || !isAdmin ? 'Войдите как администратор' : 'Сохранить как черновик'}
+            </Button>
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={uploading || !user || !isAdmin}
+              onClick={(e) => handleSubmit(e, true)}
+            >
+              {uploading ? 'Публикация...' : !user || !isAdmin ? 'Войдите как администратор' : 'Опубликовать'}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

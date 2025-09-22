@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye, Send } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
@@ -430,6 +430,14 @@ const AdminPage = () => {
                             title={product.is_active ? "Скрыть товар" : "Показать товар"}
                           >
                             {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={product.is_active ? "default" : "outline"}
+                            onClick={() => handleToggleProductVisibility(product.id, product.is_active, product.name)}
+                            title={product.is_active ? "Снять с публикации" : "Опубликовать товар"}
+                          >
+                            <Send className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
