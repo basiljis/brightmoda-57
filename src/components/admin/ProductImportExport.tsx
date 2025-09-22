@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Download, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, Download, FileText, AlertCircle, CheckCircle, BookOpen } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
@@ -292,8 +292,103 @@ const ProductImportExport = () => {
         description: error instanceof Error ? error.message : 'Неизвестная ошибка',
         variant: "destructive"
       });
-    } finally {
-      setIsExporting(false);
+    }
+  };
+
+  const downloadReference = async (referenceType: string) => {
+    try {
+      let data, filename;
+      
+      switch (referenceType) {
+        case 'categories':
+          const { data: categories } = await supabase
+            .from('categories')
+            .select('name, slug, description, is_active, sort_order')
+            .order('sort_order');
+          data = categories;
+          filename = 'categories_reference.csv';
+          break;
+          
+        case 'subcategories':
+          const { data: subcategories } = await supabase
+            .from('subcategories')
+            .select('name, slug, description, is_active, sort_order, category:categories(name, slug)')
+            .order('sort_order');
+          data = subcategories?.map(sub => ({
+            name: sub.name,
+            slug: sub.slug,
+            description: sub.description,
+            is_active: sub.is_active,
+            sort_order: sub.sort_order,
+            category_name: sub.category?.name || '',
+            category_slug: sub.category?.slug || ''
+          }));
+          filename = 'subcategories_reference.csv';
+          break;
+          
+        case 'collections':
+          const { data: collections } = await supabase
+            .from('collections')
+            .select('name, slug, description, is_active, sort_order, show_on_homepage')
+            .order('sort_order');
+          data = collections;
+          filename = 'collections_reference.csv';
+          break;
+          
+        case 'colors':
+          const { data: colors } = await supabase
+            .from('colors')
+            .select('name, hex_code, is_active, sort_order')
+            .order('sort_order');
+          data = colors;
+          filename = 'colors_reference.csv';
+          break;
+          
+        case 'sizes':
+          const { data: sizes } = await supabase
+            .from('sizes')
+            .select('name, is_active, sort_order')
+            .order('sort_order');
+          data = sizes;
+          filename = 'sizes_reference.csv';
+          break;
+          
+        default:
+          throw new Error('Неизвестный тип справочника');
+      }
+
+      if (!data || data.length === 0) {
+        toast({
+          title: "Нет данных",
+          description: "Справочник пуст",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const csv = Papa.unparse(data, { header: true });
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Справочник скачан",
+        description: `Справочник "${referenceType}" успешно скачан`
+      });
+
+    } catch (error) {
+      console.error('Reference download error:', error);
+      toast({
+        title: "Ошибка скачивания",
+        description: error instanceof Error ? error.message : 'Неизвестная ошибка',
+        variant: "destructive"
+      });
     }
   };
 
@@ -318,6 +413,69 @@ const ProductImportExport = () => {
           >
             {isExporting ? 'Экспортируем...' : 'Скачать все товары'}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Reference Downloads */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Скачать справочники
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            Скачайте справочники для удобства заполнения файлов с товарами
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Button 
+              onClick={() => downloadReference('categories')} 
+              variant="outline"
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Категории
+            </Button>
+            <Button 
+              onClick={() => downloadReference('subcategories')} 
+              variant="outline"
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Подкатегории
+            </Button>
+            <Button 
+              onClick={() => downloadReference('collections')} 
+              variant="outline"
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Коллекции
+            </Button>
+            <Button 
+              onClick={() => downloadReference('colors')} 
+              variant="outline"
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Цвета
+            </Button>
+            <Button 
+              onClick={() => downloadReference('sizes')} 
+              variant="outline"
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Размеры
+            </Button>
+          </div>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Справочники помогут вам правильно заполнить поля category, subcategory, collection, colors и sizes в CSV файле с товарами.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
 

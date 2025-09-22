@@ -6,9 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
@@ -37,9 +40,16 @@ const AdminPage = () => {
   });
 
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // Search and pagination state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (isAdmin) {
@@ -64,9 +74,38 @@ const AdminPage = () => {
       
       if (error) throw error;
       setProducts(data || []);
+      setFilteredProducts(data || []);
     } catch (error) {
       console.error('Error loading products:', error);
     }
+  };
+
+  // Filter products based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter((product: any) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.categories?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.subcategories?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+    setCurrentPage(1); // Reset to first page when searching
+  }, [searchTerm, products]);
+
+  // Calculate pagination
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
+  }, [filteredProducts, itemsPerPage]);
+
+  // Get current page products
+  const getCurrentPageProducts = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
   };
 
   const loadOrders = async () => {
@@ -149,6 +188,31 @@ const AdminPage = () => {
     }
   };
 
+  const handleToggleProductVisibility = async (productId: string, currentStatus: boolean, productName: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: !currentStatus })
+        .eq('id', productId);
+
+      if (error) throw error;
+
+      toast({
+        title: currentStatus ? "Товар скрыт" : "Товар показан",
+        description: `Товар "${productName}" ${currentStatus ? 'скрыт' : 'отображается'} в каталоге`,
+      });
+
+      loadProducts();
+    } catch (error) {
+      console.error('Error toggling product visibility:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось изменить видимость товара",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeliverySettingsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -224,15 +288,60 @@ const AdminPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Список товаров</CardTitle>
+              <CardDescription>
+                Всего товаров: {filteredProducts.length} из {products.length}
+              </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Search and pagination controls */}
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Поиск по названию, артиклу, категории..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
+                    Показать:
+                  </Label>
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(parseInt(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-4">
-                {products.map((product: any) => (
-                  <div key={product.id} className="p-4 border rounded-lg">
+                {getCurrentPageProducts().map((product: any) => (
+                  <div key={product.id} className={`p-4 border rounded-lg ${!product.is_active ? 'opacity-60 bg-muted/30' : ''}`}>
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold">{product.name}</h3>
+                          {!product.is_active && (
+                            <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                              Скрыт
+                            </span>
+                          )}
                           {product.sku && (
                             <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
                               {product.sku}
@@ -317,6 +426,14 @@ const AdminPage = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleToggleProductVisibility(product.id, product.is_active, product.name)}
+                            title={product.is_active ? "Скрыть товар" : "Показать товар"}
+                          >
+                            {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleEditProduct(product)}
                           >
                             <Edit className="h-4 w-4" />
@@ -334,8 +451,74 @@ const AdminPage = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage > 1) setCurrentPage(currentPage - 1);
+                          }}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNumber;
+                        if (totalPages <= 5) {
+                          pageNumber = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNumber = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNumber = totalPages - 4 + i;
+                        } else {
+                          pageNumber = currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(pageNumber);
+                              }}
+                              isActive={currentPage === pageNumber}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                          }}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </CardContent>
           </Card>
+          
+          <ProductEdit
+            product={editingProduct}
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            onProductUpdated={handleProductUpdated}
+          />
         </TabsContent>
 
         <TabsContent value="import-export">
@@ -388,13 +571,6 @@ const AdminPage = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <ProductEdit
-            product={editingProduct}
-            isOpen={isEditDialogOpen}
-            onClose={() => setIsEditDialogOpen(false)}
-            onProductUpdated={handleProductUpdated}
-          />
         </TabsContent>
 
         <TabsContent value="settings">
