@@ -28,13 +28,31 @@ const Footer = () => {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
   const [supportSections, setSupportSections] = useState<PageContent[]>([]);
+  const [footerLogoUrl, setFooterLogoUrl] = useState(logo);
 
   useEffect(() => {
+    loadSiteSettings();
     loadCategories();
     loadSubcategories();
     loadAboutSections();
     loadSupportSections();
   }, []);
+
+  const loadSiteSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('footer_logo_url, logo_url')
+        .maybeSingle();
+
+      if (!error && data) {
+        // Use footer_logo_url if available, otherwise use logo_url, otherwise use default
+        setFooterLogoUrl(data.footer_logo_url || data.logo_url || logo);
+      }
+    } catch (error) {
+      console.error('Error loading site settings:', error);
+    }
+  };
 
   const loadCategories = async () => {
     try {
@@ -122,7 +140,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
               <img 
-                src={logo} 
+                src={footerLogoUrl} 
                 alt="BRIGHT" 
                 className="h-8 w-auto"
               />

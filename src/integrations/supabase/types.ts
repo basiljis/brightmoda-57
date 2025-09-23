@@ -778,6 +778,84 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
+          page_name: string
+          robots: string | null
+          schema_markup: Json | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_name: string
+          robots?: string | null
+          schema_markup?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_name?: string
+          robots?: string | null
+          schema_markup?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          favicon_url: string | null
+          footer_logo_url: string | null
+          id: string
+          logo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          favicon_url?: string | null
+          footer_logo_url?: string | null
+          id?: string
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          favicon_url?: string | null
+          footer_logo_url?: string | null
+          id?: string
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sizes: {
         Row: {
           created_at: string

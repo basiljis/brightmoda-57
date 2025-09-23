@@ -30,6 +30,7 @@ const Header = () => {
   const [categories, setCategories] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(logo);
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
@@ -39,6 +40,16 @@ const Header = () => {
 
   const loadData = async () => {
     try {
+      // Load site settings for logo
+      const { data: siteData, error: siteError } = await supabase
+        .from('site_settings')
+        .select('logo_url')
+        .maybeSingle();
+      
+      if (!siteError && siteData?.logo_url) {
+        setLogoUrl(siteData.logo_url);
+      }
+
       // Load collections
       const { data: collectionsData, error: collectionsError } = await supabase
         .from('collections')
@@ -96,7 +107,7 @@ const Header = () => {
                 <SheetContent side="left" className="w-80 p-0">
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b">
-                      <img src={logo} alt="BRIGHT" className="h-8 w-auto" />
+                      <img src={logoUrl} alt="BRIGHT" className="h-8 w-auto" />
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                       <div className="space-y-4">
@@ -174,7 +185,7 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="hover:opacity-80 transition-opacity">
               <img 
-                src={logo} 
+                src={logoUrl} 
                 alt="BRIGHT" 
                 className="h-8 w-auto"
               />

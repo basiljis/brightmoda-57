@@ -24,6 +24,8 @@ import ProductImportExport from '@/components/admin/ProductImportExport';
 import EmailSubscriptionManagement from '@/components/admin/EmailSubscriptionManagement';
 import EmailSettings from '@/components/admin/EmailSettings';
 import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManagement';
+import SiteSettings from '@/components/admin/SiteSettings';
+import SEOSettings from '@/components/admin/SEOSettings';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -639,9 +641,11 @@ const AdminPage = () => {
 
         <TabsContent value="settings">
           <Tabs defaultValue="delivery" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="delivery">Настройки доставки</TabsTrigger>
               <TabsTrigger value="email">Email настройки</TabsTrigger>
+              <TabsTrigger value="site">Настройки сайта</TabsTrigger>
+              <TabsTrigger value="seo">SEO настройки</TabsTrigger>
             </TabsList>
             
             <TabsContent value="delivery">
@@ -720,6 +724,14 @@ const AdminPage = () => {
             
             <TabsContent value="email">
               <EmailSettings />
+            </TabsContent>
+            
+            <TabsContent value="site">
+              <SiteSettings />
+            </TabsContent>
+            
+            <TabsContent value="seo">
+              <SEOSettings />
             </TabsContent>
           </Tabs>
         </TabsContent>
