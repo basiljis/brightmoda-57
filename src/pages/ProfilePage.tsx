@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings } from "lucide-react";
+import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings, Send } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import DeliveryAddresses from '@/components/profile/DeliveryAddresses';
 import CartItems from '@/components/profile/CartItems';
+import EmailSubscriptionSettings from '@/components/profile/EmailSubscriptionSettings';
 
 const ProfilePage = () => {
   const { user, signOut, loading, isAdmin } = useAuth();
@@ -129,7 +130,7 @@ const ProfilePage = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Профиль
@@ -149,6 +150,10 @@ const ProfilePage = () => {
             <TabsTrigger value="cart" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               Корзина
+            </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Подписки
             </TabsTrigger>
           </TabsList>
 
@@ -321,6 +326,10 @@ const ProfilePage = () => {
 
           <TabsContent value="cart">
             <CartItems />
+          </TabsContent>
+
+          <TabsContent value="subscriptions">
+            <EmailSubscriptionSettings />
           </TabsContent>
         </Tabs>
       </div>

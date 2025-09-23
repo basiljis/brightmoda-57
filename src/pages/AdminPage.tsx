@@ -18,6 +18,7 @@ import ProductEdit from '@/components/admin/ProductEdit';
 import LookbookManagement from '@/components/admin/LookbookManagement';
 import PageContentManagement from '@/components/admin/PageContentManagement';
 import ProductImportExport from '@/components/admin/ProductImportExport';
+import EmailSubscriptionManagement from '@/components/admin/EmailSubscriptionManagement';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -247,7 +248,7 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Товары
@@ -279,6 +280,10 @@ const AdminPage = () => {
           <TabsTrigger value="instructions" className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4" />
             Инструкции
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+            <Send className="h-4 w-4" />
+            Подписки
           </TabsTrigger>
         </TabsList>
 
@@ -792,6 +797,10 @@ const AdminPage = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="subscriptions">
+          <EmailSubscriptionManagement />
         </TabsContent>
       </Tabs>
     </div>
