@@ -9,9 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye, Send } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye, Send, Menu } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
@@ -25,6 +28,9 @@ import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManag
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("products");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
@@ -242,60 +248,84 @@ const AdminPage = () => {
     }
   };
 
+  const tabItems = [
+    { value: "products", label: "Товары", icon: Package },
+    { value: "import-export", label: "Импорт/Экспорт", icon: Upload },
+    { value: "references", label: "Справочники", icon: BookOpen },
+    { value: "lookbook", label: "Lookbook", icon: BookOpen },
+    { value: "content", label: "Контент", icon: Edit },
+    { value: "orders", label: "Заказы", icon: ShoppingCart },
+    { value: "settings", label: "Настройки", icon: Settings },
+    { value: "instructions", label: "Инструкции", icon: HelpCircle },
+    { value: "subscriptions", label: "Подписки", icon: Send },
+    { value: "email-settings", label: "Email настройки", icon: Settings },
+    { value: "header-collections", label: "Коллекции в шапке", icon: Edit },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Админ-панель</h1>
-        <p className="text-muted-foreground">Управление товарами и настройками</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Админ-панель</h1>
+          <p className="text-muted-foreground">Управление товарами и настройками</p>
+        </div>
+        
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Menu className="h-4 w-4 mr-2" />
+                Меню
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <div className="p-6 border-b">
+                <h2 className="text-lg font-semibold">Админ-панель</h2>
+              </div>
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-2">
+                  {tabItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.value}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                          activeTab === item.value 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'hover:bg-muted'
+                        }`}
+                        onClick={() => {
+                          setActiveTab(item.value);
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
 
-      <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-11">
-          <TabsTrigger value="products" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            Товары
-          </TabsTrigger>
-          <TabsTrigger value="import-export" className="flex items-center gap-2">
-            <Upload className="h-4 w-4" />
-            Импорт/Экспорт
-          </TabsTrigger>
-          <TabsTrigger value="references" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Справочники
-          </TabsTrigger>
-          <TabsTrigger value="lookbook" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Lookbook
-          </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-2">
-            <Edit className="h-4 w-4" />
-            Контент
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="flex items-center gap-2">
-            <ShoppingCart className="h-4 w-4" />
-            Заказы
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Настройки
-          </TabsTrigger>
-          <TabsTrigger value="instructions" className="flex items-center gap-2">
-            <HelpCircle className="h-4 w-4" />
-            Инструкции
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-            <Send className="h-4 w-4" />
-            Подписки
-          </TabsTrigger>
-          <TabsTrigger value="email-settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Email настройки
-          </TabsTrigger>
-          <TabsTrigger value="header-collections" className="flex items-center gap-2">
-            <Edit className="h-4 w-4" />
-            Коллекции в шапке
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {!isMobile && (
+          <TabsList className="grid w-full grid-cols-11">
+            {tabItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        )}
 
         <TabsContent value="products" className="space-y-6">
           <ProductForm onProductAdded={handleProductAdded} />

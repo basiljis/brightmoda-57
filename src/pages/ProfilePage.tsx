@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings, Send } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings, Send, Menu } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import DeliveryAddresses from '@/components/profile/DeliveryAddresses';
@@ -17,6 +20,9 @@ import EmailSubscriptionSettings from '@/components/profile/EmailSubscriptionSet
 const ProfilePage = () => {
   const { user, signOut, loading, isAdmin } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -114,48 +120,100 @@ const ProfilePage = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const tabItems = [
+    { value: "profile", label: "Профиль", icon: User },
+    { value: "orders", label: "Заказы", icon: Package },
+    { value: "favorites", label: "Избранное", icon: Heart },
+    { value: "addresses", label: "Адреса", icon: MapPin },
+    { value: "cart", label: "Корзина", icon: ShoppingCart },
+    { value: "subscriptions", label: "Подписки", icon: Send },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-8">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Личный кабинет</h1>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-            className="flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Выйти
-          </Button>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold">Личный кабинет</h1>
+            
+            {/* Mobile Menu Button */}
+            {isMobile && (
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Menu className="h-4 w-4 mr-2" />
+                    Меню
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-0">
+                  <div className="p-6 border-b">
+                    <h2 className="text-lg font-semibold">Личный кабинет</h2>
+                  </div>
+                  <ScrollArea className="h-full">
+                    <div className="p-4 space-y-2">
+                      {tabItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.value}
+                            className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                              activeTab === item.value 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'hover:bg-muted'
+                            }`}
+                            onClick={() => {
+                              setActiveTab(item.value);
+                              setIsMobileMenuOpen(false);
+                            }}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {item.label}
+                          </button>
+                        );
+                      })}
+                      <div className="border-t pt-2 mt-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={handleSignOut}
+                          className="w-full flex items-center justify-center gap-2"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Выйти
+                        </Button>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
+          
+          {!isMobile && (
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Выйти
+            </Button>
+          )}
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Профиль
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Заказы
-            </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              Избранное
-            </TabsTrigger>
-            <TabsTrigger value="addresses" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Адреса
-            </TabsTrigger>
-            <TabsTrigger value="cart" className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Корзина
-            </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Подписки
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {!isMobile && (
+            <TabsList className="grid w-full grid-cols-6">
+              {tabItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          )}
 
           <TabsContent value="profile">
             <Card>
