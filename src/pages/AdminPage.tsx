@@ -33,6 +33,7 @@ const AdminPage = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("products");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hiddenSections, setHiddenSections] = useState<string[]>([]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
@@ -261,6 +262,16 @@ const AdminPage = () => {
     { value: "subscriptions", label: "Подписки", icon: Send },
   ];
 
+  const visibleTabItems = tabItems.filter(item => !hiddenSections.includes(item.value));
+
+  const toggleSectionVisibility = (sectionValue: string) => {
+    setHiddenSections(prev => 
+      prev.includes(sectionValue) 
+        ? prev.filter(s => s !== sectionValue)
+        : [...prev, sectionValue]
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
@@ -269,52 +280,75 @@ const AdminPage = () => {
           <p className="text-muted-foreground">Управление товарами и настройками</p>
         </div>
         
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Menu className="h-4 w-4 mr-2" />
-                Меню
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold">Админ-панель</h2>
-              </div>
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-2">
-                  {tabItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <button
-                        key={item.value}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                          activeTab === item.value 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'hover:bg-muted'
-                        }`}
-                        onClick={() => {
-                          setActiveTab(item.value);
-                          setIsMobileMenuOpen(false);
-                        }}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {item.label}
-                      </button>
-                    );
-                  })}
+        <div className="flex items-center gap-4">
+          {/* Section visibility controls */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Разделы:</span>
+            {tabItems.map((item) => {
+              const Icon = item.icon;
+              const isHidden = hiddenSections.includes(item.value);
+              return (
+                <Button
+                  key={item.value}
+                  variant={isHidden ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => toggleSectionVisibility(item.value)}
+                  className="text-xs"
+                >
+                  <Icon className="h-3 w-3 mr-1" />
+                  {isHidden ? <EyeOff className="h-3 w-3 ml-1" /> : <Eye className="h-3 w-3 ml-1" />}
+                </Button>
+              );
+            })}
+          </div>
+          
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Menu className="h-4 w-4 mr-2" />
+                  Меню
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <div className="p-6 border-b">
+                  <h2 className="text-lg font-semibold">Админ-панель</h2>
                 </div>
-              </ScrollArea>
-            </SheetContent>
-          </Sheet>
-        )}
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-2">
+                    {visibleTabItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.value}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                            activeTab === item.value 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'hover:bg-muted'
+                          }`}
+                          onClick={() => {
+                            setActiveTab(item.value);
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          )}
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {!isMobile && (
-          <TabsList className="grid w-full grid-cols-8">
-            {tabItems.map((item) => {
+          <TabsList className="w-full grid grid-cols-1 lg:grid-cols-8 gap-1">
+            {visibleTabItems.map((item) => {
               const Icon = item.icon;
               return (
                 <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">

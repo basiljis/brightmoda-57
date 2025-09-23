@@ -24,6 +24,8 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+import SEOHead from "@/components/SEOHead";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -31,6 +33,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <SEOHead />
           <div className="min-h-screen bg-background flex flex-col">
             <Header />
             <main className="flex-1">
