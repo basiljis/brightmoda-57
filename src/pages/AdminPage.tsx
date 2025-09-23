@@ -19,6 +19,8 @@ import LookbookManagement from '@/components/admin/LookbookManagement';
 import PageContentManagement from '@/components/admin/PageContentManagement';
 import ProductImportExport from '@/components/admin/ProductImportExport';
 import EmailSubscriptionManagement from '@/components/admin/EmailSubscriptionManagement';
+import EmailSettings from '@/components/admin/EmailSettings';
+import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManagement';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -248,7 +250,7 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-11">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             Товары
@@ -284,6 +286,14 @@ const AdminPage = () => {
           <TabsTrigger value="subscriptions" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
             Подписки
+          </TabsTrigger>
+          <TabsTrigger value="email-settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Email настройки
+          </TabsTrigger>
+          <TabsTrigger value="header-collections" className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Коллекции в шапке
           </TabsTrigger>
         </TabsList>
 
@@ -801,6 +811,14 @@ const AdminPage = () => {
 
         <TabsContent value="subscriptions">
           <EmailSubscriptionManagement />
+        </TabsContent>
+
+        <TabsContent value="email-settings">
+          <EmailSettings />
+        </TabsContent>
+
+        <TabsContent value="header-collections">
+          <HeaderCollectionManagement />
         </TabsContent>
       </Tabs>
     </div>

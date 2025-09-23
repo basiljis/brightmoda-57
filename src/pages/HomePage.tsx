@@ -9,16 +9,19 @@ import categoryClothing from "@/assets/category-clothing.jpg";
 import categoryInterior from "@/assets/category-interior.jpg";
 import { ArrowRight, Star, Shield, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import EmailSubscriptionSection from "@/components/EmailSubscriptionSection";
 
 const HomePage = () => {
   const [scrollY, setScrollY] = useState(0);
   const [collections, setCollections] = useState([]);
+  const [headerCollections, setHeaderCollections] = useState([]);
   const featuredProducts = products.slice(0, 4);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     loadCollections();
+    loadHeaderCollections();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -38,48 +41,106 @@ const HomePage = () => {
     }
   };
 
+  const loadHeaderCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('header_collections')
+        .select('*')
+        .eq('is_active', true)
+        .order('position');
+      
+      if (error) throw error;
+      setHeaderCollections(data || []);
+    } catch (error) {
+      console.error('Error loading header collections:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Split Collection Layout */}
       <section className="h-screen relative overflow-hidden">
         <div className="grid md:grid-cols-2 h-full">
-          {/* Men's Collection */}
-          <div className="relative group cursor-pointer">
-            <Link to="/catalog" className="absolute inset-0 z-10"></Link>
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url(${menCollection})` }}
-            >
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
-                  MEN
-                </h2>
-                <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          {headerCollections.length >= 2 ? (
+            <>
+              {/* First Header Collection */}
+              <div className="relative group cursor-pointer">
+                <Link to={headerCollections[0]?.link_url || "/catalog"} className="absolute inset-0 z-10"></Link>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${headerCollections[0]?.image_url || menCollection})` }}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
+                      {headerCollections[0]?.title || 'MEN'}
+                    </h2>
+                    <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Women's Collection */}
-          <div className="relative group cursor-pointer">
-            <Link to="/catalog" className="absolute inset-0 z-10"></Link>
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url(${womenCollection})` }}
-            >
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
-                  WOMEN
-                </h2>
-                <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              {/* Second Header Collection */}
+              <div className="relative group cursor-pointer">
+                <Link to={headerCollections[1]?.link_url || "/catalog"} className="absolute inset-0 z-10"></Link>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${headerCollections[1]?.image_url || womenCollection})` }}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
+                      {headerCollections[1]?.title || 'WOMEN'}
+                    </h2>
+                    <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Fallback to static collections if no dynamic data */}
+              <div className="relative group cursor-pointer">
+                <Link to="/catalog" className="absolute inset-0 z-10"></Link>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${menCollection})` }}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
+                      MEN
+                    </h2>
+                    <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative group cursor-pointer">
+                <Link to="/catalog" className="absolute inset-0 z-10"></Link>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${womenCollection})` }}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <h2 className="text-4xl md:text-6xl font-light text-white tracking-[0.3em] mb-4">
+                      WOMEN
+                    </h2>
+                    <div className="w-16 h-px bg-white mx-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -237,6 +298,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Email Subscription Section */}
+      <EmailSubscriptionSection />
     </div>
   );
 };

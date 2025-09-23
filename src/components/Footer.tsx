@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-import EmailSubscription from "@/components/EmailSubscription";
 
 interface Category {
   id: string;
@@ -196,11 +195,6 @@ const Footer = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Email Subscription */}
-        <div className="mt-12">
-          <EmailSubscription />
         </div>
 
         {/* Bottom Section */}
