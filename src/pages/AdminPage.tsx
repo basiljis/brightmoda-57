@@ -252,14 +252,11 @@ const AdminPage = () => {
     { value: "products", label: "Товары", icon: Package },
     { value: "import-export", label: "Импорт/Экспорт", icon: Upload },
     { value: "references", label: "Справочники", icon: BookOpen },
-    { value: "lookbook", label: "Lookbook", icon: BookOpen },
     { value: "content", label: "Контент", icon: Edit },
     { value: "orders", label: "Заказы", icon: ShoppingCart },
     { value: "settings", label: "Настройки", icon: Settings },
     { value: "instructions", label: "Инструкции", icon: HelpCircle },
     { value: "subscriptions", label: "Подписки", icon: Send },
-    { value: "email-settings", label: "Email настройки", icon: Settings },
-    { value: "header-collections", label: "Коллекции в шапке", icon: Edit },
   ];
 
   return (
@@ -314,7 +311,7 @@ const AdminPage = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {!isMobile && (
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-8">
             {tabItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -582,12 +579,26 @@ const AdminPage = () => {
           <ReferenceManagement />
         </TabsContent>
 
-        <TabsContent value="lookbook">
-          <LookbookManagement />
-        </TabsContent>
-
         <TabsContent value="content">
-          <PageContentManagement />
+          <Tabs defaultValue="pages" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="pages">Страницы</TabsTrigger>
+              <TabsTrigger value="lookbook">Lookbook</TabsTrigger>
+              <TabsTrigger value="header-collections">Коллекции в шапке</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="pages">
+              <PageContentManagement />
+            </TabsContent>
+            
+            <TabsContent value="lookbook">
+              <LookbookManagement />
+            </TabsContent>
+            
+            <TabsContent value="header-collections">
+              <HeaderCollectionManagement />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="orders">
@@ -627,77 +638,90 @@ const AdminPage = () => {
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Настройки доставки</CardTitle>
-              <CardDescription>Настройки интеграции с СДЭК</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleDeliverySettingsSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cdek_client_id">СДЭК Client ID</Label>
-                    <Input
-                      id="cdek_client_id"
-                      value={deliverySettings.cdek_client_id}
-                      onChange={(e) => setDeliverySettings({
-                        ...deliverySettings,
-                        cdek_client_id: e.target.value
-                      })}
-                      placeholder="Введите Client ID"
-                    />
-                  </div>
+          <Tabs defaultValue="delivery" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="delivery">Настройки доставки</TabsTrigger>
+              <TabsTrigger value="email">Email настройки</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="delivery">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Настройки доставки</CardTitle>
+                  <CardDescription>Настройки интеграции с СДЭК</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleDeliverySettingsSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cdek_client_id">СДЭК Client ID</Label>
+                        <Input
+                          id="cdek_client_id"
+                          value={deliverySettings.cdek_client_id}
+                          onChange={(e) => setDeliverySettings({
+                            ...deliverySettings,
+                            cdek_client_id: e.target.value
+                          })}
+                          placeholder="Введите Client ID"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="cdek_client_secret">СДЭК Client Secret</Label>
-                    <Input
-                      id="cdek_client_secret"
-                      type="password"
-                      value={deliverySettings.cdek_client_secret}
-                      onChange={(e) => setDeliverySettings({
-                        ...deliverySettings,
-                        cdek_client_secret: e.target.value
-                      })}
-                      placeholder="Введите Client Secret"
-                    />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cdek_client_secret">СДЭК Client Secret</Label>
+                        <Input
+                          id="cdek_client_secret"
+                          type="password"
+                          value={deliverySettings.cdek_client_secret}
+                          onChange={(e) => setDeliverySettings({
+                            ...deliverySettings,
+                            cdek_client_secret: e.target.value
+                          })}
+                          placeholder="Введите Client Secret"
+                        />
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="default_city_name">Город по умолчанию</Label>
-                    <Input
-                      id="default_city_name"
-                      value={deliverySettings.default_city_name}
-                      onChange={(e) => setDeliverySettings({
-                        ...deliverySettings,
-                        default_city_name: e.target.value
-                      })}
-                      placeholder="Москва"
-                    />
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="default_city_name">Город по умолчанию</Label>
+                        <Input
+                          id="default_city_name"
+                          value={deliverySettings.default_city_name}
+                          onChange={(e) => setDeliverySettings({
+                            ...deliverySettings,
+                            default_city_name: e.target.value
+                          })}
+                          placeholder="Москва"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="default_city_code">Код города</Label>
-                    <Input
-                      id="default_city_code"
-                      type="number"
-                      value={deliverySettings.default_city_code}
-                      onChange={(e) => setDeliverySettings({
-                        ...deliverySettings,
-                        default_city_code: parseInt(e.target.value)
-                      })}
-                      placeholder="270"
-                    />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="default_city_code">Код города</Label>
+                        <Input
+                          id="default_city_code"
+                          type="number"
+                          value={deliverySettings.default_city_code}
+                          onChange={(e) => setDeliverySettings({
+                            ...deliverySettings,
+                            default_city_code: parseInt(e.target.value)
+                          })}
+                          placeholder="270"
+                        />
+                      </div>
+                    </div>
 
-                <Button type="submit" className="w-full">
-                  Сохранить настройки
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                    <Button type="submit" className="w-full">
+                      Сохранить настройки
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="email">
+              <EmailSettings />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="instructions">
@@ -841,14 +865,6 @@ const AdminPage = () => {
 
         <TabsContent value="subscriptions">
           <EmailSubscriptionManagement />
-        </TabsContent>
-
-        <TabsContent value="email-settings">
-          <EmailSettings />
-        </TabsContent>
-
-        <TabsContent value="header-collections">
-          <HeaderCollectionManagement />
         </TabsContent>
       </Tabs>
     </div>
