@@ -782,11 +782,6 @@ export type Database = {
         Row: {
           canonical_url: string | null
           created_at: string
-          custom_fonts_css: string | null
-          font_accent: string | null
-          font_body: string | null
-          font_headings: string | null
-          font_weights: Json | null
           id: string
           is_active: boolean
           meta_description: string | null
@@ -803,11 +798,6 @@ export type Database = {
         Insert: {
           canonical_url?: string | null
           created_at?: string
-          custom_fonts_css?: string | null
-          font_accent?: string | null
-          font_body?: string | null
-          font_headings?: string | null
-          font_weights?: Json | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
@@ -824,11 +814,6 @@ export type Database = {
         Update: {
           canonical_url?: string | null
           created_at?: string
-          custom_fonts_css?: string | null
-          font_accent?: string | null
-          font_body?: string | null
-          font_headings?: string | null
-          font_weights?: Json | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
