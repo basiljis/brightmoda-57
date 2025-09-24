@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye, Send, Menu } from 'lucide-react';
+import { Package, Settings, ShoppingCart, BookOpen, HelpCircle, Edit, Trash2, Upload, Search, EyeOff, Eye, Send, Menu, Type, CreditCard } from 'lucide-react';
 import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
@@ -26,6 +26,9 @@ import EmailSettings from '@/components/admin/EmailSettings';
 import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManagement';
 import SiteSettings from '@/components/admin/SiteSettings';
 import SEOSettings from '@/components/admin/SEOSettings';
+import FontSettings from '@/components/admin/FontSettings';
+import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
+import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -33,6 +36,7 @@ const AdminPage = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("products");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hiddenSections, setHiddenSections] = useState<string[]>([]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
@@ -67,8 +71,60 @@ const AdminPage = () => {
       loadProducts();
       loadOrders();
       loadDeliverySettings();
+      loadSectionVisibility();
     }
   }, [isAdmin]);
+
+  const loadSectionVisibility = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_section_visibility')
+        .select('section_name, is_visible')
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      const hidden = data?.filter(item => !item.is_visible).map(item => item.section_name) || [];
+      setHiddenSections(hidden);
+    } catch (error) {
+      console.error('Error loading section visibility:', error);
+    }
+  };
+
+  const toggleSectionVisibility = async (sectionName: string) => {
+    const isCurrentlyHidden = hiddenSections.includes(sectionName);
+    const newVisibility = isCurrentlyHidden;
+    
+    try {
+      const { error } = await supabase
+        .from('admin_section_visibility')
+        .upsert({
+          user_id: user?.id,
+          section_name: sectionName,
+          is_visible: newVisibility
+        });
+
+      if (error) throw error;
+
+      setHiddenSections(prev => 
+        newVisibility 
+          ? prev.filter(name => name !== sectionName)
+          : [...prev, sectionName]
+      );
+
+      toast({
+        title: newVisibility ? "Раздел показан" : "Раздел скрыт",
+        description: `Раздел "${sectionName}" ${newVisibility ? 'отображается' : 'скрыт'}`,
+      });
+    } catch (error) {
+      console.error('Error toggling section visibility:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось изменить видимость раздела",
+        variant: "destructive",
+      });
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -259,7 +315,7 @@ const AdminPage = () => {
     { value: "settings", label: "Настройки", icon: Settings },
     { value: "instructions", label: "Инструкции", icon: HelpCircle },
     { value: "subscriptions", label: "Подписки", icon: Send },
-  ];
+  ].filter(item => !hiddenSections.includes(item.value));
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -311,6 +367,11 @@ const AdminPage = () => {
         )}
       </div>
 
+      <HiddenSectionsManager 
+        hiddenSections={hiddenSections}
+        onRestoreSection={toggleSectionVisibility}
+      />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {!isMobile && (
           <TabsList className="grid w-full grid-cols-8">
@@ -327,6 +388,18 @@ const AdminPage = () => {
         )}
 
         <TabsContent value="products" className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Управление товарами</h2>
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={() => toggleSectionVisibility('products')}
+            >
+              <EyeOff className="h-4 w-4 mr-2" />
+              Скрыть раздел
+            </Button>
+          </div>
+          
           <ProductForm onProductAdded={handleProductAdded} />
 
           <Card>
@@ -640,12 +713,26 @@ const AdminPage = () => {
         </TabsContent>
 
         <TabsContent value="settings">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Настройки</h2>
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={() => toggleSectionVisibility('settings')}
+            >
+              <EyeOff className="h-4 w-4 mr-2" />
+              Скрыть раздел
+            </Button>
+          </div>
+          
           <Tabs defaultValue="delivery" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="delivery">Настройки доставки</TabsTrigger>
-              <TabsTrigger value="email">Email настройки</TabsTrigger>
-              <TabsTrigger value="site">Настройки сайта</TabsTrigger>
-              <TabsTrigger value="seo">SEO настройки</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="delivery">Доставка</TabsTrigger>
+              <TabsTrigger value="email">Email</TabsTrigger>
+              <TabsTrigger value="site">Сайт</TabsTrigger>
+              <TabsTrigger value="seo">SEO</TabsTrigger>
+              <TabsTrigger value="fonts">Шрифты</TabsTrigger>
+              <TabsTrigger value="payments">Платежи</TabsTrigger>
             </TabsList>
             
             <TabsContent value="delivery">
@@ -732,6 +819,14 @@ const AdminPage = () => {
             
             <TabsContent value="seo">
               <SEOSettings />
+            </TabsContent>
+            
+            <TabsContent value="fonts">
+              <FontSettings />
+            </TabsContent>
+            
+            <TabsContent value="payments">
+              <YandexPaymentSettings />
             </TabsContent>
           </Tabs>
         </TabsContent>

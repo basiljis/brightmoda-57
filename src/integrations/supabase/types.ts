@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_section_visibility: {
+        Row: {
+          created_at: string
+          id: string
+          is_visible: boolean
+          section_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          section_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          section_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           color: string | null
@@ -782,6 +809,11 @@ export type Database = {
         Row: {
           canonical_url: string | null
           created_at: string
+          custom_fonts_css: string | null
+          font_accent: string | null
+          font_body: string | null
+          font_headings: string | null
+          font_weights: Json | null
           id: string
           is_active: boolean
           meta_description: string | null
@@ -798,6 +830,11 @@ export type Database = {
         Insert: {
           canonical_url?: string | null
           created_at?: string
+          custom_fonts_css?: string | null
+          font_accent?: string | null
+          font_body?: string | null
+          font_headings?: string | null
+          font_weights?: Json | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
@@ -814,6 +851,11 @@ export type Database = {
         Update: {
           canonical_url?: string | null
           created_at?: string
+          custom_fonts_css?: string | null
+          font_accent?: string | null
+          font_body?: string | null
+          font_headings?: string | null
+          font_weights?: Json | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
@@ -926,6 +968,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      yandex_payment_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          secret_key: string | null
+          shop_id: string | null
+          test_mode: boolean
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          secret_key?: string | null
+          shop_id?: string | null
+          test_mode?: boolean
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          secret_key?: string | null
+          shop_id?: string | null
+          test_mode?: boolean
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
