@@ -379,15 +379,6 @@ const Header = () => {
               <Package className="h-5 w-5" />
               <span className="text-xs mt-1">Каталог</span>
             </Link>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex flex-col items-center p-2"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="h-5 w-5" />
-              <span className="text-xs mt-1">Поиск</span>
-            </Button>
             <Link to="/favorites" className="flex flex-col items-center p-2 relative">
               <Heart className="h-5 w-5" />
               <span className="text-xs mt-1">Избранное</span>

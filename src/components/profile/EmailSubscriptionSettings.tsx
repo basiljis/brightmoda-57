@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,16 +67,37 @@ const EmailSubscriptionSettings = () => {
     return <div>Загрузка настроек подписки...</div>;
   }
 
+  const handleSubscribe = async () => {
+    if (!user?.email) return;
+
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .insert([{ email: user.email, user_id: user.id }]);
+
+      if (error) throw error;
+      
+      toast.success('Вы успешно подписались на рассылку!');
+      loadSubscription();
+    } catch (error) {
+      console.error('Error subscribing:', error);
+      toast.error('Ошибка подписки на рассылку');
+    }
+  };
+
   if (!subscription) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Подписка на рассылку</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Вы не подписаны на нашу рассылку. Подпишитесь в футере сайта, чтобы первыми узнавать о новых коллекциях!
+            Вы не подписаны на нашу рассылку. Подпишитесь, чтобы первыми узнавать о новых коллекциях!
           </p>
+          <Button onClick={handleSubscribe} className="w-full">
+            Подписаться на рассылку
+          </Button>
         </CardContent>
       </Card>
     );

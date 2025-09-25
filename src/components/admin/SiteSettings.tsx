@@ -193,18 +193,27 @@ const SiteSettings = () => {
           description="Иконка сайта, отображаемая во вкладке браузера (рекомендуется 32x32 или 16x16 пикселей)"
           accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml"
         />
+        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
+          <strong>Инструкция:</strong> Загрузите файл изображения или вставьте URL. Изображения автоматически сохраняются в облачном хранилище.
+        </div>
 
         <FileUploadField
           field="logo_url"
           label="Логотип в шапке"
           description="Логотип, отображаемый в шапке сайта"
         />
+        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
+          <strong>Инструкция:</strong> Рекомендуемый размер: высота до 40px. Поддерживаются PNG, JPG, SVG форматы.
+        </div>
 
         <FileUploadField
           field="footer_logo_url"
           label="Логотип в подвале"
           description="Логотип, отображаемый в подвале сайта (может отличаться от основного)"
         />
+        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
+          <strong>Инструкция:</strong> Может быть в другом цвете или стиле для лучшего отображения в подвале.
+        </div>
 
         <Button onClick={handleSave} disabled={loading} className="w-full">
           {loading ? 'Сохранение...' : 'Сохранить настройки'}
