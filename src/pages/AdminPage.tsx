@@ -308,7 +308,6 @@ const AdminPage = () => {
 
   const tabItems = [
     { value: "products", label: "Товары", icon: Package },
-    { value: "import-export", label: "Импорт/Экспорт", icon: Upload },
     { value: "references", label: "Справочники", icon: BookOpen },
     { value: "content", label: "Контент", icon: Edit },
     { value: "orders", label: "Заказы", icon: ShoppingCart },
@@ -389,7 +388,7 @@ const AdminPage = () => {
 
         <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Управление товарами</h2>
+            <h2 className="text-2xl font-bold">Товары</h2>
             <Button
               variant="outline" 
               size="sm"
@@ -400,255 +399,211 @@ const AdminPage = () => {
             </Button>
           </div>
           
-          <ProductForm onProductAdded={handleProductAdded} />
+          <Tabs defaultValue="management" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="management">Управление товарами</TabsTrigger>
+              <TabsTrigger value="import-export">Импорт/Экспорт</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="management" className="space-y-6">
+              <ProductForm onProductAdded={handleProductAdded} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Список товаров</CardTitle>
-              <CardDescription>
-                Всего товаров: {filteredProducts.length} из {products.length}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Search and pagination controls */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Поиск по названию, артиклу, категории..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={itemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setItemsPerPage(parseInt(value));
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {getCurrentPageProducts().map((product: any) => (
-                  <div key={product.id} className={`p-4 border rounded-lg ${!product.is_active ? 'opacity-60 bg-muted/30' : ''}`}>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{product.name}</h3>
-                          {!product.is_active && (
-                            <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                              Скрыт
-                            </span>
-                          )}
-                          {product.sku && (
-                            <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                              {product.sku}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {product.categories?.name} 
-                          {product.subcategories?.name && ` / ${product.subcategories.name}`}
-                        </p>
-                        <p className="text-lg font-bold">{product.price} руб.</p>
-                        
-                        {/* Display images */}
-                        {product.images && product.images.length > 0 && (
-                          <div className="flex gap-2 mt-2">
-                            {product.images.slice(0, 3).map((image: string, idx: number) => (
-                              <img
-                                key={idx}
-                                src={image}
-                                alt={`${product.name} ${idx + 1}`}
-                                className="w-12 h-12 object-cover rounded border"
-                              />
-                            ))}
-                            {product.images.length > 3 && (
-                              <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center text-xs">
-                                +{product.images.length - 3}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Display colors */}
-                        {product.product_colors && product.product_colors.length > 0 && (
-                          <div className="flex gap-1 mt-2">
-                            {product.product_colors.map((pc: any, idx: number) => (
-                              <div
-                                key={idx}
-                                className="w-4 h-4 rounded-full border"
-                                style={{ backgroundColor: pc.colors.hex_code }}
-                                title={pc.colors.name}
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Display sizes */}
-                        {product.product_sizes && product.product_sizes.length > 0 && (
-                          <div className="flex gap-1 mt-1">
-                            {product.product_sizes.map((ps: any, idx: number) => (
-                              <span
-                                key={idx}
-                                className="text-xs bg-gray-100 text-gray-700 px-1 py-0.5 rounded"
-                              >
-                                {ps.sizes.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <div className="text-right text-sm">
-                          <p>Склад: {product.stock_quantity || 0}</p>
-                          <div className="flex flex-col gap-1 mt-2">
-                            {product.is_featured && (
-                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                Рекомендуемый
-                              </span>
-                            )}
-                            {product.is_new && (
-                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                Новинка
-                              </span>
-                            )}
-                            {product.is_preorder && (
-                              <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
-                                Предзаказ
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleToggleProductVisibility(product.id, product.is_active, product.name)}
-                            title={product.is_active ? "Скрыть товар" : "Показать товар"}
-                          >
-                            {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={product.is_active ? "default" : "outline"}
-                            onClick={() => handleToggleProductVisibility(product.id, product.is_active, product.name)}
-                            title={product.is_active ? "Снять с публикации" : "Опубликовать товар"}
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteProduct(product.id, product.name)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Список товаров</CardTitle>
+                  <CardDescription>
+                    Всего товаров: {filteredProducts.length} из {products.length}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Search and pagination controls */}
+                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Поиск по названию, артиклу, категории..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
+                        Показать:
+                      </Label>
+                      <Select
+                        value={itemsPerPage.toString()}
+                        onValueChange={(value) => {
+                          setItemsPerPage(parseInt(value));
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-6">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (currentPage > 1) setCurrentPage(currentPage - 1);
-                          }}
-                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNumber;
-                        if (totalPages <= 5) {
-                          pageNumber = i + 1;
-                        } else if (currentPage <= 3) {
-                          pageNumber = i + 1;
-                        } else if (currentPage >= totalPages - 2) {
-                          pageNumber = totalPages - 4 + i;
-                        } else {
-                          pageNumber = currentPage - 2 + i;
-                        }
-                        
-                        return (
-                          <PaginationItem key={pageNumber}>
-                            <PaginationLink
+                  <div className="space-y-4">
+                    {getCurrentPageProducts().map((product: any) => (
+                      <div key={product.id} className={`p-4 border rounded-lg ${!product.is_active ? 'opacity-60 bg-muted/30' : ''}`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{product.name}</h3>
+                              {!product.is_active && (
+                                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                                  Скрыт
+                                </span>
+                              )}
+                              {product.sku && (
+                                <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                  {product.sku}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {product.categories?.name && (
+                                <span>Категория: {product.categories.name}</span>
+                              )}
+                              {product.subcategories?.name && (
+                                <span> | Подкатегория: {product.subcategories.name}</span>
+                              )}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Цена: {product.price} руб.
+                            </p>
+                            {product.product_colors?.length > 0 && (
+                              <div className="flex items-center gap-1 mt-2">
+                                <span className="text-xs text-muted-foreground">Цвета:</span>
+                                {product.product_colors.map((pc: any) => (
+                                  <div
+                                    key={pc.colors.name}
+                                    className="w-4 h-4 rounded-full border border-gray-300"
+                                    style={{ backgroundColor: pc.colors.hex_code }}
+                                    title={pc.colors.name}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            {product.product_sizes?.length > 0 && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Размеры: {product.product_sizes.map((ps: any) => ps.sizes.name).join(', ')}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleProductVisibility(product.id, product.is_active, product.name)}
+                            >
+                              {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditProduct(product)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteProduct(product.id, product.name)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center mt-6">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
                               href="#"
                               onClick={(e) => {
                                 e.preventDefault();
-                                setCurrentPage(pageNumber);
+                                if (currentPage > 1) setCurrentPage(currentPage - 1);
                               }}
-                              isActive={currentPage === pageNumber}
-                            >
-                              {pageNumber}
-                            </PaginationLink>
+                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
                           </PaginationItem>
-                        );
-                      })}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                          }}
-                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          <ProductEdit
-            product={editingProduct}
-            isOpen={isEditDialogOpen}
-            onClose={() => setIsEditDialogOpen(false)}
-            onProductUpdated={handleProductUpdated}
-          />
+                          
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNumber;
+                            if (totalPages <= 5) {
+                              pageNumber = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNumber = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNumber = totalPages - 4 + i;
+                            } else {
+                              pageNumber = currentPage - 2 + i;
+                            }
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCurrentPage(pageNumber);
+                                  }}
+                                  isActive={currentPage === pageNumber}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                              }}
+                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              
+              <ProductEdit
+                product={editingProduct}
+                isOpen={isEditDialogOpen}
+                onClose={() => setIsEditDialogOpen(false)}
+                onProductUpdated={handleProductUpdated}
+              />
+            </TabsContent>
+            
+            <TabsContent value="import-export">
+              <ProductImportExport />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        <TabsContent value="import-export">
-          <ProductImportExport />
-        </TabsContent>
 
         <TabsContent value="references">
           <ReferenceManagement />
