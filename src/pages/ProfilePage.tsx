@@ -123,7 +123,6 @@ const ProfilePage = () => {
   const tabItems = [
     { value: "profile", label: "Профиль", icon: User },
     { value: "orders", label: "Заказы", icon: Package },
-    { value: "favorites", label: "Избранное", icon: Heart },
     { value: "addresses", label: "Адреса", icon: MapPin },
     { value: "cart", label: "Корзина", icon: ShoppingCart },
     { value: "subscriptions", label: "Подписки", icon: Send },
@@ -202,7 +201,7 @@ const ProfilePage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {!isMobile && (
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               {tabItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -367,15 +366,6 @@ const ProfilePage = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="favorites">
-            <Link to="/favorites">
-              <Button className="mb-4">Перейти на страницу избранного</Button>
-            </Link>
-            <p className="text-muted-foreground">
-              Управляйте своими избранными товарами на отдельной странице
-            </p>
           </TabsContent>
 
           <TabsContent value="addresses">
