@@ -689,26 +689,31 @@ export default function ReferenceManagement() {
       </div>
 
       <Tabs defaultValue="categories" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="categories" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1 h-auto p-1">
+          <TabsTrigger value="categories" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
             <Layers className="h-4 w-4" />
-            Категории
+            <span className="hidden sm:inline">Категории</span>
+            <span className="sm:hidden">Кат.</span>
           </TabsTrigger>
-          <TabsTrigger value="subcategories" className="flex items-center gap-2">
+          <TabsTrigger value="subcategories" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
             <Tag className="h-4 w-4" />
-            Подкатегории
+            <span className="hidden sm:inline">Подкатегории</span>
+            <span className="sm:hidden">Подкат.</span>
           </TabsTrigger>
-          <TabsTrigger value="collections" className="flex items-center gap-2">
+          <TabsTrigger value="collections" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
             <Package className="h-4 w-4" />
-            Коллекции
+            <span className="hidden sm:inline">Коллекции</span>
+            <span className="sm:hidden">Колл.</span>
           </TabsTrigger>
-          <TabsTrigger value="colors" className="flex items-center gap-2">
+          <TabsTrigger value="colors" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
             <Palette className="h-4 w-4" />
-            Цвета
+            <span className="hidden sm:inline">Цвета</span>
+            <span className="sm:hidden">Цвета</span>
           </TabsTrigger>
-          <TabsTrigger value="sizes" className="flex items-center gap-2">
+          <TabsTrigger value="sizes" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
             <Shapes className="h-4 w-4" />
-            Размеры
+            <span className="hidden sm:inline">Размеры</span>
+            <span className="sm:hidden">Разм.</span>
           </TabsTrigger>
         </TabsList>
 
