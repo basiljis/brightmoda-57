@@ -372,19 +372,18 @@ const AdminPage = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        {!isMobile && (
-          <TabsList className="grid w-full grid-cols-8">
-            {tabItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        )}
+        <TabsList className="hidden md:grid w-full grid-cols-8">
+          {tabItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <TabsTrigger key={item.value} value={item.value} className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2 md:py-3">
+                <Icon className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden lg:inline">{item.label}</span>
+                <span className="lg:hidden text-[10px] leading-tight">{item.label.slice(0, 4)}</span>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
 
         <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between mb-6">
