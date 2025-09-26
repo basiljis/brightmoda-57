@@ -1011,6 +1011,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      upsert_email_subscription: {
+        Args: { p_email: string; p_user_id?: string }
+        Returns: string
+      }
     }
     Enums: {
       user_role: "admin" | "user"

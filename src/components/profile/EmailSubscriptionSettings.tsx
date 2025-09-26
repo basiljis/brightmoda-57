@@ -21,14 +21,27 @@ const EmailSubscriptionSettings = () => {
   const { user } = useAuth();
 
   const loadSubscription = async () => {
-    if (!user?.email) return;
+    if (!user?.email || !user?.id) return;
 
     try {
-      const { data, error } = await supabase
+      // Try to find subscription by user_id first, then by email
+      let { data, error } = await supabase
         .from('email_subscriptions')
         .select('*')
-        .eq('email', user.email)
+        .eq('user_id', user.id)
         .maybeSingle();
+
+      // If not found by user_id, try by email
+      if (!data && !error) {
+        const { data: emailData, error: emailError } = await supabase
+          .from('email_subscriptions')
+          .select('*')
+          .eq('email', user.email)
+          .maybeSingle();
+        
+        data = emailData;
+        error = emailError;
+      }
 
       if (error) throw error;
       setSubscription(data);
@@ -71,28 +84,23 @@ const EmailSubscriptionSettings = () => {
     if (!user?.email) return;
 
     try {
-      // Use RPC call to handle upsert safely
-      const { data, error } = await supabase.rpc('upsert_email_subscription', {
-        p_email: user.email,
-        p_user_id: user.id
-      });
+      // Use upsert to handle both new and existing subscriptions
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .upsert(
+          { 
+            email: user.email, 
+            user_id: user.id, 
+            is_active: true,
+            updated_at: new Date().toISOString()
+          },
+          { 
+            onConflict: 'email',
+            ignoreDuplicates: false 
+          }
+        );
 
-      if (error) {
-        console.error('Error subscribing:', error);
-        // If function doesn't exist, fall back to direct insert
-        if (error.code === 'PGRST202') {
-          const { error: insertError } = await supabase
-            .from('email_subscriptions')
-            .upsert(
-              { email: user.email, user_id: user.id, is_active: true },
-              { onConflict: 'email', ignoreDuplicates: false }
-            );
-          
-          if (insertError) throw insertError;
-        } else {
-          throw error;
-        }
-      }
+      if (error) throw error;
       
       toast.success('Вы успешно подписались на рассылку!');
       loadSubscription();
