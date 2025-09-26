@@ -71,11 +71,28 @@ const EmailSubscriptionSettings = () => {
     if (!user?.email) return;
 
     try {
-      const { error } = await supabase
-        .from('email_subscriptions')
-        .insert([{ email: user.email, user_id: user.id }]);
+      // Use RPC call to handle upsert safely
+      const { data, error } = await supabase.rpc('upsert_email_subscription', {
+        p_email: user.email,
+        p_user_id: user.id
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error subscribing:', error);
+        // If function doesn't exist, fall back to direct insert
+        if (error.code === 'PGRST202') {
+          const { error: insertError } = await supabase
+            .from('email_subscriptions')
+            .upsert(
+              { email: user.email, user_id: user.id, is_active: true },
+              { onConflict: 'email', ignoreDuplicates: false }
+            );
+          
+          if (insertError) throw insertError;
+        } else {
+          throw error;
+        }
+      }
       
       toast.success('Вы успешно подписались на рассылку!');
       loadSubscription();
