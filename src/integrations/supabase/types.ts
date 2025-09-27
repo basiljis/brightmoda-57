@@ -41,6 +41,36 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_summary: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           color: string | null
@@ -503,6 +533,42 @@ export type Database = {
           page_name?: string
           section_name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          page_path: string
+          page_title: string | null
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          page_path: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          page_path?: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -969,6 +1035,39 @@ export type Database = {
           },
         ]
       }
+      user_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       yandex_payment_settings: {
         Row: {
           created_at: string
@@ -1010,6 +1109,10 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      update_analytics_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       upsert_email_subscription: {
         Args: { p_email: string; p_user_id?: string }

@@ -4,11 +4,13 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const EmailSubscriptionSection = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { trackEmailSubscription } = useAnalytics();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,9 @@ const EmailSubscriptionSection = () => {
           throw error;
         }
       } else {
+        // Track successful subscription
+        trackEmailSubscription(email);
+        
         toast.success('Вы успешно подписались на рассылку!');
         setEmail('');
       }

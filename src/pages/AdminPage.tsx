@@ -29,6 +29,7 @@ import SEOSettings from '@/components/admin/SEOSettings';
 import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 
 const AdminPage = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -307,6 +308,7 @@ const AdminPage = () => {
   };
 
   const tabItems = [
+    { value: "analytics", label: "Аналитика", icon: Package },
     { value: "products", label: "Товары", icon: Package },
     { value: "references", label: "Справочники", icon: BookOpen },
     { value: "content", label: "Контент", icon: Edit },
@@ -372,7 +374,7 @@ const AdminPage = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="hidden md:grid w-full grid-cols-8">
+        <TabsList className="hidden md:grid w-full grid-cols-9">
           {tabItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -384,6 +386,10 @@ const AdminPage = () => {
             );
           })}
         </TabsList>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <AnalyticsDashboard />
+        </TabsContent>
 
         <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between mb-6">

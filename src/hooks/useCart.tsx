@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface CartItem {
   id: string;
@@ -14,6 +15,7 @@ interface CartItem {
 export const useCart = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { trackAddToCart, trackRemoveFromCart } = useAnalytics();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -97,6 +99,21 @@ export const useCart = () => {
         setCartItems(prev => [...prev, data]);
       }
       
+      // Track analytics - получим данные о товаре для цены
+      try {
+        const { data: product } = await supabase
+          .from('products')
+          .select('price, name')
+          .eq('id', productId)
+          .single();
+        
+        if (product) {
+          trackAddToCart(productId, quantity, product.price);
+        }
+      } catch (error) {
+        console.error('Error tracking analytics:', error);
+      }
+      
       toast({ title: "Товар добавлен в корзину" });
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -110,6 +127,9 @@ export const useCart = () => {
 
   const removeFromCart = async (itemId: string) => {
     try {
+      // Сначала получаем данные об удаляемом товаре для аналитики
+      const itemToRemove = cartItems.find(item => item.id === itemId);
+      
       const { error } = await supabase
         .from('cart_items')
         .delete()
@@ -118,6 +138,12 @@ export const useCart = () => {
       if (error) throw error;
       
       setCartItems(prev => prev.filter(item => item.id !== itemId));
+      
+      // Track analytics
+      if (itemToRemove) {
+        trackRemoveFromCart(itemToRemove.product_id, itemToRemove.quantity);
+      }
+      
       toast({ title: "Товар удален из корзины" });
     } catch (error) {
       console.error('Error removing from cart:', error);
