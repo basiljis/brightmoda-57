@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Plus, ArrowUp, ArrowDown, Image } from 'lucide-react';
+import FileUploadField from './FileUploadField';
 import {
   Dialog,
   DialogContent,
@@ -240,15 +241,15 @@ const LookbookManagement = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL изображения</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
+                <FileUploadField
+                  field="image_url"
+                  label="Изображение образа"
+                  description="Загрузите изображение для lookbook"
+                  value={formData.image_url}
+                  onChange={(value) => setFormData({ ...formData, image_url: value })}
+                  folder="lookbook"
+                  showRecommendations={true}
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Описание</Label>

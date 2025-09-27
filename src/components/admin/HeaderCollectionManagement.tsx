@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import FileUploadField from './FileUploadField';
 
 interface HeaderCollection {
   id: string;
@@ -168,13 +169,16 @@ const HeaderCollectionManagement = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>URL изображения</Label>
-                    <Input
+                    <FileUploadField
+                      field={`header_image_${headerCollection.id}`}
+                      label="Изображение коллекции"
+                      description="Загрузите изображение для отображения в шапке сайта"
                       value={headerCollection.image_url}
-                      onChange={(e) => 
-                        handleInputChange(headerCollection.id, 'image_url', e.target.value)
+                      onChange={(value) => 
+                        handleInputChange(headerCollection.id, 'image_url', value)
                       }
-                      placeholder="/src/assets/men-collection.jpg"
+                      folder="header-collections"
+                      showRecommendations={true}
                     />
                   </div>
                 </div>

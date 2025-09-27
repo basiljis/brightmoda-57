@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image, Trash2 } from 'lucide-react';
+import FileUploadField from './FileUploadField';
 
 const SiteSettings = () => {
   const { toast } = useToast();
@@ -15,7 +13,6 @@ const SiteSettings = () => {
     footer_logo_url: ''
   });
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState('');
 
   useEffect(() => {
     loadSettings();
@@ -42,42 +39,6 @@ const SiteSettings = () => {
     }
   };
 
-  const handleFileUpload = async (file: File, field: string) => {
-    if (!file) return;
-
-    setUploading(field);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${field}-${Date.now()}.${fileExt}`;
-      const filePath = `site/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-
-      setSettings(prev => ({...prev, [field]: publicUrl}));
-
-      toast({
-        title: "Файл загружен",
-        description: "Изображение успешно загружено",
-      });
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast({
-        title: "Ошибка",
-        description: "Не удалось загрузить файл",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading('');
-    }
-  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -119,64 +80,6 @@ const SiteSettings = () => {
     }
   };
 
-  const clearImage = (field: string) => {
-    setSettings(prev => ({...prev, [field]: ''}));
-  };
-
-  const FileUploadField = ({ 
-    field, 
-    label, 
-    description, 
-    accept = "image/*" 
-  }: { 
-    field: string; 
-    label: string; 
-    description: string; 
-    accept?: string; 
-  }) => (
-    <div className="space-y-2">
-      <Label htmlFor={field}>{label}</Label>
-      <p className="text-sm text-muted-foreground">{description}</p>
-      
-      {settings[field as keyof typeof settings] && (
-        <div className="flex items-center gap-2 p-2 border rounded">
-          <Image className="h-4 w-4" />
-          <span className="text-sm flex-1 truncate">
-            {settings[field as keyof typeof settings]}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => clearImage(field)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      
-      <div className="flex items-center gap-2">
-        <Input
-          id={field}
-          type="file"
-          accept={accept}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFileUpload(file, field);
-          }}
-          disabled={uploading === field}
-        />
-        {uploading === field && (
-          <div className="text-sm text-muted-foreground">Загрузка...</div>
-        )}
-      </div>
-      
-      <Input
-        placeholder="Или вставьте URL"
-        value={settings[field as keyof typeof settings]}
-        onChange={(e) => setSettings(prev => ({...prev, [field]: e.target.value}))}
-      />
-    </div>
-  );
 
   return (
     <Card>
@@ -190,30 +93,33 @@ const SiteSettings = () => {
         <FileUploadField
           field="favicon_url"
           label="Фавикон"
-          description="Иконка сайта, отображаемая во вкладке браузера (рекомендуется 32x32 или 16x16 пикселей)"
-          accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml"
+          description="Иконка сайта, отображаемая во вкладке браузера"
+          value={settings.favicon_url}
+          onChange={(value) => setSettings(prev => ({...prev, favicon_url: value}))}
+          accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml,image/ico"
+          folder="site"
+          disabled={loading}
         />
-        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
-          <strong>Инструкция:</strong> Загрузите файл изображения или вставьте URL. Изображения автоматически сохраняются в облачном хранилище.
-        </div>
 
         <FileUploadField
           field="logo_url"
           label="Логотип в шапке"
           description="Логотип, отображаемый в шапке сайта"
+          value={settings.logo_url}
+          onChange={(value) => setSettings(prev => ({...prev, logo_url: value}))}
+          folder="site"
+          disabled={loading}
         />
-        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
-          <strong>Инструкция:</strong> Рекомендуемый размер: высота до 40px. Поддерживаются PNG, JPG, SVG форматы.
-        </div>
 
         <FileUploadField
           field="footer_logo_url"
           label="Логотип в подвале"
           description="Логотип, отображаемый в подвале сайта (может отличаться от основного)"
+          value={settings.footer_logo_url}
+          onChange={(value) => setSettings(prev => ({...prev, footer_logo_url: value}))}
+          folder="site"
+          disabled={loading}
         />
-        <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground">
-          <strong>Инструкция:</strong> Может быть в другом цвете или стиле для лучшего отображения в подвале.
-        </div>
 
         <Button onClick={handleSave} disabled={loading} className="w-full">
           {loading ? 'Сохранение...' : 'Сохранить настройки'}

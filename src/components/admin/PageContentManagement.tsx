@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Trash2, Plus, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowUp, ArrowDown, Image } from 'lucide-react';
+import FileUploadField from './FileUploadField';
 import {
   Dialog,
   DialogContent,
@@ -187,6 +188,7 @@ const PageContentManagement = () => {
     }
   };
 
+
   const getSectionDisplayName = (sectionName: string) => {
     const sectionMap: { [key: string]: string } = {
       title: 'Заголовок',
@@ -293,13 +295,33 @@ const PageContentManagement = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="content_value">Содержимое*</Label>
-                    <Textarea
-                      id="content_value"
-                      value={formData.content_value}
-                      onChange={(e) => setFormData({ ...formData, content_value: e.target.value })}
-                      rows={4}
-                      required
-                    />
+                    
+                    {formData.content_type === 'image' ? (
+                      <FileUploadField
+                        field="content_value"
+                        label=""
+                        description="Загрузите изображение для отображения на странице"
+                        value={formData.content_value}
+                        onChange={(value) => setFormData({ ...formData, content_value: value })}
+                        folder="page-content"
+                        showRecommendations={true}
+                      />
+                    ) : (
+                      <Textarea
+                        id="content_value"
+                        value={formData.content_value}
+                        onChange={(e) => setFormData({ ...formData, content_value: e.target.value })}
+                        rows={4}
+                        required
+                        placeholder={
+                          formData.content_type === 'html' 
+                            ? 'Введите HTML код...'
+                            : formData.content_type === 'json'
+                            ? 'Введите JSON данные...'
+                            : 'Введите текст...'
+                        }
+                      />
+                    )}
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -338,7 +360,14 @@ const PageContentManagement = () => {
                         Секция: {item.section_name}
                       </p>
                       <div className="text-sm border rounded p-2 bg-gray-50 max-h-20 overflow-y-auto">
-                        {item.content_value}
+                        {item.content_type === 'image' ? (
+                          <div className="flex items-center gap-2">
+                            <Image className="h-4 w-4 text-blue-600" />
+                            <span className="text-blue-600 truncate">{item.content_value}</span>
+                          </div>
+                        ) : (
+                          item.content_value
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
