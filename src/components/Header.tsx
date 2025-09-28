@@ -36,6 +36,22 @@ const Header = () => {
 
   useEffect(() => {
     loadData();
+    
+    // Set up a listener for logo updates in real-time
+    const channel = supabase.channel('site_settings_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'site_settings' }, 
+        (payload) => {
+          if (payload.new && typeof payload.new === 'object' && 'logo_url' in payload.new && payload.new.logo_url) {
+            setLogoUrl(payload.new.logo_url as string);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadData = async () => {

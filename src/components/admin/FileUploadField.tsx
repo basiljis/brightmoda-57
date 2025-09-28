@@ -16,6 +16,7 @@ interface FileUploadFieldProps {
   bucket?: string;
   folder?: string;
   showRecommendations?: boolean;
+  recommendationsFor?: 'banner' | 'product' | 'gallery' | 'portrait' | 'logo' | 'icon' | 'favicon' | 'general';
   disabled?: boolean;
 }
 
@@ -29,6 +30,7 @@ const FileUploadField = ({
   bucket = "product-images",
   folder = "uploads",
   showRecommendations = true,
+  recommendationsFor = 'general',
   disabled = false
 }: FileUploadFieldProps) => {
   const { toast } = useToast();
@@ -127,13 +129,61 @@ const FileUploadField = ({
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
           <div className="font-medium text-blue-900 mb-2">📸 Рекомендации по размерам:</div>
           <ul className="text-blue-800 space-y-1">
-            <li>• <strong>Баннеры/Герои:</strong> 1920x1080px, 1920x600px</li>
-            <li>• <strong>Каталог товаров:</strong> 800x800px, 1000x1000px</li>
-            <li>• <strong>Галереи:</strong> 1200x800px, 1024x768px</li>
-            <li>• <strong>Портреты:</strong> 600x800px, 480x640px</li>
-            <li>• <strong>Логотипы:</strong> 300x100px, 200x80px</li>
-            <li>• <strong>Иконки:</strong> 128x128px, 64x64px</li>
-            <li>• <strong>Favicon:</strong> 32x32px, 16x16px</li>
+            {recommendationsFor === 'banner' && (
+              <>
+                <li>• <strong>Баннеры/Герои:</strong> 1920x1080px, 1920x600px</li>
+                <li>• <strong>Рекомендуемый формат:</strong> 16:9 или 16:5</li>
+              </>
+            )}
+            {recommendationsFor === 'product' && (
+              <>
+                <li>• <strong>Каталог товаров:</strong> 800x800px, 1000x1000px</li>
+                <li>• <strong>Рекомендуемый формат:</strong> 1:1 (квадратный)</li>
+              </>
+            )}
+            {recommendationsFor === 'gallery' && (
+              <>
+                <li>• <strong>Галереи:</strong> 1200x800px, 1024x768px</li>
+                <li>• <strong>Рекомендуемый формат:</strong> 3:2 или 4:3</li>
+              </>
+            )}
+            {recommendationsFor === 'portrait' && (
+              <>
+                <li>• <strong>Портреты:</strong> 600x800px, 480x640px</li>
+                <li>• <strong>Рекомендуемый формат:</strong> 3:4</li>
+              </>
+            )}
+            {recommendationsFor === 'logo' && (
+              <>
+                <li>• <strong>Логотипы:</strong> 300x100px, 400x120px</li>
+                <li>• <strong>Формат:</strong> PNG с прозрачностью или SVG</li>
+                <li>• <strong>Пропорции:</strong> Горизонтальные, 3:1 или 4:1</li>
+              </>
+            )}
+            {recommendationsFor === 'icon' && (
+              <>
+                <li>• <strong>Иконки:</strong> 128x128px, 64x64px</li>
+                <li>• <strong>Рекомендуемый формат:</strong> 1:1 (квадратный)</li>
+              </>
+            )}
+            {recommendationsFor === 'favicon' && (
+              <>
+                <li>• <strong>Favicon:</strong> 32x32px, 16x16px</li>
+                <li>• <strong>Формат:</strong> ICO, PNG</li>
+                <li>• <strong>Рекомендация:</strong> Простой дизайн, хорошо читается в маленьком размере</li>
+              </>
+            )}
+            {recommendationsFor === 'general' && (
+              <>
+                <li>• <strong>Баннеры/Герои:</strong> 1920x1080px, 1920x600px</li>
+                <li>• <strong>Каталог товаров:</strong> 800x800px, 1000x1000px</li>
+                <li>• <strong>Галереи:</strong> 1200x800px, 1024x768px</li>
+                <li>• <strong>Портреты:</strong> 600x800px, 480x640px</li>
+                <li>• <strong>Логотипы:</strong> 300x100px, 200x80px</li>
+                <li>• <strong>Иконки:</strong> 128x128px, 64x64px</li>
+                <li>• <strong>Favicon:</strong> 32x32px, 16x16px</li>
+              </>
+            )}
           </ul>
           <div className="mt-2 text-blue-700">
             <strong>Форматы:</strong> JPEG, PNG, WebP, SVG • <strong>Размер:</strong> до 5MB

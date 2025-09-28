@@ -98,6 +98,7 @@ const SiteSettings = () => {
           onChange={(value) => setSettings(prev => ({...prev, favicon_url: value}))}
           accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml,image/ico"
           folder="site"
+          recommendationsFor="favicon"
           disabled={loading}
         />
 
@@ -108,6 +109,7 @@ const SiteSettings = () => {
           value={settings.logo_url}
           onChange={(value) => setSettings(prev => ({...prev, logo_url: value}))}
           folder="site"
+          recommendationsFor="logo"
           disabled={loading}
         />
 
@@ -118,6 +120,7 @@ const SiteSettings = () => {
           value={settings.footer_logo_url}
           onChange={(value) => setSettings(prev => ({...prev, footer_logo_url: value}))}
           folder="site"
+          recommendationsFor="logo"
           disabled={loading}
         />
 

@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HomePage from "./pages/HomePage";
@@ -24,7 +26,82 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Load fonts on app initialization
+  useEffect(() => {
+    const loadFonts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('seo_settings')
+          .select('font_headings, font_body, font_accent, font_weights, custom_fonts_css')
+          .eq('page_name', 'home')
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (error || !data) return;
+
+        const GOOGLE_FONTS = [
+          'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Source Sans Pro',
+          'Oswald', 'Raleway', 'Poppins', 'Merriweather', 'Playfair Display',
+          'Lora', 'Ubuntu', 'Nunito', 'PT Sans', 'Fira Sans', 'Work Sans',
+          'Crimson Text', 'Libre Baskerville', 'Cormorant Garamond'
+        ];
+
+        // Remove existing Google Fonts links
+        const existingLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
+        existingLinks.forEach(link => link.remove());
+
+        // Add Google Fonts
+        const uniqueFonts = [...new Set([data.font_headings, data.font_body, data.font_accent])];
+        const googleFonts = uniqueFonts.filter(font => GOOGLE_FONTS.includes(font));
+        
+        if (googleFonts.length > 0) {
+          const fontWeights = (typeof data.font_weights === 'object' && data.font_weights && !Array.isArray(data.font_weights)) 
+            ? data.font_weights as { headings?: string[]; body?: string[]; accent?: string[]; } 
+            : { headings: ['400', '600'], body: ['400'], accent: ['400'] };
+          
+          const fontWeightMap = {
+            [data.font_headings]: fontWeights.headings || ['400', '600'],
+            [data.font_body]: fontWeights.body || ['400'],
+            [data.font_accent]: fontWeights.accent || ['400']
+          };
+
+          googleFonts.forEach(font => {
+            const weights = fontWeightMap[font] || ['400'];
+            const fontFamily = font.replace(/ /g, '+');
+            const weightsStr = weights.join(',');
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@${weightsStr}&display=swap`;
+            document.head.appendChild(link);
+          });
+        }
+
+        // Add custom CSS
+        if (data.custom_fonts_css) {
+          let customStyle = document.getElementById('app-custom-fonts-style');
+          if (!customStyle) {
+            customStyle = document.createElement('style');
+            customStyle.id = 'app-custom-fonts-style';
+            document.head.appendChild(customStyle);
+          }
+          customStyle.textContent = data.custom_fonts_css;
+        }
+
+        // Apply fonts to CSS variables
+        document.documentElement.style.setProperty('--font-headings', `"${data.font_headings}", sans-serif`);
+        document.documentElement.style.setProperty('--font-body', `"${data.font_body}", sans-serif`);
+        document.documentElement.style.setProperty('--font-accent', `"${data.font_accent}", sans-serif`);
+
+      } catch (error) {
+        console.error('Error loading fonts:', error);
+      }
+    };
+
+    loadFonts();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
@@ -83,6 +160,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

@@ -119,5 +119,14 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body, 'Inter', sans-serif);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headings, 'Inter', sans-serif);
+  }
+  
+  .font-accent {
+    font-family: var(--font-accent, 'Inter', sans-serif);
   }
 }
