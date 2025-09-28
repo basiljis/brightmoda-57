@@ -11,6 +11,7 @@ import { ru } from 'date-fns/locale';
 interface EmailSubscription {
   id: string;
   email: string;
+  user_id?: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -24,27 +25,49 @@ const EmailSubscriptionSettings = () => {
     if (!user?.email || !user?.id) return;
 
     try {
-      // Try to find subscription by user_id first, then by email
+      // First try to find subscription by user_id
       let { data, error } = await supabase
         .from('email_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
-
-      // If not found by user_id, try by email
-      if (!data && !error) {
-        const { data: emailData, error: emailError } = await supabase
-          .from('email_subscriptions')
-          .select('*')
-          .eq('email', user.email)
-          .maybeSingle();
-        
-        data = emailData;
-        error = emailError;
-      }
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscription(data);
+
+      // If found by user_id, use the most recent one
+      if (data && data.length > 0) {
+        setSubscription(data[0]);
+        return;
+      }
+
+      // If not found by user_id, try by email
+      const { data: emailData, error: emailError } = await supabase
+        .from('email_subscriptions')
+        .select('*')
+        .eq('email', user.email)
+        .is('user_id', null)
+        .order('created_at', { ascending: false });
+        
+      if (emailError) throw emailError;
+      
+      // If found by email, use the most recent one and update with user_id
+      if (emailData && emailData.length > 0) {
+        const subscription = emailData[0];
+        
+        // Update the subscription with user_id
+        const { error: updateError } = await supabase
+          .from('email_subscriptions')
+          .update({ user_id: user.id })
+          .eq('id', subscription.id);
+          
+        if (updateError) throw updateError;
+        
+        setSubscription({ ...subscription, user_id: user.id });
+        return;
+      }
+
+      // No subscription found
+      setSubscription(null);
     } catch (error) {
       console.error('Error loading subscription:', error);
       toast.error('Ошибка загрузки настроек подписки');
@@ -84,21 +107,11 @@ const EmailSubscriptionSettings = () => {
     if (!user?.email) return;
 
     try {
-      // Use upsert to handle both new and existing subscriptions
-      const { error } = await supabase
-        .from('email_subscriptions')
-        .upsert(
-          { 
-            email: user.email, 
-            user_id: user.id, 
-            is_active: true,
-            updated_at: new Date().toISOString()
-          },
-          { 
-            onConflict: 'email',
-            ignoreDuplicates: false 
-          }
-        );
+      // Use the upsert_email_subscription function to handle duplicates
+      const { data, error } = await supabase.rpc('upsert_email_subscription', {
+        p_email: user.email,
+        p_user_id: user.id
+      });
 
       if (error) throw error;
       
