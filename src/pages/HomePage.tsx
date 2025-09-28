@@ -15,6 +15,7 @@ const HomePage = () => {
   const [scrollY, setScrollY] = useState(0);
   const [collections, setCollections] = useState([]);
   const [headerCollections, setHeaderCollections] = useState([]);
+  const [categories, setCategories] = useState([]);
   const featuredProducts = products.slice(0, 4);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const HomePage = () => {
     window.addEventListener('scroll', handleScroll);
     loadCollections();
     loadHeaderCollections();
+    loadCategories();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -53,6 +55,22 @@ const HomePage = () => {
       setHeaderCollections(data || []);
     } catch (error) {
       console.error('Error loading header collections:', error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, slug, size_chart_image_url')
+        .eq('is_active', true)
+        .order('sort_order')
+        .limit(6);
+      
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -151,31 +169,54 @@ const HomePage = () => {
         }`}
       >
         <div className="flex gap-4 bg-background/95 backdrop-blur-md p-4 rounded-lg shadow-elegant border border-border">
-          <Link to="/catalog" className="group">
-            <div className="w-20 h-20 overflow-hidden rounded-lg">
-              <img 
-                src={categoryClothing} 
-                alt="Одежда"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-            </div>
-            <p className="text-xs text-center mt-2 font-medium tracking-wide text-foreground">
-              ОДЕЖДА
-            </p>
-          </Link>
-          
-          <div className="group cursor-pointer">
-            <div className="w-20 h-20 overflow-hidden rounded-lg">
-              <img 
-                src={categoryInterior} 
-                alt="Интерьер"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-            </div>
-            <p className="text-xs text-center mt-2 font-medium tracking-wide text-foreground">
-              ИНТЕРЬЕР
-            </p>
-          </div>
+          {categories.length > 0 ? (
+            categories.map((category) => (
+              <Link 
+                key={category.id}
+                to={`/catalog?category=${category.slug}`} 
+                className="group flex flex-col items-center"
+              >
+                <div className="w-20 h-20 overflow-hidden rounded-lg">
+                  <img 
+                    src={category.size_chart_image_url || categoryClothing} 
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+                <p className="text-xs text-center mt-2 font-medium tracking-wide text-foreground uppercase">
+                  {category.name}
+                </p>
+              </Link>
+            ))
+          ) : (
+            <>
+              <Link to="/catalog" className="group">
+                <div className="w-20 h-20 overflow-hidden rounded-lg">
+                  <img 
+                    src={categoryClothing} 
+                    alt="Одежда"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+                <p className="text-xs text-center mt-2 font-medium tracking-wide text-foreground">
+                  ОДЕЖДА
+                </p>
+              </Link>
+              
+              <div className="group cursor-pointer">
+                <div className="w-20 h-20 overflow-hidden rounded-lg">
+                  <img 
+                    src={categoryInterior} 
+                    alt="Интерьер"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+                <p className="text-xs text-center mt-2 font-medium tracking-wide text-foreground">
+                  ИНТЕРЬЕР
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
