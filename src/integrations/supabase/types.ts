@@ -873,13 +873,18 @@ export type Database = {
       }
       seo_settings: {
         Row: {
+          additional_meta_tags: Json | null
           canonical_url: string | null
           created_at: string
           custom_fonts_css: string | null
+          facebook_domain_verification: string | null
           font_accent: string | null
           font_body: string | null
           font_headings: string | null
           font_weights: Json | null
+          google_analytics_id: string | null
+          google_search_console_verification: string | null
+          google_tag_manager_id: string | null
           id: string
           is_active: boolean
           meta_description: string | null
@@ -892,15 +897,22 @@ export type Database = {
           robots: string | null
           schema_markup: Json | null
           updated_at: string
+          yandex_metrica_id: string | null
+          yandex_webmaster_verification: string | null
         }
         Insert: {
+          additional_meta_tags?: Json | null
           canonical_url?: string | null
           created_at?: string
           custom_fonts_css?: string | null
+          facebook_domain_verification?: string | null
           font_accent?: string | null
           font_body?: string | null
           font_headings?: string | null
           font_weights?: Json | null
+          google_analytics_id?: string | null
+          google_search_console_verification?: string | null
+          google_tag_manager_id?: string | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
@@ -913,15 +925,22 @@ export type Database = {
           robots?: string | null
           schema_markup?: Json | null
           updated_at?: string
+          yandex_metrica_id?: string | null
+          yandex_webmaster_verification?: string | null
         }
         Update: {
+          additional_meta_tags?: Json | null
           canonical_url?: string | null
           created_at?: string
           custom_fonts_css?: string | null
+          facebook_domain_verification?: string | null
           font_accent?: string | null
           font_body?: string | null
           font_headings?: string | null
           font_weights?: Json | null
+          google_analytics_id?: string | null
+          google_search_console_verification?: string | null
+          google_tag_manager_id?: string | null
           id?: string
           is_active?: boolean
           meta_description?: string | null
@@ -934,6 +953,8 @@ export type Database = {
           robots?: string | null
           schema_markup?: Json | null
           updated_at?: string
+          yandex_metrica_id?: string | null
+          yandex_webmaster_verification?: string | null
         }
         Relationships: []
       }

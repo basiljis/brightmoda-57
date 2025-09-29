@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, BarChart3, Globe } from 'lucide-react';
 
 interface SEOSetting {
   id: string;
@@ -23,6 +24,14 @@ interface SEOSetting {
   robots: string;
   schema_markup: any;
   is_active: boolean;
+  // Новые поля для продвижения
+  google_analytics_id: string;
+  google_search_console_verification: string;
+  yandex_metrica_id: string;
+  yandex_webmaster_verification: string;
+  google_tag_manager_id: string;
+  facebook_domain_verification: string;
+  additional_meta_tags: any;
 }
 
 const SEOSettings = () => {
@@ -40,7 +49,15 @@ const SEOSettings = () => {
     canonical_url: '',
     robots: 'index, follow',
     schema_markup: {},
-    is_active: true
+    is_active: true,
+    // Новые поля для продвижения
+    google_analytics_id: '',
+    google_search_console_verification: '',
+    yandex_metrica_id: '',
+    yandex_webmaster_verification: '',
+    google_tag_manager_id: '',
+    facebook_domain_verification: '',
+    additional_meta_tags: {}
   });
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -87,7 +104,15 @@ const SEOSettings = () => {
       canonical_url: '',
       robots: 'index, follow',
       schema_markup: {},
-      is_active: true
+      is_active: true,
+      // Новые поля для продвижения
+      google_analytics_id: '',
+      google_search_console_verification: '',
+      yandex_metrica_id: '',
+      yandex_webmaster_verification: '',
+      google_tag_manager_id: '',
+      facebook_domain_verification: '',
+      additional_meta_tags: {}
     });
     setIsEditing(false);
     setSelectedPage('');
@@ -110,7 +135,10 @@ const SEOSettings = () => {
         page_name: currentSetting.page_name!, // Type assertion since we check above
         schema_markup: typeof currentSetting.schema_markup === 'string' 
           ? JSON.parse(currentSetting.schema_markup || '{}')
-          : currentSetting.schema_markup || {}
+          : currentSetting.schema_markup || {},
+        additional_meta_tags: typeof currentSetting.additional_meta_tags === 'string' 
+          ? JSON.parse(currentSetting.additional_meta_tags || '{}')
+          : currentSetting.additional_meta_tags || {}
       };
 
       const { error } = await supabase.from('seo_settings').upsert(dataToSave);
@@ -416,12 +444,159 @@ const SEOSettings = () => {
                   />
                   <Label htmlFor="is_active">Активно</Label>
                 </div>
-
-                <Button onClick={handleSave} disabled={loading} className="w-full">
-                  {loading ? 'Сохранение...' : 'Сохранить настройки'}
-                </Button>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Карточка с настройками продвижения */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Настройки продвижения
+          </CardTitle>
+          <CardDescription>
+            Настройки для Яндекс.Метрики, Google Analytics и других сервисов продвижения
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="analytics" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="analytics">Аналитика</TabsTrigger>
+              <TabsTrigger value="verification">Верификация</TabsTrigger>
+              <TabsTrigger value="additional">Дополнительно</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="analytics" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
+                  <Input
+                    id="google_analytics_id"
+                    value={currentSetting.google_analytics_id}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, google_analytics_id: e.target.value}))
+                    }
+                    placeholder="G-XXXXXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Идентификатор Google Analytics 4
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="yandex_metrica_id">Яндекс.Метрика ID</Label>
+                  <Input
+                    id="yandex_metrica_id"
+                    value={currentSetting.yandex_metrica_id}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, yandex_metrica_id: e.target.value}))
+                    }
+                    placeholder="12345678"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Идентификатор счетчика Яндекс.Метрики
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
+                  <Input
+                    id="google_tag_manager_id"
+                    value={currentSetting.google_tag_manager_id}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, google_tag_manager_id: e.target.value}))
+                    }
+                    placeholder="GTM-XXXXXXX"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Идентификатор Google Tag Manager
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="verification" className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="google_search_console_verification">Google Search Console верификация</Label>
+                  <Input
+                    id="google_search_console_verification"
+                    value={currentSetting.google_search_console_verification}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, google_search_console_verification: e.target.value}))
+                    }
+                    placeholder="google1234567890abcdef.html"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Код верификации для Google Search Console
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="yandex_webmaster_verification">Яндекс.Вебмастер верификация</Label>
+                  <Input
+                    id="yandex_webmaster_verification"
+                    value={currentSetting.yandex_webmaster_verification}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, yandex_webmaster_verification: e.target.value}))
+                    }
+                    placeholder="yandex_1234567890abcdef.html"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Код верификации для Яндекс.Вебмастера
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="facebook_domain_verification">Facebook Domain Verification</Label>
+                  <Input
+                    id="facebook_domain_verification"
+                    value={currentSetting.facebook_domain_verification}
+                    onChange={(e) => 
+                      setCurrentSetting(prev => ({...prev, facebook_domain_verification: e.target.value}))
+                    }
+                    placeholder="1234567890abcdef1234567890abcdef"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Код верификации домена для Facebook
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="additional" className="space-y-4">
+              <div>
+                <Label htmlFor="additional_meta_tags">Дополнительные мета-теги (JSON)</Label>
+                <Textarea
+                  id="additional_meta_tags"
+                  value={typeof currentSetting.additional_meta_tags === 'object' 
+                    ? JSON.stringify(currentSetting.additional_meta_tags, null, 2)
+                    : currentSetting.additional_meta_tags
+                  }
+                  onChange={(e) => 
+                    setCurrentSetting(prev => ({...prev, additional_meta_tags: e.target.value}))
+                  }
+                  placeholder={`{
+  "pinterest-site-verification": "1234567890abcdef",
+  "msvalidate.01": "1234567890ABCDEF",
+  "custom-meta": "value"
+}`}
+                  rows={8}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  JSON объект с дополнительными мета-тегами для различных сервисов
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="mt-6">
+            <Button onClick={handleSave} disabled={loading} className="w-full">
+              {loading ? 'Сохранение...' : 'Сохранить все настройки'}
+            </Button>
           </div>
         </CardContent>
       </Card>
