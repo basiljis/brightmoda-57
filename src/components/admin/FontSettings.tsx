@@ -62,6 +62,7 @@ const FontSettings = () => {
         .from('seo_settings')
         .select('font_headings, font_body, font_accent, font_weights, custom_fonts_css')
         .eq('page_name', 'home')
+        .eq('is_active', true)
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') {
