@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings, Send, Menu } from "lucide-react";
+import { User, Package, Heart, MapPin, ShoppingCart, LogOut, Settings, Send, Menu, Sun, Moon } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTheme } from 'next-themes';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import DeliveryAddresses from '@/components/profile/DeliveryAddresses';
@@ -21,6 +22,7 @@ const ProfilePage = () => {
   const { user, signOut, loading, isAdmin } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -302,6 +304,37 @@ const ProfilePage = () => {
                       <p className="text-sm">
                         {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('ru-RU') : '—'}
                       </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Theme Settings */}
+                <div className="pt-6 border-t">
+                  <h3 className="font-semibold mb-4">Настройки отображения</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-medium">Тема</span>
+                      <p className="text-sm text-muted-foreground">Выберите светлую или темную тему</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={theme === 'light' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setTheme('light')}
+                        className="flex items-center gap-2"
+                      >
+                        <Sun className="h-4 w-4" />
+                        Светлая
+                      </Button>
+                      <Button
+                        variant={theme === 'dark' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setTheme('dark')}
+                        className="flex items-center gap-2"
+                      >
+                        <Moon className="h-4 w-4" />
+                        Темная
+                      </Button>
                     </div>
                   </div>
                 </div>
