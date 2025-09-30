@@ -47,7 +47,7 @@ const SiteSettings = () => {
         favicon_url: settings.favicon_url,
         logo_url: settings.logo_url,
         footer_logo_url: settings.footer_logo_url
-      });
+      }).select();
 
       if (error) throw error;
 

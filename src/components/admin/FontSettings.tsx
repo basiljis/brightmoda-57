@@ -100,6 +100,8 @@ const FontSettings = () => {
           font_weights: settings.font_weights,
           custom_fonts_css: settings.custom_fonts_css,
           is_active: true
+        }, {
+          onConflict: 'page_name'
         });
 
       if (error) throw error;
