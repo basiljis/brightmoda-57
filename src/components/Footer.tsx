@@ -36,6 +36,23 @@ const Footer = () => {
     loadSubcategories();
     loadAboutSections();
     loadSupportSections();
+
+    // Set up real-time listener for footer logo updates
+    const channel = supabase.channel('footer_logo_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'site_settings' }, 
+        (payload) => {
+          if (payload.new && typeof payload.new === 'object') {
+            const newData = payload.new as any;
+            setFooterLogoUrl(newData.footer_logo_url || newData.logo_url || logo);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadSiteSettings = async () => {

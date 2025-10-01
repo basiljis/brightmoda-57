@@ -297,19 +297,19 @@ const Header = () => {
                 </NavigationMenuItem>
                 
                 <NavigationMenuItem>
-                  <Link to="/lookbook" className={navigationMenuTriggerStyle()}>
+                  <Link to="/lookbook" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
                     LOOKBOOK
                   </Link>
                 </NavigationMenuItem>
                 
                 <NavigationMenuItem>
-                  <Link to="/about" className={navigationMenuTriggerStyle()}>
+                  <Link to="/about" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
                     О НАС
                   </Link>
                 </NavigationMenuItem>
                 
                 <NavigationMenuItem>
-                  <Link to="/contacts" className={navigationMenuTriggerStyle()}>
+                  <Link to="/contacts" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
                     КОНТАКТЫ
                   </Link>
                 </NavigationMenuItem>

@@ -54,6 +54,12 @@ const ProfilePage = () => {
         full_name: data?.full_name || '',
         phone: data?.phone || ''
       });
+      
+      // Load user's saved theme
+      const profileData = data as any;
+      if (profileData?.theme) {
+        setTheme(profileData.theme);
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
     }
@@ -320,7 +326,21 @@ const ProfilePage = () => {
                       <Button
                         variant={theme === 'light' ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setTheme('light')}
+                        onClick={async () => {
+                          setTheme('light');
+                          try {
+                            await supabase
+                              .from('profiles')
+                              .update({ theme: 'light' } as any)
+                              .eq('user_id', user?.id);
+                            toast({
+                              title: "Тема изменена",
+                              description: "Светлая тема активирована",
+                            });
+                          } catch (error) {
+                            console.error('Error saving theme:', error);
+                          }
+                        }}
                         className="flex items-center gap-2"
                       >
                         <Sun className="h-4 w-4" />
@@ -329,7 +349,21 @@ const ProfilePage = () => {
                       <Button
                         variant={theme === 'dark' ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setTheme('dark')}
+                        onClick={async () => {
+                          setTheme('dark');
+                          try {
+                            await supabase
+                              .from('profiles')
+                              .update({ theme: 'dark' } as any)
+                              .eq('user_id', user?.id);
+                            toast({
+                              title: "Тема изменена",
+                              description: "Темная тема активирована",
+                            });
+                          } catch (error) {
+                            console.error('Error saving theme:', error);
+                          }
+                        }}
                         className="flex items-center gap-2"
                       >
                         <Moon className="h-4 w-4" />

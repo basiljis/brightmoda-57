@@ -90,39 +90,63 @@ const SiteSettings = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <FileUploadField
-          field="favicon_url"
-          label="Фавикон"
-          description="Иконка сайта, отображаемая во вкладке браузера"
-          value={settings.favicon_url}
-          onChange={(value) => setSettings(prev => ({...prev, favicon_url: value}))}
-          accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml,image/ico"
-          folder="site"
-          recommendationsFor="favicon"
-          disabled={loading}
-        />
+        <div className="space-y-2">
+          <FileUploadField
+            field="favicon_url"
+            label="Фавикон"
+            description="Иконка сайта, отображаемая во вкладке браузера"
+            value={settings.favicon_url}
+            onChange={(value) => setSettings(prev => ({...prev, favicon_url: value}))}
+            accept="image/png,image/jpg,image/jpeg,image/gif,image/svg+xml,image/ico"
+            folder="site"
+            recommendationsFor="favicon"
+            disabled={loading}
+          />
+          {settings.favicon_url && (
+            <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-2">Текущий фавикон:</p>
+              <img src={settings.favicon_url} alt="Favicon" className="w-8 h-8" />
+            </div>
+          )}
+        </div>
 
-        <FileUploadField
-          field="logo_url"
-          label="Логотип в шапке"
-          description="Логотип, отображаемый в шапке сайта"
-          value={settings.logo_url}
-          onChange={(value) => setSettings(prev => ({...prev, logo_url: value}))}
-          folder="site"
-          recommendationsFor="logo"
-          disabled={loading}
-        />
+        <div className="space-y-2">
+          <FileUploadField
+            field="logo_url"
+            label="Логотип в шапке"
+            description="Логотип, отображаемый в шапке сайта"
+            value={settings.logo_url}
+            onChange={(value) => setSettings(prev => ({...prev, logo_url: value}))}
+            folder="site"
+            recommendationsFor="logo"
+            disabled={loading}
+          />
+          {settings.logo_url && (
+            <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип шапки:</p>
+              <img src={settings.logo_url} alt="Header Logo" className="h-12 w-auto" />
+            </div>
+          )}
+        </div>
 
-        <FileUploadField
-          field="footer_logo_url"
-          label="Логотип в подвале"
-          description="Логотип, отображаемый в подвале сайта (может отличаться от основного)"
-          value={settings.footer_logo_url}
-          onChange={(value) => setSettings(prev => ({...prev, footer_logo_url: value}))}
-          folder="site"
-          recommendationsFor="logo"
-          disabled={loading}
-        />
+        <div className="space-y-2">
+          <FileUploadField
+            field="footer_logo_url"
+            label="Логотип в подвале"
+            description="Логотип, отображаемый в подвале сайта (может отличаться от основного)"
+            value={settings.footer_logo_url}
+            onChange={(value) => setSettings(prev => ({...prev, footer_logo_url: value}))}
+            folder="site"
+            recommendationsFor="logo"
+            disabled={loading}
+          />
+          {settings.footer_logo_url && (
+            <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип подвала:</p>
+              <img src={settings.footer_logo_url} alt="Footer Logo" className="h-12 w-auto" />
+            </div>
+          )}
+        </div>
 
         <Button onClick={handleSave} disabled={loading} className="w-full">
           {loading ? 'Сохранение...' : 'Сохранить настройки'}
