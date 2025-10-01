@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, User, Search, Settings, Menu, Home, Package } from "lucide-react";
+import { useTheme } from "next-themes";
 import { SearchModal } from "@/components/SearchModal";
 import {
   NavigationMenu,
@@ -26,13 +27,17 @@ const Header = () => {
   const { user, isAdmin } = useAuth();
   const { cartCount } = useCart();
   const { favorites } = useFavorites();
+  const { theme } = useTheme();
   const [collections, setCollections] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(logo);
+  const [logoDarkUrl, setLogoDarkUrl] = useState(logo);
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
+
+  const currentLogo = theme === 'dark' && logoDarkUrl ? logoDarkUrl : logoUrl;
 
   useEffect(() => {
     loadData();
@@ -42,8 +47,10 @@ const Header = () => {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'site_settings' }, 
         (payload) => {
-          if (payload.new && typeof payload.new === 'object' && 'logo_url' in payload.new && payload.new.logo_url) {
-            setLogoUrl(payload.new.logo_url as string);
+          if (payload.new && typeof payload.new === 'object') {
+            const newData = payload.new as any;
+            if (newData.logo_url) setLogoUrl(newData.logo_url);
+            if (newData.logo_dark_url) setLogoDarkUrl(newData.logo_dark_url);
           }
         }
       )
@@ -59,11 +66,12 @@ const Header = () => {
       // Load site settings for logo
       const { data: siteData, error: siteError } = await supabase
         .from('site_settings')
-        .select('logo_url')
+        .select('logo_url, logo_dark_url')
         .maybeSingle();
       
-      if (!siteError && siteData?.logo_url) {
-        setLogoUrl(siteData.logo_url);
+      if (!siteError && siteData) {
+        if (siteData.logo_url) setLogoUrl(siteData.logo_url);
+        if (siteData.logo_dark_url) setLogoDarkUrl(siteData.logo_dark_url);
       }
 
       // Load collections
@@ -123,7 +131,7 @@ const Header = () => {
                 <SheetContent side="left" className="w-80 p-0">
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b">
-                      <img src={logoUrl} alt="BRIGHT" className="h-8 w-auto" />
+                      <img src={currentLogo} alt="BRIGHT" className="h-8 w-auto" />
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                       <div className="space-y-4">
@@ -201,7 +209,7 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="hover:opacity-80 transition-opacity">
               <img 
-                src={logoUrl} 
+                src={currentLogo} 
                 alt="BRIGHT" 
                 className="h-8 w-auto"
               />

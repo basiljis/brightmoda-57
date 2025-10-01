@@ -10,7 +10,9 @@ const SiteSettings = () => {
   const [settings, setSettings] = useState({
     favicon_url: '',
     logo_url: '',
-    footer_logo_url: ''
+    logo_dark_url: '',
+    footer_logo_url: '',
+    footer_logo_dark_url: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +33,9 @@ const SiteSettings = () => {
         setSettings({
           favicon_url: data.favicon_url || '',
           logo_url: data.logo_url || '',
-          footer_logo_url: data.footer_logo_url || ''
+          logo_dark_url: data.logo_dark_url || '',
+          footer_logo_url: data.footer_logo_url || '',
+          footer_logo_dark_url: data.footer_logo_dark_url || ''
         });
       }
     } catch (error) {
@@ -46,7 +50,9 @@ const SiteSettings = () => {
       const { error } = await supabase.from('site_settings').upsert({
         favicon_url: settings.favicon_url,
         logo_url: settings.logo_url,
-        footer_logo_url: settings.footer_logo_url
+        logo_dark_url: settings.logo_dark_url,
+        footer_logo_url: settings.footer_logo_url,
+        footer_logo_dark_url: settings.footer_logo_dark_url
       }).select();
 
       if (error) throw error;
@@ -113,8 +119,8 @@ const SiteSettings = () => {
         <div className="space-y-2">
           <FileUploadField
             field="logo_url"
-            label="Логотип в шапке"
-            description="Логотип, отображаемый в шапке сайта"
+            label="Логотип в шапке (светлая тема)"
+            description="Логотип, отображаемый в шапке сайта при светлой теме"
             value={settings.logo_url}
             onChange={(value) => setSettings(prev => ({...prev, logo_url: value}))}
             folder="site"
@@ -123,8 +129,27 @@ const SiteSettings = () => {
           />
           {settings.logo_url && (
             <div className="mt-2 p-4 border rounded-lg bg-muted/50">
-              <p className="text-sm text-muted-foreground mb-2">Текущий логотип шапки:</p>
-              <img src={settings.logo_url} alt="Header Logo" className="h-12 w-auto" />
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип шапки (светлая тема):</p>
+              <img src={settings.logo_url} alt="Header Logo Light" className="h-12 w-auto" />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <FileUploadField
+            field="logo_dark_url"
+            label="Логотип в шапке (темная тема)"
+            description="Логотип, отображаемый в шапке сайта при темной теме"
+            value={settings.logo_dark_url}
+            onChange={(value) => setSettings(prev => ({...prev, logo_dark_url: value}))}
+            folder="site"
+            recommendationsFor="logo"
+            disabled={loading}
+          />
+          {settings.logo_dark_url && (
+            <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип шапки (темная тема):</p>
+              <img src={settings.logo_dark_url} alt="Header Logo Dark" className="h-12 w-auto" />
             </div>
           )}
         </div>
@@ -132,8 +157,8 @@ const SiteSettings = () => {
         <div className="space-y-2">
           <FileUploadField
             field="footer_logo_url"
-            label="Логотип в подвале"
-            description="Логотип, отображаемый в подвале сайта (может отличаться от основного)"
+            label="Логотип в подвале (светлая тема)"
+            description="Логотип, отображаемый в подвале сайта при светлой теме"
             value={settings.footer_logo_url}
             onChange={(value) => setSettings(prev => ({...prev, footer_logo_url: value}))}
             folder="site"
@@ -142,8 +167,27 @@ const SiteSettings = () => {
           />
           {settings.footer_logo_url && (
             <div className="mt-2 p-4 border rounded-lg bg-muted/50">
-              <p className="text-sm text-muted-foreground mb-2">Текущий логотип подвала:</p>
-              <img src={settings.footer_logo_url} alt="Footer Logo" className="h-12 w-auto" />
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип подвала (светлая тема):</p>
+              <img src={settings.footer_logo_url} alt="Footer Logo Light" className="h-12 w-auto" />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <FileUploadField
+            field="footer_logo_dark_url"
+            label="Логотип в подвале (темная тема)"
+            description="Логотип, отображаемый в подвале сайта при темной теме"
+            value={settings.footer_logo_dark_url}
+            onChange={(value) => setSettings(prev => ({...prev, footer_logo_dark_url: value}))}
+            folder="site"
+            recommendationsFor="logo"
+            disabled={loading}
+          />
+          {settings.footer_logo_dark_url && (
+            <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground mb-2">Текущий логотип подвала (темная тема):</p>
+              <img src={settings.footer_logo_dark_url} alt="Footer Logo Dark" className="h-12 w-auto" />
             </div>
           )}
         </div>

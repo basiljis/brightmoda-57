@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "next-themes";
 import logo from "@/assets/logo.png";
 
 interface Category {
@@ -24,11 +25,15 @@ interface PageContent {
 }
 
 const Footer = () => {
+  const { theme } = useTheme();
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
   const [supportSections, setSupportSections] = useState<PageContent[]>([]);
   const [footerLogoUrl, setFooterLogoUrl] = useState(logo);
+  const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState(logo);
+
+  const currentFooterLogo = theme === 'dark' && footerLogoDarkUrl ? footerLogoDarkUrl : footerLogoUrl;
 
   useEffect(() => {
     loadSiteSettings();
@@ -45,6 +50,7 @@ const Footer = () => {
           if (payload.new && typeof payload.new === 'object') {
             const newData = payload.new as any;
             setFooterLogoUrl(newData.footer_logo_url || newData.logo_url || logo);
+            setFooterLogoDarkUrl(newData.footer_logo_dark_url || newData.logo_dark_url || logo);
           }
         }
       )
@@ -59,12 +65,13 @@ const Footer = () => {
     try {
       const { data, error } = await supabase
         .from('site_settings')
-        .select('footer_logo_url, logo_url')
+        .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url')
         .maybeSingle();
 
       if (!error && data) {
         // Use footer_logo_url if available, otherwise use logo_url, otherwise use default
         setFooterLogoUrl(data.footer_logo_url || data.logo_url || logo);
+        setFooterLogoDarkUrl(data.footer_logo_dark_url || data.logo_dark_url || logo);
       }
     } catch (error) {
       console.error('Error loading site settings:', error);
@@ -157,7 +164,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
               <img 
-                src={footerLogoUrl} 
+                src={currentFooterLogo} 
                 alt="BRIGHT" 
                 className="h-8 w-auto"
               />

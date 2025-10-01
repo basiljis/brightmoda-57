@@ -962,24 +962,30 @@ export type Database = {
         Row: {
           created_at: string
           favicon_url: string | null
+          footer_logo_dark_url: string | null
           footer_logo_url: string | null
           id: string
+          logo_dark_url: string | null
           logo_url: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           favicon_url?: string | null
+          footer_logo_dark_url?: string | null
           footer_logo_url?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           favicon_url?: string | null
+          footer_logo_dark_url?: string | null
           footer_logo_url?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           updated_at?: string
         }
