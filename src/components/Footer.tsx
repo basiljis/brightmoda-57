@@ -70,7 +70,8 @@ const Footer = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url, copyright_text, footer_description, social_links')
-        .maybeSingle();
+        .limit(1)
+        .single();
 
       if (!error && data) {
         setFooterLogoUrl(data.footer_logo_url || data.logo_url || logo);

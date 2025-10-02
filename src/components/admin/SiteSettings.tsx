@@ -38,7 +38,8 @@ const SiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
       
       if (error) throw error;
       
@@ -77,7 +78,15 @@ const SiteSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Get the first record's ID to update it
+      const { data: existingSettings } = await supabase
+        .from('site_settings')
+        .select('id')
+        .limit(1)
+        .single();
+
       const { error } = await supabase.from('site_settings').upsert({
+        id: existingSettings?.id,
         favicon_url: settings.favicon_url,
         logo_url: settings.logo_url,
         logo_dark_url: settings.logo_dark_url,
