@@ -960,33 +960,42 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          copyright_text: string | null
           created_at: string
           favicon_url: string | null
+          footer_description: string | null
           footer_logo_dark_url: string | null
           footer_logo_url: string | null
           id: string
           logo_dark_url: string | null
           logo_url: string | null
+          social_links: Json | null
           updated_at: string
         }
         Insert: {
+          copyright_text?: string | null
           created_at?: string
           favicon_url?: string | null
+          footer_description?: string | null
           footer_logo_dark_url?: string | null
           footer_logo_url?: string | null
           id?: string
           logo_dark_url?: string | null
           logo_url?: string | null
+          social_links?: Json | null
           updated_at?: string
         }
         Update: {
+          copyright_text?: string | null
           created_at?: string
           favicon_url?: string | null
+          footer_description?: string | null
           footer_logo_dark_url?: string | null
           footer_logo_url?: string | null
           id?: string
           logo_dark_url?: string | null
           logo_url?: string | null
+          social_links?: Json | null
           updated_at?: string
         }
         Relationships: []

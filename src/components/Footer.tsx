@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
+import { Instagram, Facebook, Send, Youtube, Music } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 interface Category {
@@ -32,6 +33,9 @@ const Footer = () => {
   const [supportSections, setSupportSections] = useState<PageContent[]>([]);
   const [footerLogoUrl, setFooterLogoUrl] = useState(logo);
   const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState(logo);
+  const [copyrightText, setCopyrightText] = useState('© 2024 BRIGHT. Все права защищены.');
+  const [footerDescription, setFooterDescription] = useState('Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
+  const [socialLinks, setSocialLinks] = useState<{[key: string]: string}>({});
 
   const currentFooterLogo = theme === 'dark' && footerLogoDarkUrl ? footerLogoDarkUrl : footerLogoUrl;
 
@@ -65,13 +69,15 @@ const Footer = () => {
     try {
       const { data, error } = await supabase
         .from('site_settings')
-        .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url')
+        .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url, copyright_text, footer_description, social_links')
         .maybeSingle();
 
       if (!error && data) {
-        // Use footer_logo_url if available, otherwise use logo_url, otherwise use default
         setFooterLogoUrl(data.footer_logo_url || data.logo_url || logo);
         setFooterLogoDarkUrl(data.footer_logo_dark_url || data.logo_dark_url || logo);
+        setCopyrightText(data.copyright_text || '© 2024 BRIGHT. Все права защищены.');
+        setFooterDescription(data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
+        setSocialLinks((data.social_links as {[key: string]: string}) || {});
       }
     } catch (error) {
       console.error('Error loading site settings:', error);
@@ -156,6 +162,20 @@ const Footer = () => {
     };
     return sectionNames[sectionName] || sectionName;
   };
+
+  const getSocialIcon = (platform: string) => {
+    const iconProps = { size: 20 };
+    switch (platform) {
+      case 'instagram': return <Instagram {...iconProps} />;
+      case 'facebook': return <Facebook {...iconProps} />;
+      case 'vk': return <svg {...iconProps} viewBox="0 0 24 24" fill="currentColor"><path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14c5.6 0 6.93-1.33 6.93-6.93V8.93C22 3.33 20.67 2 15.07 2zm3.18 14.98h-1.28c-.64 0-.84-.52-1.99-1.67-1-.91-1.45-1.03-1.69-1.03-.35 0-.45.1-.45.58v1.53c0 .41-.13.65-1.21.65-1.79 0-3.77-1.08-5.16-3.1-2.09-2.96-2.66-5.19-2.66-5.64 0-.24.1-.47.58-.47h1.28c.43 0 .6.2.76.66.86 2.5 2.3 4.69 2.89 4.69.23 0 .33-.1.33-.68v-2.63c-.07-1.14-.67-1.24-.67-1.65 0-.2.17-.39.43-.39h2.02c.36 0 .49.19.49.61v3.54c0 .36.16.49.27.49.23 0 .42-.13.85-.56 1.33-1.49 2.28-3.79 2.28-3.79.13-.27.32-.47.75-.47h1.28c.51 0 .63.26.51.61-.19.87-2.24 4.2-2.24 4.2-.19.31-.26.45 0 .81.19.27.81.8 1.23 1.28.76.85 1.35 1.56 1.51 2.06.15.49-.08.74-.59.74z"/></svg>;
+      case 'telegram': return <Send {...iconProps} />;
+      case 'youtube': return <Youtube {...iconProps} />;
+      case 'tiktok': return <Music {...iconProps} />;
+      default: return null;
+    }
+  };
+
   return (
     <footer className="bg-background border-t border-border">
       <div className="container mx-auto px-4 py-12">
@@ -170,9 +190,27 @@ const Footer = () => {
               />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Премиальная одежда из мериносовой шерсти. 
-              Качество, комфорт и стиль в каждом изделии.
+              {footerDescription}
             </p>
+            {/* Social Links */}
+            {Object.entries(socialLinks).some(([_, url]) => url) && (
+              <div className="flex gap-3 pt-2">
+                {Object.entries(socialLinks).map(([platform, url]) => 
+                  url ? (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={platform}
+                    >
+                      {getSocialIcon(platform)}
+                    </a>
+                  ) : null
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -243,7 +281,7 @@ const Footer = () => {
         <div className="border-t border-border mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-muted-foreground">
-              © 2024 BRIGHT. Все права защищены.
+              {copyrightText}
             </div>
             <div className="flex space-x-6">
               <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
