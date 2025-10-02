@@ -55,6 +55,9 @@ const Footer = () => {
             const newData = payload.new as any;
             setFooterLogoUrl(newData.footer_logo_url || newData.logo_url || logo);
             setFooterLogoDarkUrl(newData.footer_logo_dark_url || newData.logo_dark_url || logo);
+            setCopyrightText(newData.copyright_text || '© 2024 BRIGHT. Все права защищены.');
+            setFooterDescription(newData.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
+            setSocialLinks((newData.social_links as { [key: string]: string }) || {});
           }
         }
       )
@@ -70,6 +73,7 @@ const Footer = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url, copyright_text, footer_description, social_links')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single();
 

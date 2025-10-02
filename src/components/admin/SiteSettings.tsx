@@ -38,6 +38,7 @@ const SiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single();
       
@@ -82,6 +83,7 @@ const SiteSettings = () => {
       const { data: existingSettings } = await supabase
         .from('site_settings')
         .select('id')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single();
 
