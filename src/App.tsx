@@ -45,7 +45,8 @@ const App = () => {
           'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Source Sans Pro',
           'Oswald', 'Raleway', 'Poppins', 'Merriweather', 'Playfair Display',
           'Lora', 'Ubuntu', 'Nunito', 'PT Sans', 'Fira Sans', 'Work Sans',
-          'Crimson Text', 'Libre Baskerville', 'Cormorant Garamond'
+          'Crimson Text', 'Libre Baskerville', 'Cormorant Garamond', 'Rubik',
+          'Cormorant', 'Alegreya Sans', 'IBM Plex Sans'
         ];
 
         // Remove existing Google Fonts links
@@ -73,7 +74,8 @@ const App = () => {
             const weightsStr = weights.join(',');
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@${weightsStr}&display=swap`;
+            // Добавляем поддержку кириллицы для всех шрифтов
+            link.href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@${weightsStr}&subset=cyrillic,latin&display=swap`;
             document.head.appendChild(link);
           });
         }
