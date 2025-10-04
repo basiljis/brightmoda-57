@@ -189,7 +189,7 @@ const LookbookManagement = () => {
                 Добавить образ
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingItem ? 'Редактировать образ' : 'Добавить образ'}
@@ -199,7 +199,7 @@ const LookbookManagement = () => {
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 overflow-x-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Название*</Label>
