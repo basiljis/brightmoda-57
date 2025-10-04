@@ -307,15 +307,15 @@ const AdminPage = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex w-full">
         <AdminSidebar 
           activeTab={activeTab}
           onTabChange={setActiveTab}
           hiddenSections={hiddenSections}
         />
         
-        <main className="flex-1">
-          <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <main className="flex-1 min-h-screen">
+          <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
@@ -327,7 +327,7 @@ const AdminPage = () => {
             </div>
           </div>
 
-          <div className="container mx-auto px-4 py-6">
+          <div className="container mx-auto px-4 py-6 pb-20">
             <HiddenSectionsManager 
               hiddenSections={hiddenSections}
               onRestoreSection={toggleSectionVisibility}
