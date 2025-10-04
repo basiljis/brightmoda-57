@@ -1,4 +1,4 @@
-import { BarChart3, Package, BookOpen, FileText, ShoppingCart, Settings, Mail, HelpCircle, ChevronDown, Home, Palette, Type, CreditCard, Truck, Database, Image, Layout } from "lucide-react";
+import { BarChart3, Package, BookOpen, FileText, ShoppingCart, Settings, Mail, HelpCircle, ChevronDown, Home, Palette, Type, CreditCard, Truck, Database, Image, Layout, Search, X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -16,7 +16,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface AdminSection {
   value: string;
@@ -104,9 +106,33 @@ export function AdminSidebar({ activeTab, onTabChange, hiddenSections }: AdminSi
   const { state } = useSidebar();
   const location = useLocation();
   const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const collapsed = state === "collapsed";
 
   const visibleSections = sections.filter(section => !hiddenSections.includes(section.value));
+
+  // Filter sections based on search query
+  const filteredSections = visibleSections.filter(section => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const matchesLabel = section.label.toLowerCase().includes(query);
+    const matchesSubItems = section.subItems?.some(sub => 
+      sub.label.toLowerCase().includes(query)
+    );
+    
+    return matchesLabel || matchesSubItems;
+  });
+
+  // Auto-expand groups that match search
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const matchingGroups = filteredSections
+        .filter(section => section.subItems)
+        .map(section => section.value);
+      setOpenGroups(matchingGroups);
+    }
+  }, [searchQuery]);
 
   const toggleGroup = (value: string) => {
     setOpenGroups(prev => 
@@ -141,15 +167,46 @@ export function AdminSidebar({ activeTab, onTabChange, hiddenSections }: AdminSi
           <SidebarGroupLabel className="text-base font-semibold px-4 py-3">
             {!collapsed && "Админ-панель"}
           </SidebarGroupLabel>
+          
+          {!collapsed && (
+            <div className="px-4 py-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Поиск по разделам..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-9"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+          
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleSections.map((section) => {
+              {filteredSections.map((section) => {
                 const Icon = section.icon;
                 const hasSubItems = section.subItems && section.subItems.length > 0;
                 const isActive = activeTab === section.value || 
                   section.subItems?.some(sub => activeTab === sub.value);
 
-                if (hasSubItems) {
+                // Filter sub-items based on search
+                const filteredSubItems = section.subItems?.filter(sub => {
+                  if (!searchQuery.trim()) return true;
+                  return sub.label.toLowerCase().includes(searchQuery.toLowerCase());
+                });
+
+                if (hasSubItems && filteredSubItems && filteredSubItems.length > 0) {
                   return (
                     <Collapsible
                       key={section.value}
@@ -174,7 +231,7 @@ export function AdminSidebar({ activeTab, onTabChange, hiddenSections }: AdminSi
                         {!collapsed && (
                           <CollapsibleContent>
                             <SidebarMenuSub>
-                              {section.subItems?.map((subItem) => (
+                              {filteredSubItems.map((subItem) => (
                                 <SidebarMenuSubItem key={subItem.value}>
                                   <SidebarMenuSubButton
                                     onClick={() => onTabChange(subItem.value)}
