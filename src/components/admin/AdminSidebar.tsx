@@ -136,7 +136,7 @@ export function AdminSidebar({ activeTab, onTabChange, hiddenSections }: AdminSi
       className={collapsed ? "w-14" : "w-64"}
       collapsible="icon"
     >
-      <SidebarContent>
+      <SidebarContent className="pt-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
         <SidebarGroup>
           <SidebarGroupLabel className="text-base font-semibold px-4 py-3">
             {!collapsed && "Админ-панель"}
