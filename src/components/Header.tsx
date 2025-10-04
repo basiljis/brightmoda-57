@@ -67,6 +67,8 @@ const Header = () => {
       const { data: siteData, error: siteError } = await supabase
         .from('site_settings')
         .select('logo_url, logo_dark_url')
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
       
       if (!siteError && siteData) {

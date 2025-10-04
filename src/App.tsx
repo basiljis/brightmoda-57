@@ -28,6 +28,64 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Load favicon on app initialization
+  useEffect(() => {
+    const loadFavicon = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('favicon_url')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (error || !data || !data.favicon_url) return;
+
+        // Update favicon
+        let favicon = document.querySelector('link[rel="icon"]');
+        if (favicon) {
+          favicon.setAttribute('href', data.favicon_url);
+        } else {
+          favicon = document.createElement('link');
+          favicon.setAttribute('rel', 'icon');
+          favicon.setAttribute('href', data.favicon_url);
+          document.head.appendChild(favicon);
+        }
+      } catch (error) {
+        console.error('Error loading favicon:', error);
+      }
+    };
+
+    loadFavicon();
+
+    // Set up real-time listener for favicon updates
+    const channel = supabase.channel('site_settings_favicon_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'site_settings' }, 
+        (payload) => {
+          if (payload.new && typeof payload.new === 'object') {
+            const newData = payload.new as any;
+            if (newData.favicon_url) {
+              let favicon = document.querySelector('link[rel="icon"]');
+              if (favicon) {
+                favicon.setAttribute('href', newData.favicon_url);
+              } else {
+                favicon = document.createElement('link');
+                favicon.setAttribute('rel', 'icon');
+                favicon.setAttribute('href', newData.favicon_url);
+                document.head.appendChild(favicon);
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Load fonts on app initialization
   useEffect(() => {
     const loadFonts = async () => {
