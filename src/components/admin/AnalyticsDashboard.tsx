@@ -74,6 +74,7 @@ const AnalyticsDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7');
+  const [totalActiveSubscribers, setTotalActiveSubscribers] = useState(0);
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 7);
@@ -123,6 +124,15 @@ const AnalyticsDashboard = () => {
         .lte('created_at', `${end}T23:59:59`);
 
       if (productError) throw productError;
+
+      // Get total active subscribers count
+      const { count: activeSubscribersCount, error: subscribersError } = await supabase
+        .from('email_subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+
+      if (subscribersError) throw subscribersError;
+      setTotalActiveSubscribers(activeSubscribersCount || 0);
 
       // Process data
       const dailyStats = processDailyStats(summaryData || []);
@@ -443,8 +453,11 @@ const AnalyticsDashboard = () => {
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-orange-600" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Подписчики</p>
-                    <p className="text-2xl font-bold">{analyticsData.summary.total_subscribers}</p>
+                    <p className="text-sm text-muted-foreground">Всего активных</p>
+                    <p className="text-2xl font-bold">{totalActiveSubscribers}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Новых за период: {analyticsData.summary.total_subscribers}
+                    </p>
                   </div>
                 </div>
               </CardContent>
