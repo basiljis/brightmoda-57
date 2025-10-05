@@ -4,8 +4,20 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Grid, List } from "lucide-react";
+import { Search, Filter, Grid, List, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const CatalogPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,7 +29,16 @@ const CatalogPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [productColors, setProductColors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc">("default");
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -73,6 +94,43 @@ const CatalogPage = () => {
       
       if (subcategoriesError) throw subcategoriesError;
       setSubcategories(subcategoriesData || []);
+
+      // Load collections
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (collectionsError) throw collectionsError;
+      setCollections(collectionsData || []);
+
+      // Load colors
+      const { data: colorsData, error: colorsError } = await supabase
+        .from('colors')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (colorsError) throw colorsError;
+      setColors(colorsData || []);
+
+      // Load product-color relationships
+      const { data: productColorsData, error: productColorsError } = await supabase
+        .from('product_colors')
+        .select('product_id, color_id');
+      
+      if (productColorsError) throw productColorsError;
+      
+      // Create a map of product_id -> [color_ids]
+      const productColorMap: Record<string, string[]> = {};
+      (productColorsData || []).forEach(pc => {
+        if (!productColorMap[pc.product_id]) {
+          productColorMap[pc.product_id] = [];
+        }
+        productColorMap[pc.product_id].push(pc.color_id);
+      });
+      setProductColors(productColorMap);
       
     } catch (error) {
       console.error('Error loading data:', error);
@@ -100,8 +158,30 @@ const CatalogPage = () => {
     if (selectedSubcategory && currentSubcategory) {
       matchesSubcategory = product.subcategory_id === currentSubcategory.id;
     }
+
+    let matchesCollection = true;
+    if (selectedCollections.length > 0) {
+      matchesCollection = selectedCollections.includes(product.collection_id);
+    }
+
+    let matchesColor = true;
+    if (selectedColors.length > 0) {
+      // Check if product has any of the selected colors
+      const prodColors = productColors[product.id] || [];
+      matchesColor = prodColors.some(colorId => selectedColors.includes(colorId));
+    }
     
-    return matchesSearch && matchesCategory && matchesSubcategory;
+    return matchesSearch && matchesCategory && matchesSubcategory && matchesCollection && matchesColor;
+  });
+
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === "price_asc") {
+      return Number(a.price) - Number(b.price);
+    } else if (sortBy === "price_desc") {
+      return Number(b.price) - Number(a.price);
+    }
+    return 0; // default - no sorting
   });
 
   // Get filtered subcategories for current category
@@ -219,16 +299,139 @@ const CatalogPage = () => {
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            Найдено {filteredProducts.length} товар{filteredProducts.length !== 1 && filteredProducts.length < 5 ? 'а' : 'ов'}
+            Найдено {sortedProducts.length} товар{sortedProducts.length !== 1 && sortedProducts.length < 5 ? 'а' : 'ов'}
           </p>
-          <Button variant="ghost" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Фильтры
-          </Button>
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Фильтры
+                {(sortBy !== "default" || selectedCollections.length > 0 || selectedColors.length > 0) && (
+                  <Badge variant="default" className="ml-2">
+                    {(sortBy !== "default" ? 1 : 0) + selectedCollections.length + selectedColors.length}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Фильтры</SheetTitle>
+                <SheetDescription>
+                  Настройте параметры для поиска товаров
+                </SheetDescription>
+              </SheetHeader>
+              <ScrollArea className="h-[calc(100vh-120px)] mt-6">
+                <div className="space-y-6 pr-4">
+                  {/* Sort by price */}
+                  <div>
+                    <Label className="text-base font-semibold mb-3 block">Сортировка по цене</Label>
+                    <RadioGroup value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="default" id="default" />
+                        <Label htmlFor="default" className="font-normal cursor-pointer">По умолчанию</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="price_asc" id="price_asc" />
+                        <Label htmlFor="price_asc" className="font-normal cursor-pointer">Сначала дешевле</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="price_desc" id="price_desc" />
+                        <Label htmlFor="price_desc" className="font-normal cursor-pointer">Сначала дороже</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Collections filter */}
+                  {collections.length > 0 && (
+                    <div>
+                      <Label className="text-base font-semibold mb-3 block">Коллекции</Label>
+                      <div className="space-y-2">
+                        {collections.map((collection) => (
+                          <div key={collection.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`collection-${collection.id}`}
+                              checked={selectedCollections.includes(collection.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedCollections([...selectedCollections, collection.id]);
+                                } else {
+                                  setSelectedCollections(selectedCollections.filter(id => id !== collection.id));
+                                }
+                              }}
+                            />
+                            <Label 
+                              htmlFor={`collection-${collection.id}`} 
+                              className="font-normal cursor-pointer"
+                            >
+                              {collection.name}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Colors filter */}
+                  {colors.length > 0 && (
+                    <div>
+                      <Label className="text-base font-semibold mb-3 block">Цвет</Label>
+                      <div className="space-y-2">
+                        {colors.map((color) => (
+                          <div key={color.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`color-${color.id}`}
+                              checked={selectedColors.includes(color.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedColors([...selectedColors, color.id]);
+                                } else {
+                                  setSelectedColors(selectedColors.filter(id => id !== color.id));
+                                }
+                              }}
+                            />
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-4 h-4 rounded-full border border-border" 
+                                style={{ backgroundColor: color.hex_code }}
+                              />
+                              <Label 
+                                htmlFor={`color-${color.id}`} 
+                                className="font-normal cursor-pointer"
+                              >
+                                {color.name}
+                              </Label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Clear filters button */}
+              {(sortBy !== "default" || selectedCollections.length > 0 || selectedColors.length > 0) && (
+                <div className="absolute bottom-4 left-4 right-4">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSortBy("default");
+                      setSelectedCollections([]);
+                      setSelectedColors([]);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Сбросить фильтры
+                  </Button>
+                </div>
+              )}
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Products Grid */}
-        {filteredProducts.length === 0 ? (
+        {sortedProducts.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="h-8 w-8 text-muted-foreground" />
@@ -245,6 +448,9 @@ const CatalogPage = () => {
                 setSearchTerm("");
                 setSelectedCategory("Все");
                 setSelectedSubcategory("");
+                setSortBy("default");
+                setSelectedCollections([]);
+                setSelectedColors([]);
               }}
             >
               Сбросить фильтры
@@ -256,7 +462,7 @@ const CatalogPage = () => {
               ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
               : "grid-cols-1"
           }`}>
-            {filteredProducts.map((product) => (
+            {sortedProducts.map((product) => (
               <ProductCard 
                 key={product.id} 
                 product={{
