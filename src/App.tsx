@@ -22,6 +22,7 @@ import AdminPage from "./pages/AdminPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
 import CategoryPage from "./components/CategoryPage";
+import CollectionPage from "./pages/CollectionPage";
 import CartPage from "./pages/CartPage";
 import NotFound from "./pages/NotFound";
 
@@ -198,7 +199,7 @@ const App = () => {
                 <Route path="/pillowcases" element={<CategoryPage title="Наволочки" description="Наволочки премиального качества" />} />
                 
                 {/* Collections */}
-                <Route path="/collections/:collection" element={<CategoryPage title="Коллекция" />} />
+                <Route path="/collections/:collection" element={<CollectionPage />} />
                 
                 {/* Pages */}
                 <Route path="/lookbook" element={<LookbookPage />} />

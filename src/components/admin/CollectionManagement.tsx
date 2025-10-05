@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import FileUploadField from './FileUploadField';
 
 interface Collection {
   id: string;
@@ -53,11 +54,27 @@ const CollectionManagement = () => {
     }
   };
 
+  const transliterate = (text: string): string => {
+    const map: Record<string, string> = {
+      'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+      'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+      'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+      'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+      'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+    };
+    
+    return text.split('').map(char => {
+      const lower = char.toLowerCase();
+      return map[lower] || char;
+    }).join('');
+  };
+
   const generateSlug = (name: string) => {
-    return name
+    return transliterate(name)
       .toLowerCase()
-      .replace(/[^a-zа-я0-9\s]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
       .trim();
   };
 
@@ -190,17 +207,24 @@ const CollectionManagement = () => {
                   id="collection-slug"
                   value={collectionForm.slug}
                   onChange={(e) => setCollectionForm({...collectionForm, slug: e.target.value})}
-                  placeholder="autumn-collection"
+                  placeholder="Генерируется автоматически"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Оставьте пустым для автоматической генерации из названия
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="collection-image">URL изображения</Label>
-                <Input
-                  id="collection-image"
+              <div className="space-y-2 md:col-span-2">
+                <FileUploadField
+                  field="image_url"
+                  label="Изображение коллекции"
+                  description="Загрузите изображение или вставьте URL"
                   value={collectionForm.image_url}
-                  onChange={(e) => setCollectionForm({...collectionForm, image_url: e.target.value})}
-                  placeholder="https://..."
+                  onChange={(value) => setCollectionForm({...collectionForm, image_url: value})}
+                  accept="image/*"
+                  bucket="product-images"
+                  folder="collections"
+                  recommendationsFor="banner"
                 />
               </div>
               
