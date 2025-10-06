@@ -213,7 +213,9 @@ const CatalogPage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-4">Каталог товаров</h1>
           <p className="text-muted-foreground">
-            Коллекция премиальной одежды из мериносовой шерсти
+            {currentSubcategory?.description || 
+             currentCategory?.description || 
+             "Коллекция премиальной одежды из мериносовой шерсти"}
           </p>
         </div>
 
