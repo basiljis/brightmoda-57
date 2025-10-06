@@ -61,6 +61,7 @@ const SEOSettings = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     loadSEOSettings();
@@ -77,6 +78,80 @@ const SEOSettings = () => {
       setSeoSettings(data || []);
     } catch (error) {
       console.error('Error loading SEO settings:', error);
+    }
+  };
+
+  const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+  const seoPageToContentKey: Record<string, string> = {
+    about: 'about_us',
+    contacts: 'contacts',
+    privacy: 'privacy_policy',
+    terms: 'terms_of_use',
+    lookbook: 'lookbook',
+    home: 'home',
+    catalog: 'catalog',
+    cart: 'cart',
+    favorites: 'favorites',
+  };
+
+  const analyzeAndAutoConfigure = async () => {
+    if (!currentSetting.page_name) {
+      toast({
+        title: 'Укажите страницу',
+        description: 'Сначала выберите страницу для настройки SEO.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const pageKey = seoPageToContentKey[currentSetting.page_name] || currentSetting.page_name;
+
+    setAnalyzing(true);
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', pageKey)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+
+      const items = data || [];
+      const textBlocks = items
+        .filter((it: any) => it.content_type === 'text' || it.content_type === 'html')
+        .map((it: any) => stripHtml(it.content_value || ''));
+
+      const fullText = textBlocks.join(' ').slice(0, 4000);
+      const titleBlock = items.find((it: any) => it.section_name === 'title')?.content_value || '';
+      const candidateTitle = stripHtml(titleBlock) || fullText.split(/[.!?]/)[0]?.trim() || '';
+      const candidateDesc = fullText.slice(0, 300).trim();
+
+      const metaTitle = candidateTitle.slice(0, 60);
+      const metaDescription = candidateDesc.slice(0, 160);
+
+      setCurrentSetting(prev => ({
+        ...prev,
+        meta_title: metaTitle || prev.meta_title || '',
+        meta_description: metaDescription || prev.meta_description || '',
+        og_title: (metaTitle || prev.og_title || ''),
+        og_description: (metaDescription || prev.og_description || ''),
+        robots: prev.robots || 'index, follow',
+      }));
+
+      toast({
+        title: 'Анализ выполнен',
+        description: 'Мета‑теги заполнены на основе содержимого страницы.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Ошибка анализа',
+        description: 'Не удалось автоматически настроить SEO. Попробуйте позже.',
+        variant: 'destructive',
+      });
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -213,9 +288,19 @@ const SEOSettings = () => {
       <Card>
         <CardHeader>
           <CardTitle>SEO настройки</CardTitle>
-          <CardDescription>
+          <CardDescription className="mt-2">
             Управление мета-тегами и SEO параметрами страниц
           </CardDescription>
+          <div className="mt-3">
+            <Button onClick={analyzeAndAutoConfigure} disabled={analyzing || !currentSetting.page_name} variant="secondary">
+              <Globe className="h-4 w-4 mr-2" />
+              {analyzing ? 'Анализируем…' : 'Анализ сайта и автонастройка'}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Кнопка выполняет быстрый анализ содержимого выбранной страницы и автоматически заполняет мета‑теги
+              (title, description, Open Graph) на основе текста на сайте. Проверьте результат перед сохранением.
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

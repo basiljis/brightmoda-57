@@ -10,6 +10,46 @@ import categoryInterior from "@/assets/category-interior.jpg";
 import { ArrowRight, Star, Shield, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import EmailSubscriptionSection from "@/components/EmailSubscriptionSection";
+import { useMemo } from "react";
+
+function MerinoSection({ blocks = [] as any[] }) {
+  const by = (name: string) => blocks.find((b: any) => b.section_name === name)?.content_value || '';
+  const title = by('merino_title') || 'Мериносовая шерсть';
+  const items = [
+    { t: by('merino_block_1_title') || 'Терморегуляция', d: by('merino_block_1_text') || 'Естественная способность регулировать температуру тела в любых условиях.' },
+    { t: by('merino_block_2_title') || 'Комфорт', d: by('merino_block_2_text') || 'Тончайшие волокна обеспечивают мягкость и отсутствие раздражения.' },
+    { t: by('merino_block_3_title') || 'Антибактериальные свойства', d: by('merino_block_3_text') || 'Натуральная защита от неприятных запахов без химических добавок.' },
+    { t: by('merino_block_4_title') || 'Долговечность', d: by('merino_block_4_text') || 'Качество, которое сохраняется годами при правильном уходе.' },
+  ];
+  return (
+    <div className="max-w-4xl mx-auto text-center">
+      <h2 className="text-3xl md:text-4xl font-light text-foreground mb-8 tracking-wide">{title}</h2>
+      <div className="w-16 h-px bg-foreground mx-auto mb-12"></div>
+      <div className="grid md:grid-cols-2 gap-12 text-left">
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[0].t}</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">{items[0].d}</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[1].t}</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">{items[1].d}</p>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[2].t}</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">{items[2].d}</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[3].t}</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">{items[3].d}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const HomePage = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -17,6 +57,7 @@ const HomePage = () => {
   const [headerCollections, setHeaderCollections] = useState([]);
   const [categories, setCategories] = useState([]);
   const featuredProducts = products.slice(0, 4);
+  const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -24,6 +65,7 @@ const HomePage = () => {
     loadCollections();
     loadHeaderCollections();
     loadCategories();
+    loadMerinoBlocks();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -71,6 +113,21 @@ const HomePage = () => {
       setCategories(data || []);
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadMerinoBlocks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', 'home')
+        .in('section_name', ['merino_title', 'merino_block_1_title', 'merino_block_1_text', 'merino_block_2_title', 'merino_block_2_text', 'merino_block_3_title', 'merino_block_3_text', 'merino_block_4_title', 'merino_block_4_text'])
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      setMerinoBlocks(data || []);
+    } catch (e) {
+      console.error('Error loading merino blocks:', e);
     }
   };
 
@@ -289,54 +346,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* About Merino Wool */}
+      {/* About Merino Wool - editable via page_content (home) */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-light text-foreground mb-8 tracking-wide">
-              Мериносовая шерсть
-            </h2>
-            <div className="w-16 h-px bg-foreground mx-auto mb-12"></div>
-            
-            <div className="grid md:grid-cols-2 gap-12 text-left">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">
-                    Терморегуляция
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    Естественная способность регулировать температуру тела в любых условиях.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">
-                    Комфорт
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    Тончайшие волокна обеспечивают мягкость и отсутствие раздражения.
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">
-                    Антибактериальные свойства
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    Натуральная защита от неприятных запахов без химических добавок.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">
-                    Долговечность
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    Качество, которое сохраняется годами при правильном уходе.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <MerinoSection blocks={merinoBlocks} />
         </div>
       </section>
 

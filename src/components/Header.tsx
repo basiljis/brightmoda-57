@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, ShoppingBag, User, Search, Settings, Menu, Home, Package } from "lucide-react";
+import { Heart, ShoppingBag, User, Search, Settings, Menu, Home, Package, MessageCircle, Send as TelegramIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { SearchModal } from "@/components/SearchModal";
 import {
@@ -14,6 +14,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
@@ -35,6 +36,10 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(logo);
   const [logoDarkUrl, setLogoDarkUrl] = useState(logo);
+  const [contactPlatform, setContactPlatform] = useState<string | null>(null);
+  const [contactUrl, setContactUrl] = useState<string | null>(null);
+  const [contactIconMode, setContactIconMode] = useState<string>('auto');
+  const [contactCustomIcon, setContactCustomIcon] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
@@ -67,7 +72,7 @@ const Header = () => {
       // Load site settings for logo
       const { data: siteData, error: siteError } = await supabase
         .from('site_settings')
-        .select('logo_url, logo_dark_url')
+        .select('logo_url, logo_dark_url, social_links')
         .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -75,6 +80,12 @@ const Header = () => {
       if (!siteError && siteData) {
         if (siteData.logo_url) setLogoUrl(siteData.logo_url);
         if (siteData.logo_dark_url) setLogoDarkUrl(siteData.logo_dark_url);
+        const links = (siteData as any).social_links || {};
+        const platform = links.contact_us_platform || null;
+        setContactPlatform(platform);
+        setContactUrl(platform ? links[platform] || null : null);
+        setContactIconMode(links.contact_us_icon_mode || 'auto');
+        setContactCustomIcon(links.contact_us_custom_icon_url || null);
       }
 
       // Load collections
@@ -118,7 +129,7 @@ const Header = () => {
       const { data: headerMenuData, error: headerMenuError } = await supabase
         .from('page_content')
         .select('*')
-        .eq('menu_location', 'header')
+        .in('menu_location', ['header', 'both'])
         .eq('is_active', true)
         .order('display_order');
       
@@ -346,11 +357,38 @@ const Header = () => {
                   </Link>
                 </NavigationMenuItem>
                 
-                {headerMenuItems.map((item) => (
-                  <NavigationMenuItem key={item.id}>
-                    <Link to={item.content_value} className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
-                      {(item.menu_label || item.section_name).toUpperCase()}
-                    </Link>
+                {/* Group top-level pages; if группа с одинаковым page_name > 1, сделать выпадающее */}
+                {Object.entries(
+                  headerMenuItems.reduce((acc: any, it: any) => {
+                    const key = it.page_name || it.section_name;
+                    acc[key] = acc[key] || [];
+                    acc[key].push(it);
+                    return acc;
+                  }, {})
+                ).map(([group, items]: any) => (
+                  <NavigationMenuItem key={group}>
+                    {items.length > 1 ? (
+                      <>
+                        <NavigationMenuTrigger className="text-sm font-light tracking-wide">
+                          {(items[0].menu_label || group).toUpperCase()}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="grid w-[400px] gap-2 p-4">
+                            {items.map((it: any) => (
+                              <NavigationMenuLink asChild key={it.id}>
+                                <Link to={it.content_value} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                  {(it.menu_label || it.section_name)}
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <Link to={items[0].content_value} className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
+                        {(items[0].menu_label || group).toUpperCase()}
+                      </Link>
+                    )}
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
@@ -358,59 +396,89 @@ const Header = () => {
 
             {/* Actions */}
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="hidden sm:flex"
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="hidden sm:flex"
+                    onClick={() => setIsSearchOpen(true)}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Поиск</TooltipContent>
+              </Tooltip>
               
               {!isMobile && (
                 <>
-                  <Link to="/favorites">
-                    <Button variant="ghost" size="sm" className="relative">
-                      <Heart className="h-4 w-4" />
-                      {favorites.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {favorites.length}
-                        </span>
-                      )}
-                    </Button>
-                  </Link>
-                  {user ? (
-                    <>
-                      <Link to="/profile">
-                        <Button variant="ghost" size="sm">
-                          <User className="h-4 w-4" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/favorites">
+                        <Button variant="ghost" size="sm" className="relative">
+                          <Heart className="h-4 w-4" />
+                          {favorites.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                              {favorites.length}
+                            </span>
+                          )}
                         </Button>
                       </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>Избранное</TooltipContent>
+                  </Tooltip>
+                  {user ? (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link to="/profile">
+                            <Button variant="ghost" size="sm">
+                              <User className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Профиль</TooltipContent>
+                      </Tooltip>
                       {isAdmin && (
-                        <Link to="/admin">
-                          <Button variant="ghost" size="sm">
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link to="/admin">
+                              <Button variant="ghost" size="sm">
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>Админка</TooltipContent>
+                        </Tooltip>
                       )}
                     </>
                   ) : (
-                    <Link to="/auth">
-                      <Button variant="ghost" size="sm">
-                        <User className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link to="/auth">
+                          <Button variant="ghost" size="sm">
+                            <User className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>Войти</TooltipContent>
+                    </Tooltip>
                   )}
-                  <Link to="/cart">
-                    <Button variant="ghost" size="sm" className="relative">
-                      <ShoppingBag className="h-4 w-4" />
-                      {cartCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {cartCount}
-                        </span>
-                      )}
-                    </Button>
-                  </Link>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link to="/cart">
+                        <Button variant="ghost" size="sm" className="relative">
+                          <ShoppingBag className="h-4 w-4" />
+                          {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                              {cartCount}
+                            </span>
+                          )}
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>Корзина</TooltipContent>
+                  </Tooltip>
                 </>
               )}
             </div>
@@ -422,6 +490,23 @@ const Header = () => {
           onClose={() => setIsSearchOpen(false)} 
         />
       </header>
+
+      {/* Floating Contact button (bottom-right) */}
+      {contactPlatform && contactUrl && (
+        <a href={contactUrl} target="_blank" rel="noopener noreferrer" className={`fixed ${isMobile ? 'bottom-20' : 'bottom-6'} right-6 z-50`}>
+          <Button variant="default" size="icon" className="h-14 w-14 rounded-full shadow-lg">
+            {contactIconMode === 'custom' && contactCustomIcon ? (
+              <img src={contactCustomIcon} alt="Связаться" className="h-6 w-6 object-contain" />
+            ) : contactIconMode === 'default' ? (
+              <MessageCircle className="h-6 w-6" />
+            ) : contactPlatform === 'telegram' ? (
+              <TelegramIcon className="h-6 w-6" />
+            ) : (
+              <MessageCircle className="h-6 w-6" />
+            )}
+          </Button>
+        </a>
+      )}
 
       {/* Mobile Bottom Navigation */}
       {isMobile && (

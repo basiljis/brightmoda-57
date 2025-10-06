@@ -33,6 +33,7 @@ interface PageContent {
 }
 
 const PAGE_OPTIONS = [
+  { value: 'home', label: 'Главная' },
   { value: 'about_us', label: 'О нас' },
   { value: 'contacts', label: 'Контакты' },
   { value: 'support', label: 'Поддержка' },
@@ -63,6 +64,13 @@ const PageContentManagement = () => {
     menu_label: '',
     menu_location: 'none'
   });
+  const [menuLevel, setMenuLevel] = useState<'top' | 'submenu'>('top');
+  const headerParentOptions = Array.from(new Set(
+    content
+      .filter(i => (i as any).menu_location === 'header' || (i as any).menu_location === 'both')
+      .map(i => i.page_name)
+      .filter(Boolean)
+  ));
 
   useEffect(() => {
     loadContent();
@@ -150,6 +158,9 @@ const PageContentManagement = () => {
       menu_label: item.menu_label || '',
       menu_location: item.menu_location || 'none'
     });
+    // Определяем меню уровень для превью/формы (не сохраняется отдельно)
+    const sameGroup = content.filter(c => c.page_name === item.page_name && ((c as any).menu_location === 'header' || (c as any).menu_location === 'both'));
+    setMenuLevel(sameGroup.length > 1 ? 'submenu' : 'top');
     setIsDialogOpen(true);
   };
 
@@ -292,6 +303,55 @@ const PageContentManagement = () => {
                     </div>
                   </div>
 
+                  {/* Настройки меню: уровень и группа (page_name) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="menu_level">Уровень меню</Label>
+                      <Select
+                        value={menuLevel}
+                        onValueChange={(value) => setMenuLevel(value as 'top' | 'submenu')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="top">Верхний уровень</SelectItem>
+                          <SelectItem value="submenu">Подменю</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">Группировка пунктов меню в шапке идёт по полю "Название страницы" (page_name).</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="page_name">Название страницы (группа меню)</Label>
+                      {menuLevel === 'submenu' ? (
+                        <Select
+                          value={formData.page_name}
+                          onValueChange={(value) => setFormData({ ...formData, page_name: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Выберите верхний пункт (группу)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from(new Set([formData.page_name, ...headerParentOptions].filter(Boolean))).map((name) => (
+                              <SelectItem key={name} value={name as string}>
+                                {name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          id="page_name"
+                          value={formData.page_name}
+                          onChange={(e) => setFormData({ ...formData, page_name: e.target.value })}
+                          placeholder="Например: about, support, catalog"
+                        />
+                      )}
+                      <p className="text-xs text-muted-foreground">Одинаковое название страницы объединит пункты в выпадающий список в шапке.</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="display_order">Порядок отображения</Label>
                     <Input
@@ -317,20 +377,104 @@ const PageContentManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="menu_location">Расположение меню</Label>
-                      <Select
-                        value={formData.menu_location}
-                        onValueChange={(value) => setFormData({ ...formData, menu_location: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Не показывать</SelectItem>
-                          <SelectItem value="header">Шапка</SelectItem>
-                          <SelectItem value="footer">Подвал</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label>Где показывать в меню</Label>
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="menu_location_header"
+                            checked={formData.menu_location === 'header' || formData.menu_location === 'both'}
+                            onCheckedChange={(checked) => {
+                              const isFooter = formData.menu_location === 'footer' || formData.menu_location === 'both';
+                              const next = checked ? (isFooter ? 'both' : 'header') : (isFooter ? 'footer' : 'none');
+                              setFormData({ ...formData, menu_location: next });
+                            }}
+                          />
+                          <Label htmlFor="menu_location_header">Шапка</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="menu_location_footer"
+                            checked={formData.menu_location === 'footer' || formData.menu_location === 'both'}
+                            onCheckedChange={(checked) => {
+                              const isHeader = formData.menu_location === 'header' || formData.menu_location === 'both';
+                              const next = checked ? (isHeader ? 'both' : 'footer') : (isHeader ? 'header' : 'none');
+                              setFormData({ ...formData, menu_location: next });
+                            }}
+                          />
+                          <Label htmlFor="menu_location_footer">Подвал</Label>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Можно выбрать оба места. Снимите оба переключателя, чтобы скрыть пункт меню.</p>
+
+                      {/* Превью отображения в меню */}
+                      <div className="mt-3 grid gap-4 md:grid-cols-2">
+                        {/* Header preview */}
+                        <div className="border rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground mb-2">Превью в шапке</p>
+                          {(['header', 'both'].includes(formData.menu_location)) ? (
+                            (() => {
+                              const headerItems = [
+                                ...content.filter(it => ['header', 'both'].includes(it.menu_location || 'none')),
+                                // Включаем текущий редактируемый элемент, если его ещё нет в списке
+                              ];
+                              const hasCurrent = headerItems.some(it => it.section_name === formData.section_name);
+                              if (!hasCurrent) {
+                                headerItems.push({
+                                  id: 'current-preview',
+                                  section_name: formData.section_name,
+                                  menu_label: formData.menu_label,
+                                  content_value: formData.content_value,
+                                } as any);
+                              }
+                              // Если элементов больше одного — показать превью выпадающего списка как в каталоге
+                              if (headerItems.length > 1) {
+                                const triggerLabel = (formData.page_name || 'СТРАНИЦА').toUpperCase();
+                                return (
+                                  <div>
+                                    <div className="inline-flex items-center text-sm font-light tracking-wide px-3 py-1 border rounded">
+                                      {triggerLabel}
+                                      <span className="ml-2 text-xs text-muted-foreground">▾</span>
+                                    </div>
+                                    <div className="mt-2 w-[280px] border rounded p-3 bg-background">
+                                      <div className="grid gap-1">
+                                        {headerItems.map((it) => (
+                                          <div key={it.id} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                            {it.menu_label || it.section_name}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              // Иначе — одиночный пункт меню
+                              return (
+                                <div className="flex gap-4 flex-wrap">
+                                  <span className="text-sm font-light tracking-wide relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full">
+                                    {(formData.menu_label || formData.section_name || 'Пункт меню').toUpperCase()}
+                                  </span>
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <p className="text-xs text-muted-foreground">В шапке не отображается</p>
+                          )}
+                        </div>
+
+                        {/* Footer preview */}
+                        <div className="border rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground mb-2">Превью в подвале</p>
+                          {(['footer', 'both'].includes(formData.menu_location)) ? (
+                            <div className="space-y-2">
+                              <a className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                {formData.menu_label || formData.section_name || 'Пункт меню'}
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">В подвале не отображается</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

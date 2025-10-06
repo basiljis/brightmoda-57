@@ -21,6 +21,7 @@ import ProductImportExport from '@/components/admin/ProductImportExport';
 import EmailSubscriptionManagement from '@/components/admin/EmailSubscriptionManagement';
 import EmailSettings from '@/components/admin/EmailSettings';
 import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManagement';
+import MenuManagement from '@/components/admin/MenuManagement';
 import SiteSettings from '@/components/admin/SiteSettings';
 import SEOSettings from '@/components/admin/SEOSettings';
 import FontSettings from '@/components/admin/FontSettings';
@@ -572,6 +573,13 @@ const AdminPage = () => {
             {activeTab === "content-pages" && (
               <div className="space-y-6">
                 <PageContentManagement />
+              </div>
+            )}
+
+            {/* Content - Menus */}
+            {activeTab === "content-menus" && (
+              <div className="space-y-6">
+                <MenuManagement />
               </div>
             )}
 

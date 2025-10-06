@@ -21,6 +21,7 @@ import AuthPage from "./pages/AuthPage";
 import AdminPage from "./pages/AdminPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CategoryPage from "./components/CategoryPage";
 import CollectionPage from "./pages/CollectionPage";
 import CartPage from "./pages/CartPage";
@@ -182,6 +183,7 @@ const App = () => {
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 
                 {/* Clothing Categories */}

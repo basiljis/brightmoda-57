@@ -24,7 +24,10 @@ const SiteSettings = () => {
       vk: '',
       telegram: '',
       youtube: '',
-      tiktok: ''
+      tiktok: '',
+      contact_us_platform: '',
+      contact_us_icon_mode: 'auto', // auto | default | custom
+      contact_us_custom_icon_url: ''
     }
   });
   const [loading, setLoading] = useState(false);
@@ -60,13 +63,19 @@ const SiteSettings = () => {
             telegram: string;
             youtube: string;
             tiktok: string;
+            contact_us_platform?: string;
+            contact_us_icon_mode?: string;
+            contact_us_custom_icon_url?: string;
           }) || {
             instagram: '',
             facebook: '',
             vk: '',
             telegram: '',
             youtube: '',
-            tiktok: ''
+            tiktok: '',
+            contact_us_platform: '',
+            contact_us_icon_mode: 'auto',
+            contact_us_custom_icon_url: ''
           }
         });
       }
@@ -351,6 +360,75 @@ const SiteSettings = () => {
                 disabled={loading}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contact_us_platform">Кнопка «Связаться с нами» — платформа</Label>
+            <select
+              id="contact_us_platform"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={settings.social_links.contact_us_platform || ''}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                social_links: { ...prev.social_links, contact_us_platform: e.target.value }
+              }))}
+              disabled={loading}
+            >
+              <option value="">Не выбрано</option>
+              <option value="telegram">Telegram</option>
+              <option value="instagram">Instagram</option>
+              <option value="vk">VK</option>
+              <option value="facebook">Facebook</option>
+              <option value="youtube">YouTube</option>
+              <option value="tiktok">TikTok</option>
+            </select>
+            <p className="text-xs text-muted-foreground">
+              Кнопка отображается в шапке, если выбрана платформа и соответствующая ссылка выше заполнена.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contact_us_icon_mode">Иконка кнопки «Связаться с нами»</Label>
+            <select
+              id="contact_us_icon_mode"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={settings.social_links.contact_us_icon_mode || 'auto'}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                social_links: { ...prev.social_links, contact_us_icon_mode: e.target.value }
+              }))}
+              disabled={loading}
+            >
+              <option value="auto">Авто (по платформе)</option>
+              <option value="default">Стандартная</option>
+              <option value="custom">Своя иконка</option>
+            </select>
+            {settings.social_links.contact_us_icon_mode === 'custom' && (
+              <div className="space-y-2 mt-2">
+                <FileUploadField
+                  field="contact_us_custom_icon_url"
+                  label="Иконка (SVG/PNG)"
+                  description="Загрузите свою иконку для кнопки"
+                  value={settings.social_links.contact_us_custom_icon_url || ''}
+                  onChange={(value) => setSettings(prev => ({
+                    ...prev,
+                    social_links: { ...prev.social_links, contact_us_custom_icon_url: value }
+                  }))}
+                  folder="site"
+                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                  disabled={loading}
+                />
+                {!!settings.social_links.contact_us_custom_icon_url && (
+                  <div className="mt-2 p-2 border rounded inline-flex items-center gap-2">
+                    <img src={settings.social_links.contact_us_custom_icon_url} alt="Иконка" className="w-8 h-8 object-contain" />
+                    <span className="text-xs text-muted-foreground">Предпросмотр</span>
+                  </div>
+                )}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              «Авто» — иконка подбирается по выбранной платформе (Telegram, Instagram и т.д.). «Стандартная» — универсальная иконка.
+            </p>
           </div>
         </div>
 

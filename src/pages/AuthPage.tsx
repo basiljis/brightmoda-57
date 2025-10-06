@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +15,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
@@ -76,6 +78,39 @@ const AuthPage = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast({
+        title: 'Укажите email',
+        description: 'Введите ваш email, чтобы отправить ссылку на сброс пароля.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setResetLoading(true);
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      if (error) throw error;
+
+      toast({
+        title: 'Ссылка отправлена',
+        description: 'Проверьте почту для сброса пароля.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Ошибка',
+        description: error?.message || 'Не удалось отправить ссылку на сброс пароля',
+        variant: 'destructive',
+      });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -144,6 +179,19 @@ const AuthPage = () => {
                 : (isLogin ? 'Войти' : 'Зарегистрироваться')
               }
             </Button>
+            {isLogin && (
+              <div className="flex justify-between">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="px-0 text-sm"
+                  onClick={handleResetPassword}
+                  disabled={resetLoading}
+                >
+                  {resetLoading ? 'Отправляем…' : 'Забыли пароль?'}
+                </Button>
+              </div>
+            )}
           </form>
           
           <div className="text-center">
