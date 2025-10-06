@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -27,12 +27,13 @@ import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
-import CollectionManagement from '@/components/admin/CollectionManagement';
+// removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 const AdminPage = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("analytics");
   const [hiddenSections, setHiddenSections] = useState<string[]>([]);
@@ -73,6 +74,15 @@ const AdminPage = () => {
       loadSectionVisibility();
     }
   }, [isAdmin]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Выход выполнен",
+      description: "Вы успешно вышли из аккаунта",
+    });
+    navigate('/auth', { replace: true });
+  };
 
   const loadSectionVisibility = async () => {
     try {
@@ -323,6 +333,9 @@ const AdminPage = () => {
                   <h1 className="text-2xl font-bold text-foreground">Админ-панель</h1>
                   <p className="text-sm text-muted-foreground">Управление товарами и настройками</p>
                 </div>
+                <div className="ml-auto">
+                  <Button variant="outline" onClick={handleSignOut}>Выйти</Button>
+                </div>
               </div>
             </div>
           </div>
@@ -541,29 +554,8 @@ const AdminPage = () => {
               </div>
             )}
 
-            {/* References - Categories */}
-            {activeTab === "references-categories" && (
-              <div className="space-y-6">
-                <ReferenceManagement />
-              </div>
-            )}
-
-            {/* References - Collections */}
-            {activeTab === "references-collections" && (
-              <div className="space-y-6">
-                <CollectionManagement />
-              </div>
-            )}
-
-            {/* References - Colors */}
-            {activeTab === "references-colors" && (
-              <div className="space-y-6">
-                <ReferenceManagement />
-              </div>
-            )}
-
-            {/* References - Sizes */}
-            {activeTab === "references-sizes" && (
+            {/* References - Unified */}
+            {activeTab === "references" && (
               <div className="space-y-6">
                 <ReferenceManagement />
               </div>

@@ -49,12 +49,6 @@ const sections: AdminSection[] = [
     value: "references",
     label: "Справочники",
     icon: Database,
-    subItems: [
-      { value: "references-categories", label: "Категории" },
-      { value: "references-collections", label: "Коллекции" },
-      { value: "references-colors", label: "Цвета" },
-      { value: "references-sizes", label: "Размеры" },
-    ],
   },
   {
     value: "content",

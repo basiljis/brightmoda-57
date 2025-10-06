@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Plus, ArrowUp, ArrowDown, Image } from 'lucide-react';
 import FileUploadField from './FileUploadField';
+import RichTextEditor from './RichTextEditor';
 import {
   Dialog,
   DialogContent,
@@ -248,7 +249,7 @@ const PageContentManagement = () => {
                   Добавить элемент
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingContent ? 'Редактировать элемент' : 'Добавить элемент'}
@@ -335,7 +336,7 @@ const PageContentManagement = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="content_value">Содержимое*</Label>
-                    
+
                     {formData.content_type === 'image' ? (
                       <FileUploadField
                         field="content_value"
@@ -346,19 +347,23 @@ const PageContentManagement = () => {
                         folder="page-content"
                         showRecommendations={true}
                       />
+                    ) : formData.content_type === 'text' ? (
+                      <RichTextEditor
+                        value={formData.content_value}
+                        onChange={(html) => setFormData({ ...formData, content_value: html })}
+                        placeholder="Введите текст..."
+                      />
                     ) : (
                       <Textarea
                         id="content_value"
                         value={formData.content_value}
                         onChange={(e) => setFormData({ ...formData, content_value: e.target.value })}
-                        rows={4}
+                        rows={6}
                         required
                         placeholder={
-                          formData.content_type === 'html' 
+                          formData.content_type === 'html'
                             ? 'Введите HTML код...'
-                            : formData.content_type === 'json'
-                            ? 'Введите JSON данные...'
-                            : 'Введите текст...'
+                            : 'Введите JSON данные...'
                         }
                       />
                     )}
@@ -415,6 +420,8 @@ const PageContentManagement = () => {
                             <Image className="h-4 w-4 text-blue-600" />
                             <span className="text-blue-600 truncate">{item.content_value}</span>
                           </div>
+                        ) : item.content_type === 'text' || item.content_type === 'html' ? (
+                          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: item.content_value }} />
                         ) : (
                           item.content_value
                         )}
