@@ -27,6 +27,8 @@ interface PageContent {
   content_value: string;
   display_order: number;
   is_active: boolean;
+  menu_label?: string;
+  menu_location?: string;
 }
 
 const PAGE_OPTIONS = [
@@ -56,7 +58,9 @@ const PageContentManagement = () => {
     content_type: 'text',
     content_value: '',
     display_order: 0,
-    is_active: true
+    is_active: true,
+    menu_label: '',
+    menu_location: 'none'
   });
 
   useEffect(() => {
@@ -85,7 +89,9 @@ const PageContentManagement = () => {
       content_type: 'text',
       content_value: '',
       display_order: content.length + 1,
-      is_active: true
+      is_active: true,
+      menu_label: '',
+      menu_location: 'none'
     });
     setEditingContent(null);
   };
@@ -139,7 +145,9 @@ const PageContentManagement = () => {
       content_type: item.content_type,
       content_value: item.content_value,
       display_order: item.display_order,
-      is_active: item.is_active
+      is_active: item.is_active,
+      menu_label: item.menu_label || '',
+      menu_location: item.menu_location || 'none'
     });
     setIsDialogOpen(true);
   };
@@ -293,6 +301,38 @@ const PageContentManagement = () => {
                     />
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="menu_label">Название в меню</Label>
+                      <Input
+                        id="menu_label"
+                        value={formData.menu_label}
+                        onChange={(e) => setFormData({ ...formData, menu_label: e.target.value })}
+                        placeholder="Например: О компании, Наши контакты"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Оставьте пустым, чтобы не показывать в меню
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="menu_location">Расположение меню</Label>
+                      <Select
+                        value={formData.menu_location}
+                        onValueChange={(value) => setFormData({ ...formData, menu_location: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Не показывать</SelectItem>
+                          <SelectItem value="header">Шапка</SelectItem>
+                          <SelectItem value="footer">Подвал</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="content_value">Содержимое*</Label>
                     
@@ -350,12 +390,22 @@ const PageContentManagement = () => {
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                           {CONTENT_TYPE_OPTIONS.find(opt => opt.value === item.content_type)?.label}
                         </span>
+                        {item.menu_location && item.menu_location !== 'none' && (
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            {item.menu_location === 'header' ? '📍 Шапка' : '📍 Подвал'}
+                          </span>
+                        )}
                         {!item.is_active && (
                           <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
                             Неактивен
                           </span>
                         )}
                       </div>
+                      {item.menu_label && (
+                        <p className="text-sm text-blue-600 mb-1">
+                          Меню: {item.menu_label}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground mb-2">
                         Секция: {item.section_name}
                       </p>

@@ -508,6 +508,8 @@ export type Database = {
           display_order: number | null
           id: string
           is_active: boolean | null
+          menu_label: string | null
+          menu_location: string | null
           page_name: string
           section_name: string
           updated_at: string
@@ -519,6 +521,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          menu_label?: string | null
+          menu_location?: string | null
           page_name: string
           section_name: string
           updated_at?: string
@@ -530,6 +534,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          menu_label?: string | null
+          menu_location?: string | null
           page_name?: string
           section_name?: string
           updated_at?: string

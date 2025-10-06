@@ -30,6 +30,7 @@ const Header = () => {
   const { theme } = useTheme();
   const [collections, setCollections] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [headerMenuItems, setHeaderMenuItems] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(logo);
@@ -112,6 +113,17 @@ const Header = () => {
       })) || [];
       
       setCategories(processedCategories);
+
+      // Load header menu items
+      const { data: headerMenuData, error: headerMenuError } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('menu_location', 'header')
+        .eq('is_active', true)
+        .order('display_order');
+      
+      if (headerMenuError) throw headerMenuError;
+      setHeaderMenuItems(headerMenuData || []);
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -201,6 +213,16 @@ const Header = () => {
                         >
                           КОНТАКТЫ
                         </Link>
+                        {headerMenuItems.map((item) => (
+                          <Link
+                            key={item.id}
+                            to={item.content_value}
+                            className="block text-sm font-medium py-2 hover:text-primary transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {item.menu_label || item.section_name}
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -323,6 +345,14 @@ const Header = () => {
                     КОНТАКТЫ
                   </Link>
                 </NavigationMenuItem>
+                
+                {headerMenuItems.map((item) => (
+                  <NavigationMenuItem key={item.id}>
+                    <Link to={item.content_value} className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
+                      {(item.menu_label || item.section_name).toUpperCase()}
+                    </Link>
+                  </NavigationMenuItem>
+                ))}
               </NavigationMenuList>
             </NavigationMenu>
 

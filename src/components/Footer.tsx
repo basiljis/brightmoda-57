@@ -20,9 +20,12 @@ interface Subcategory {
 
 interface PageContent {
   id: string;
+  page_name: string;
   section_name: string;
   content_value: string;
   display_order: number;
+  menu_label?: string;
+  menu_location?: string;
 }
 
 const Footer = () => {
@@ -31,6 +34,7 @@ const Footer = () => {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
   const [supportSections, setSupportSections] = useState<PageContent[]>([]);
+  const [footerMenuItems, setFooterMenuItems] = useState<PageContent[]>([]);
   const [footerLogoUrl, setFooterLogoUrl] = useState(logo);
   const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState(logo);
   const [copyrightText, setCopyrightText] = useState('© 2024 BRIGHT. Все права защищены.');
@@ -45,6 +49,7 @@ const Footer = () => {
     loadSubcategories();
     loadAboutSections();
     loadSupportSections();
+    loadFooterMenuItems();
 
     // Set up real-time listener for footer logo updates
     const channel = supabase.channel('footer_logo_changes')
@@ -123,7 +128,7 @@ const Footer = () => {
     try {
       const { data, error } = await supabase
         .from('page_content')
-        .select('id, section_name, content_value, display_order')
+        .select('*')
         .eq('page_name', 'about_us')
         .eq('is_active', true)
         .order('display_order');
@@ -139,7 +144,7 @@ const Footer = () => {
     try {
       const { data, error } = await supabase
         .from('page_content')
-        .select('id, section_name, content_value, display_order')
+        .select('*')
         .eq('page_name', 'support')
         .eq('is_active', true)
         .order('display_order');
@@ -148,6 +153,22 @@ const Footer = () => {
       setSupportSections(data || []);
     } catch (error) {
       console.error('Error loading support sections:', error);
+    }
+  };
+
+  const loadFooterMenuItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('menu_location', 'footer')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setFooterMenuItems(data || []);
+    } catch (error) {
+      console.error('Error loading footer menu items:', error);
     }
   };
 
@@ -280,6 +301,26 @@ const Footer = () => {
               ))}
             </div>
           </div>
+
+          {/* Custom Footer Menu Items */}
+          {footerMenuItems.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-foreground tracking-wide">
+                ДОПОЛНИТЕЛЬНО
+              </h3>
+              <div className="space-y-3">
+                {footerMenuItems.map((item) => (
+                  <Link 
+                    key={item.id}
+                    to={item.content_value} 
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {item.menu_label || item.section_name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Section */}
