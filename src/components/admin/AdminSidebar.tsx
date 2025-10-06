@@ -159,7 +159,7 @@ export function AdminSidebar({ activeTab, onTabChange, hiddenSections }: AdminSi
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-14" : "w-64"} sticky top-16 h-[calc(100vh-4rem)] z-0`}
+      className={`${collapsed ? "w-14" : "w-64"} sticky top-16 h-[calc(100vh-4rem)] z-20`}
       collapsible="icon"
     >
       <SidebarContent className="mt-0 pt-2 max-h-[calc(100vh-4rem)] overflow-y-auto pb-24">
