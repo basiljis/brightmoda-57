@@ -56,26 +56,16 @@ const SiteSettings = () => {
           footer_logo_dark_url: data.footer_logo_dark_url || '',
           copyright_text: data.copyright_text || '© 2024 BRIGHT. Все права защищены.',
           footer_description: data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.',
-          social_links: (data.social_links as {
-            instagram: string;
-            facebook: string;
-            vk: string;
-            telegram: string;
-            youtube: string;
-            tiktok: string;
-            contact_us_platform?: string;
-            contact_us_icon_mode?: string;
-            contact_us_custom_icon_url?: string;
-          }) || {
-            instagram: '',
-            facebook: '',
-            vk: '',
-            telegram: '',
-            youtube: '',
-            tiktok: '',
-            contact_us_platform: '',
-            contact_us_icon_mode: 'auto',
-            contact_us_custom_icon_url: ''
+          social_links: {
+            instagram: (data.social_links as any)?.instagram || '',
+            facebook: (data.social_links as any)?.facebook || '',
+            vk: (data.social_links as any)?.vk || '',
+            telegram: (data.social_links as any)?.telegram || '',
+            youtube: (data.social_links as any)?.youtube || '',
+            tiktok: (data.social_links as any)?.tiktok || '',
+            contact_us_platform: (data.social_links as any)?.contact_us_platform || '',
+            contact_us_icon_mode: (data.social_links as any)?.contact_us_icon_mode || 'auto',
+            contact_us_custom_icon_url: (data.social_links as any)?.contact_us_custom_icon_url || ''
           }
         });
       }

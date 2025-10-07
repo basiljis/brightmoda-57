@@ -26,6 +26,7 @@ import CategoryPage from "./components/CategoryPage";
 import CollectionPage from "./pages/CollectionPage";
 import CartPage from "./pages/CartPage";
 import NotFound from "./pages/NotFound";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -172,6 +173,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <div className="min-h-screen bg-background flex flex-col">
               <Header />
               <main className="flex-1">
