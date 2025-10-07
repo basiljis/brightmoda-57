@@ -386,8 +386,11 @@ export type Database = {
       }
       header_collections: {
         Row: {
+          autoplay_enabled: boolean | null
+          autoplay_speed: string | null
           collection_id: string | null
           created_at: string
+          desktop_display_mode: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -397,8 +400,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          autoplay_enabled?: boolean | null
+          autoplay_speed?: string | null
           collection_id?: string | null
           created_at?: string
+          desktop_display_mode?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -408,8 +414,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          autoplay_enabled?: boolean | null
+          autoplay_speed?: string | null
           collection_id?: string | null
           created_at?: string
+          desktop_display_mode?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean

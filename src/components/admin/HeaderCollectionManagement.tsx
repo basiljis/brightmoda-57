@@ -17,6 +17,9 @@ interface HeaderCollection {
   link_url: string;
   image_url: string;
   is_active: boolean;
+  desktop_display_mode?: string;
+  autoplay_enabled?: boolean;
+  autoplay_speed?: string;
 }
 
 interface Collection {
@@ -102,10 +105,85 @@ const HeaderCollectionManagement = () => {
         <CardHeader>
           <CardTitle>Управление коллекциями в шапке</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Настройте коллекции, которые отображаются в Hero секции главной страницы
+            Настройте коллекции, которые отображаются в Hero секции главной страницы. 
+            Можно добавить больше 2 коллекций для использования карусели.
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-8">
+          {/* Global Settings */}
+          <div className="border rounded-lg p-4 bg-muted/30">
+            <h4 className="font-medium mb-4">Общие настройки отображения</h4>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Режим отображения на десктопе</Label>
+                <Select
+                  value={headerCollections[0]?.desktop_display_mode || 'two'}
+                  onValueChange={(value) => {
+                    setHeaderCollections(prev => 
+                      prev.map(item => ({ ...item, desktop_display_mode: value }))
+                    );
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one">Одна картинка</SelectItem>
+                    <SelectItem value="two">Две картинки</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Определяет количество картинок, отображаемых одновременно
+                </p>
+              </div>
+
+              {headerCollections.length > 2 && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Автоматическая прокрутка
+                      <Switch
+                        checked={headerCollections[0]?.autoplay_enabled || false}
+                        onCheckedChange={(checked) => {
+                          setHeaderCollections(prev => 
+                            prev.map(item => ({ ...item, autoplay_enabled: checked }))
+                          );
+                        }}
+                      />
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Включить автоматическое переключение слайдов
+                    </p>
+                  </div>
+
+                  {(headerCollections[0]?.autoplay_enabled || false) && (
+                    <div className="space-y-2">
+                      <Label>Скорость прокрутки</Label>
+                      <Select
+                        value={headerCollections[0]?.autoplay_speed || 'medium'}
+                        onValueChange={(value) => {
+                          setHeaderCollections(prev => 
+                            prev.map(item => ({ ...item, autoplay_speed: value }))
+                          );
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="slow">Медленно (8 сек)</SelectItem>
+                          <SelectItem value="medium">Средне (5 сек)</SelectItem>
+                          <SelectItem value="fast">Быстро (3 сек)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Individual Collection Items */}
           <div className="grid gap-6">
             {headerCollections.map((headerCollection) => (
               <div key={headerCollection.id} className="border rounded-lg p-4 space-y-4">
