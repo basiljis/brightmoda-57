@@ -8,6 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import FileUploadField from './FileUploadField';
+import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface HeaderCollection {
   id: string;
@@ -91,6 +103,118 @@ const HeaderCollectionManagement = () => {
     );
   };
 
+  const handleCreate = async () => {
+    setSaving(true);
+    try {
+      const maxPosition = headerCollections.length > 0 
+        ? Math.max(...headerCollections.map(c => c.position))
+        : 0;
+
+      const { error } = await supabase
+        .from('header_collections')
+        .insert({
+          position: maxPosition + 1,
+          title: 'Новая коллекция',
+          link_url: '/catalog',
+          image_url: '',
+          is_active: false,
+          desktop_display_mode: headerCollections[0]?.desktop_display_mode || 'two',
+          autoplay_enabled: headerCollections[0]?.autoplay_enabled || false,
+          autoplay_speed: headerCollections[0]?.autoplay_speed || 'medium'
+        });
+
+      if (error) throw error;
+
+      toast.success('Коллекция создана');
+      loadData();
+    } catch (error) {
+      console.error('Error creating header collection:', error);
+      toast.error('Ошибка создания');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('header_collections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success('Коллекция удалена');
+      loadData();
+    } catch (error) {
+      console.error('Error deleting header collection:', error);
+      toast.error('Ошибка удаления');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMoveUp = async (collection: HeaderCollection) => {
+    const currentIndex = headerCollections.findIndex(c => c.id === collection.id);
+    if (currentIndex === 0) return;
+
+    const prevCollection = headerCollections[currentIndex - 1];
+    
+    setSaving(true);
+    try {
+      const { error: error1 } = await supabase
+        .from('header_collections')
+        .update({ position: prevCollection.position })
+        .eq('id', collection.id);
+
+      const { error: error2 } = await supabase
+        .from('header_collections')
+        .update({ position: collection.position })
+        .eq('id', prevCollection.id);
+
+      if (error1 || error2) throw error1 || error2;
+
+      toast.success('Позиция изменена');
+      loadData();
+    } catch (error) {
+      console.error('Error moving collection:', error);
+      toast.error('Ошибка изменения позиции');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleMoveDown = async (collection: HeaderCollection) => {
+    const currentIndex = headerCollections.findIndex(c => c.id === collection.id);
+    if (currentIndex === headerCollections.length - 1) return;
+
+    const nextCollection = headerCollections[currentIndex + 1];
+    
+    setSaving(true);
+    try {
+      const { error: error1 } = await supabase
+        .from('header_collections')
+        .update({ position: nextCollection.position })
+        .eq('id', collection.id);
+
+      const { error: error2 } = await supabase
+        .from('header_collections')
+        .update({ position: collection.position })
+        .eq('id', nextCollection.id);
+
+      if (error1 || error2) throw error1 || error2;
+
+      toast.success('Позиция изменена');
+      loadData();
+    } catch (error) {
+      console.error('Error moving collection:', error);
+      toast.error('Ошибка изменения позиции');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -103,11 +227,19 @@ const HeaderCollectionManagement = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Управление коллекциями в шапке</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Настройте коллекции, которые отображаются в Hero секции главной страницы. 
-            Можно добавить больше 2 коллекций для использования карусели.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Управление коллекциями в шапке</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                Настройте коллекции, которые отображаются в Hero секции главной страницы. 
+                Можно добавить больше 2 коллекций для использования карусели.
+              </p>
+            </div>
+            <Button onClick={handleCreate} disabled={saving}>
+              <Plus className="mr-2 h-4 w-4" />
+              Добавить коллекцию
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Global Settings */}
@@ -185,18 +317,71 @@ const HeaderCollectionManagement = () => {
 
           {/* Individual Collection Items */}
           <div className="grid gap-6">
-            {headerCollections.map((headerCollection) => (
+            {headerCollections.map((headerCollection, index) => (
               <div key={headerCollection.id} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">
-                    Позиция {headerCollection.position} ({headerCollection.position === 1 ? 'Левая' : 'Правая'})
-                  </h4>
-                  <Switch
-                    checked={headerCollection.is_active}
-                    onCheckedChange={(checked) => 
-                      handleInputChange(headerCollection.id, 'is_active', checked)
-                    }
-                  />
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleMoveUp(headerCollection)}
+                        disabled={index === 0 || saving}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleMoveDown(headerCollection)}
+                        disabled={index === headerCollections.length - 1 || saving}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">
+                        Позиция {headerCollection.position}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {headerCollection.is_active ? 'Активна' : 'Скрыта'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm">Активна</Label>
+                      <Switch
+                        checked={headerCollection.is_active}
+                        onCheckedChange={(checked) => 
+                          handleInputChange(headerCollection.id, 'is_active', checked)
+                        }
+                      />
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="icon" disabled={saving}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Удалить коллекцию?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Это действие нельзя отменить. Коллекция будет удалена навсегда.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Отмена</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(headerCollection.id)}>
+                            Удалить
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
