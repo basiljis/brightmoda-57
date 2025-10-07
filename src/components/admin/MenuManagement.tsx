@@ -26,6 +26,8 @@ export default function MenuManagement() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'header' | 'footer'>('all');
   const [search, setSearch] = useState('');
+  const SYSTEM_PAGES = useMemo(() => new Set(['home', 'catalog', 'about', 'contacts']), []);
+  const isSystem = (pageName?: string | null) => !!pageName && SYSTEM_PAGES.has(pageName);
 
   useEffect(() => {
     load();
@@ -133,7 +135,12 @@ export default function MenuManagement() {
                 <div className="grid md:grid-cols-12 gap-3 items-center">
                   <div className="md:col-span-2 space-y-1">
                     <Label className="text-xs">Группа</Label>
-                    <Input value={it.page_name} onChange={e => updateItem({ id: it.id, page_name: e.target.value })} />
+                    <Input 
+                      value={it.page_name} 
+                      onChange={e => !isSystem(it.page_name) && updateItem({ id: it.id, page_name: e.target.value })}
+                      disabled={isSystem(it.page_name)}
+                      title={isSystem(it.page_name) ? 'Системная страница — изменение группы запрещено' : ''}
+                    />
                   </div>
                   <div className="md:col-span-2 space-y-1">
                     <Label className="text-xs">Подпись</Label>
@@ -141,7 +148,13 @@ export default function MenuManagement() {
                   </div>
                   <div className="md:col-span-2 space-y-1">
                     <Label className="text-xs">Ссылка</Label>
-                    <Input value={it.content_value} onChange={e => updateItem({ id: it.id, content_value: e.target.value })} placeholder="/about, https://..." />
+                    <Input 
+                      value={it.content_value} 
+                      onChange={e => !isSystem(it.page_name) && updateItem({ id: it.id, content_value: e.target.value })} 
+                      placeholder="/about, https://..." 
+                      disabled={isSystem(it.page_name)}
+                      title={isSystem(it.page_name) ? 'Системная страница — изменение ссылок запрещено' : ''}
+                    />
                   </div>
                   <div className="md:col-span-2 space-y-1">
                     <Label className="text-xs">Расположение</Label>

@@ -28,6 +28,7 @@ import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import PageSyncStatus from '@/components/admin/PageSyncStatus';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -75,6 +76,30 @@ const AdminPage = () => {
       loadSectionVisibility();
     }
   }, [isAdmin]);
+
+  // Listen for cross-component navigation to content editor
+  useEffect(() => {
+    const handler = (e: any) => {
+      const page = e?.detail?.page;
+      if (page) {
+        setActiveTab('content-pages');
+      }
+    };
+    const visualEditorHandler = (e: any) => {
+      const page = e?.detail?.page;
+      if (page) {
+        setActiveTab('content-pages');
+        // Дополнительно можно передать информацию о том, что нужно открыть визуальный редактор
+        window.dispatchEvent(new CustomEvent('open-visual-editor-for', { detail: { page } }));
+      }
+    };
+    window.addEventListener('open-content-for', handler as any);
+    window.addEventListener('open-visual-editor', visualEditorHandler as any);
+    return () => {
+      window.removeEventListener('open-content-for', handler as any);
+      window.removeEventListener('open-visual-editor', visualEditorHandler as any);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -334,8 +359,32 @@ const AdminPage = () => {
                   <h1 className="text-2xl font-bold text-foreground">Админ-панель</h1>
                   <p className="text-sm text-muted-foreground">Управление товарами и настройками</p>
                 </div>
-                <div className="ml-auto">
-                  <Button variant="outline" onClick={handleSignOut}>Выйти</Button>
+                <div className="ml-auto flex items-center gap-2">
+                  <Button variant="outline" onClick={handleSignOut} className="hidden md:flex items-center gap-2">
+                    {/* Иконка выхода (дверь) как в профиле */}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <path d="M15 3h-3a2 2 0 00-2 2v14a2 2 0 002 2h3"/>
+                      <path d="M10 12h9"/>
+                      <path d="M15 17l5-5-5-5"/>
+                    </svg>
+                    Выйти
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => document.documentElement.classList.toggle('dark')}
+                    title="Переключить тему"
+                  >
+                    <span className="sr-only">Тема</span>
+                    {/* Солнце / Луна */}
+                    <svg className="h-4 w-4 block dark:hidden" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"/>
+                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    <svg className="h-4 w-4 hidden dark:block" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -572,6 +621,7 @@ const AdminPage = () => {
             {/* Content - Pages */}
             {activeTab === "content-pages" && (
               <div className="space-y-6">
+                <PageSyncStatus />
                 <PageContentManagement />
               </div>
             )}

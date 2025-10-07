@@ -6,9 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Palette, RefreshCw } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import PageEditor from './PageEditor';
-import PageSyncManager from './PageSyncManager';
 import { PageData } from '@/types/page-editor';
 
 interface PageContent {
@@ -25,34 +24,19 @@ interface PageContent {
 
 const PAGE_OPTIONS = [
   { value: 'home', label: 'Главная' },
-  { value: 'catalog', label: 'Каталог' },
-  { value: 'about', label: 'О нас' },
+  { value: 'about_us', label: 'О нас' },
   { value: 'contacts', label: 'Контакты' },
-  { value: 'lookbook', label: 'Lookbook' },
+  { value: 'support', label: 'Поддержка' },
   { value: 'privacy_policy', label: 'Политика конфиденциальности' },
-  { value: 'terms_of_use', label: 'Условия использования' },
-  { value: 'public_offer', label: 'Публичная оферта' },
-  { value: 'shipping_payment', label: 'Доставка и оплата' },
-  { value: 'returns_exchange', label: 'Возврат и обмен' },
-  { value: 'cardigans', label: 'Кардиганы' },
-  { value: 'vests', label: 'Жилеты' },
-  { value: 'sweaters', label: 'Свитеры' },
-  { value: 'skirts', label: 'Юбки' },
-  { value: 'pants', label: 'Брюки' },
-  { value: 'scarves', label: 'Шарфы' },
-  { value: 'hats', label: 'Головные уборы' },
-  { value: 'blankets', label: 'Пледы' },
-  { value: 'pillows', label: 'Подушки' },
-  { value: 'pillowcases', label: 'Наволочки' }
+  { value: 'terms_of_use', label: 'Условия использования' }
 ];
 
 const PageContentManagement = () => {
   const { toast } = useToast();
   const [content, setContent] = useState<PageContent[]>([]);
-  const [selectedPage, setSelectedPage] = useState<string>('about');
+  const [selectedPage, setSelectedPage] = useState<string>('about_us');
   const [isPageEditorOpen, setIsPageEditorOpen] = useState(false);
   const [currentPageData, setCurrentPageData] = useState<PageData | null>(null);
-  const [viewMode, setViewMode] = useState<'editor' | 'sync'>('sync');
 
   useEffect(() => {
     loadContent();
@@ -176,80 +160,60 @@ const PageContentManagement = () => {
           <CardDescription>Редактируйте содержимое страниц с помощью визуального редактора</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 mb-6">
-            <Button
-              variant={viewMode === 'sync' ? 'default' : 'outline'}
-              onClick={() => setViewMode('sync')}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Синхронизация страниц
-            </Button>
-            <Button
-              variant={viewMode === 'editor' ? 'default' : 'outline'}
-              onClick={() => setViewMode('editor')}
-            >
-              <Palette className="h-4 w-4 mr-2" />
-              Редактор контента
-            </Button>
-          </div>
-          {viewMode === 'sync' ? (
-            <PageSyncManager />
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Выберите страницу</Label>
-                <Select value={selectedPage} onValueChange={setSelectedPage}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Выберите страницу</Label>
+              <Select value={selectedPage} onValueChange={setSelectedPage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="flex gap-2">
-                <Button onClick={() => openPageEditor(selectedPage)}>
-                  <Palette className="h-4 w-4 mr-2" />
-                  Визуальный редактор
-                </Button>
-              </div>
+            <div className="flex gap-2">
+              <Button onClick={() => openPageEditor(selectedPage)}>
+                <Palette className="h-4 w-4 mr-2" />
+                Визуальный редактор
+              </Button>
+            </div>
 
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">Текущий контент</h3>
-                <div className="space-y-4">
-                  {content.map((item, index) => (
-                    <div key={item.id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{item.section_name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Тип: {item.content_type} | Порядок: {item.display_order}
-                          </p>
-                          <div className="text-sm border rounded p-2 bg-gray-50 max-h-20 overflow-y-auto mt-2">
-                            {item.content_type === 'image' ? (
-                              <span className="text-blue-600">Изображение: {item.content_value}</span>
-                            ) : (
-                              item.content_value
-                            )}
-                          </div>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4">Текущий контент</h3>
+              <div className="space-y-4">
+                {content.map((item, index) => (
+                  <div key={item.id} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{item.section_name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Тип: {item.content_type} | Порядок: {item.display_order}
+                        </p>
+                        <div className="text-sm border rounded p-2 bg-gray-50 max-h-20 overflow-y-auto mt-2">
+                          {item.content_type === 'image' ? (
+                            <span className="text-blue-600">Изображение: {item.content_value}</span>
+                          ) : (
+                            item.content_value
+                          )}
                         </div>
                       </div>
                     </div>
-                  ))}
-                  {content.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Контент не найден. Используйте визуальный редактор для создания страницы.
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ))}
+                {content.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Контент не найден. Используйте визуальный редактор для создания страницы.
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
@@ -267,3 +231,11 @@ const PageContentManagement = () => {
 };
 
 export default PageContentManagement;
+
+
+
+
+
+
+
+
