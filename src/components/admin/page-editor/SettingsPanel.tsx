@@ -37,7 +37,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
         ...selectedBlock.props,
         [prop]: value
       }
-    };
+    } as Block;
     onBlockUpdate(selectedBlock.id, updatedBlock);
   };
 
@@ -281,7 +281,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
         return (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-700">
-              Неизвестный тип блока: {selectedBlock.type}
+              Неизвестный тип блока: {(selectedBlock as any).type}
             </p>
           </div>
         );

@@ -483,6 +483,7 @@ const HeaderCollectionManagement = () => {
                       }
                       folder="header-collections"
                       showRecommendations={true}
+                      recommendationsFor="banner"
                     />
                   </div>
                 </div>

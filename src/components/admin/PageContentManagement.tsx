@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Palette, RefreshCw } from 'lucide-react';
 import PageEditor from './PageEditor';
 import PageSyncManager from './PageSyncManager';
-import { PageData } from '@/types/page-editor';
+import { PageData, Block, BlockType, ParagraphBlock, ImageBlock, HeadingBlock } from '@/types/page-editor';
 
 interface PageContent {
   id: string;
@@ -95,20 +95,28 @@ const PageContentManagement = () => {
       const pageData: PageData = {
         id: pageName,
         title: pageName.charAt(0).toUpperCase() + pageName.slice(1).replace('_', ' '),
-        blocks: existingContent?.map(item => ({
-          id: item.id,
-          type: item.content_type as any,
-          props: {
-            ...(item.content_type === 'text' || item.content_type === 'html' ? {
+        blocks: existingContent?.map(item => {
+          // Map old content_type to new block types
+          let blockType: BlockType = 'paragraph';
+          if (item.content_type === 'image') blockType = 'image';
+          if (item.content_type === 'heading') blockType = 'heading';
+          
+          return {
+            id: item.id,
+            type: blockType,
+            props: blockType === 'paragraph' ? {
               content: item.content_value
-            } : {}),
-            ...(item.content_type === 'image' ? {
+            } : blockType === 'image' ? {
               url: item.content_value,
-              alt: item.section_name,
-              caption: item.menu_label
-            } : {})
-          }
-        })) || []
+              alt: item.section_name || '',
+              caption: item.menu_label || undefined
+            } : blockType === 'heading' ? {
+              text: item.content_value,
+              level: 2 as const,
+              align: 'left' as const
+            } : {}
+          } as Block;
+        }) || []
       };
 
       setCurrentPageData(pageData);
@@ -133,11 +141,13 @@ const PageContentManagement = () => {
         page_name: pageData.id,
         section_name: `${block.type}_${index}`,
         content_type: block.type,
-        content_value: block.type === 'text' || block.type === 'html' 
-          ? (block as any).props.content 
+        content_value: block.type === 'paragraph' 
+          ? (block as ParagraphBlock).props.content 
           : block.type === 'image' 
-            ? (block as any).props.url 
-            : JSON.stringify(block.props),
+            ? (block as ImageBlock).props.url 
+            : block.type === 'heading'
+              ? (block as HeadingBlock).props.text
+              : JSON.stringify(block.props),
         display_order: index + 1,
         is_active: true,
         menu_label: null,

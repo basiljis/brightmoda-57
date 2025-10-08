@@ -150,7 +150,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
     default:
       return (
         <div className="text-muted-foreground">
-          Неизвестный тип блока: {block.type}
+          Неизвестный тип блока: {(block as any).type}
         </div>
       );
   }
