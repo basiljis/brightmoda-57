@@ -155,6 +155,42 @@ const HeaderCollectionManagement = () => {
     }
   };
 
+  const handleSaveGlobalSettings = async () => {
+    if (headerCollections.length === 0) return;
+    
+    setSaving(true);
+    try {
+      const globalSettings = {
+        desktop_display_mode: headerCollections[0].desktop_display_mode,
+        autoplay_enabled: headerCollections[0].autoplay_enabled,
+        autoplay_speed: headerCollections[0].autoplay_speed,
+      };
+
+      // Update all header collections with the same global settings
+      const updates = headerCollections.map(collection => 
+        supabase
+          .from('header_collections')
+          .update(globalSettings)
+          .eq('id', collection.id)
+      );
+
+      const results = await Promise.all(updates);
+      const errors = results.filter(r => r.error);
+
+      if (errors.length > 0) {
+        throw errors[0].error;
+      }
+
+      toast.success('Общие настройки сохранены');
+      loadData();
+    } catch (error) {
+      console.error('Error saving global settings:', error);
+      toast.error('Ошибка сохранения настроек');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleMoveUp = async (collection: HeaderCollection) => {
     const currentIndex = headerCollections.findIndex(c => c.id === collection.id);
     if (currentIndex === 0) return;
@@ -244,7 +280,12 @@ const HeaderCollectionManagement = () => {
         <CardContent className="space-y-8">
           {/* Global Settings */}
           <div className="border rounded-lg p-4 bg-muted/30">
-            <h4 className="font-medium mb-4">Общие настройки отображения</h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-medium">Общие настройки отображения</h4>
+              <Button onClick={handleSaveGlobalSettings} disabled={saving} size="sm">
+                Сохранить настройки
+              </Button>
+            </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Режим отображения на десктопе</Label>
