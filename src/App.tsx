@@ -5,10 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Preloader from "@/components/Preloader";
 import HomePage from "./pages/HomePage";
 import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
@@ -31,6 +32,15 @@ import { ScrollToTop } from "./components/ScrollToTop";
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [faviconReady, setFaviconReady] = useState(false);
+  const [fontsReady, setFontsReady] = useState(false);
+  const [minDelayDone, setMinDelayDone] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMinDelayDone(true), 400);
+    return () => clearTimeout(t);
+  }, []);
+
   // Load favicon on app initialization
   useEffect(() => {
     const loadFavicon = async () => {
@@ -56,6 +66,8 @@ const App = () => {
         }
       } catch (error) {
         console.error('Error loading favicon:', error);
+      } finally {
+        setFaviconReady(true);
       }
     };
 
@@ -159,11 +171,15 @@ const App = () => {
 
       } catch (error) {
         console.error('Error loading fonts:', error);
+      } finally {
+        setFontsReady(true);
       }
     };
 
     loadFonts();
   }, []);
+
+  const isAppReady = faviconReady && fontsReady && minDelayDone;
 
   return (
   <QueryClientProvider client={queryClient}>
@@ -174,7 +190,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
-            <div className="min-h-screen bg-background flex flex-col">
+            {!isAppReady && <Preloader />}
+            <div className="min-h-screen bg-background flex flex-col" style={{ visibility: isAppReady ? 'visible' : 'hidden' }}>
               <Header />
               <main className="flex-1">
                 <Routes>

@@ -42,6 +42,7 @@ const Footer = () => {
   const [socialLinks, setSocialLinks] = useState<{[key: string]: string}>({});
 
   const currentFooterLogo = theme === 'dark' && footerLogoDarkUrl ? footerLogoDarkUrl : footerLogoUrl;
+  const isFooterLogoReady = Boolean(currentFooterLogo && typeof currentFooterLogo === 'string' && currentFooterLogo.length > 0);
 
   useEffect(() => {
     loadSiteSettings();
@@ -209,11 +210,18 @@ const Footer = () => {
           {/* Logo and Brand */}
           <div className="space-y-4">
             <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
-              <img 
-                src={currentFooterLogo} 
-                alt="BRIGHT" 
-                className="h-8 w-auto"
-              />
+              {isFooterLogoReady ? (
+                <img 
+                  src={currentFooterLogo} 
+                  alt="BRIGHT" 
+                  className="h-8 w-auto"
+                  width={120}
+                  height={32}
+                  loading="eager"
+                />
+              ) : (
+                <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+              )}
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {footerDescription}

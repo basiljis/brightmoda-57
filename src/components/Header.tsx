@@ -44,6 +44,7 @@ const Header = () => {
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
 
   const currentLogo = theme === 'dark' && logoDarkUrl ? logoDarkUrl : logoUrl;
+  const isLogoReady = Boolean(currentLogo && typeof currentLogo === 'string' && currentLogo.length > 0);
 
   useEffect(() => {
     loadData();
@@ -156,7 +157,11 @@ const Header = () => {
                 <SheetContent side="left" className="w-80 p-0">
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b">
-                      <img src={currentLogo} alt="BRIGHT" className="h-8 w-auto" />
+                      {isLogoReady ? (
+                        <img src={currentLogo} alt="BRIGHT" className="h-8 w-auto" width={120} height={32} loading="eager" />
+                      ) : (
+                        <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+                      )}
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                       <div className="space-y-4">
@@ -243,11 +248,18 @@ const Header = () => {
 
             {/* Logo */}
             <Link to="/" className="hover:opacity-80 transition-opacity">
-              <img 
-                src={currentLogo} 
-                alt="BRIGHT" 
-                className="h-8 w-auto"
-              />
+              {isLogoReady ? (
+                <img 
+                  src={currentLogo} 
+                  alt="BRIGHT" 
+                  className="h-8 w-auto"
+                  width={120}
+                  height={32}
+                  loading="eager"
+                />
+              ) : (
+                <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+              )}
             </Link>
 
             {/* Desktop Navigation */}
