@@ -48,14 +48,19 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
   }, [api]);
 
   useEffect(() => {
-    if (!api || !autoplayEnabled || collections.length <= 2) return;
+    if (!api || !autoplayEnabled) return;
+    
+    // For 'one' mode, enable autoplay if there are 2+ collections
+    // For 'two' mode (carousel), enable autoplay if there are 3+ collections
+    const minCollections = displayMode === 'one' ? 2 : 3;
+    if (collections.length < minCollections) return;
 
     const interval = setInterval(() => {
       api.scrollNext();
     }, delay);
 
     return () => clearInterval(interval);
-  }, [api, autoplayEnabled, delay, collections.length]);
+  }, [api, autoplayEnabled, delay, collections.length, displayMode]);
 
   if (collections.length === 0) return null;
 
