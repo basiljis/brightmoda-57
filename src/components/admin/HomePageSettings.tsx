@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -12,6 +14,13 @@ const HomePageSettings = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showMerinoSection, setShowMerinoSection] = useState(true);
+  const [merinoTitle, setMerinoTitle] = useState('Мериносовая шерсть');
+  const [merinoBlocks, setMerinoBlocks] = useState([
+    { title: 'Терморегуляция', text: 'Естественная способность регулировать температуру тела в любых условиях.' },
+    { title: 'Комфорт', text: 'Тончайшие волокна обеспечивают мягкость и отсутствие раздражения.' },
+    { title: 'Антибактериальные свойства', text: 'Натуральная защита от неприятных запахов без химических добавок.' },
+    { title: 'Долговечность', text: 'Качество, которое сохраняется годами при правильном уходе.' }
+  ]);
 
   useEffect(() => {
     loadSettings();
@@ -23,14 +32,34 @@ const HomePageSettings = () => {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
-        .eq('page_name', 'home')
-        .eq('section_name', 'show_merino_section')
-        .single();
+        .eq('page_name', 'home');
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       
       if (data) {
-        setShowMerinoSection(data.content_value === 'true');
+        const visibilitySetting = data.find(item => item.section_name === 'show_merino_section');
+        if (visibilitySetting) {
+          setShowMerinoSection(visibilitySetting.content_value === 'true');
+        }
+
+        const title = data.find(item => item.section_name === 'merino_title');
+        if (title) {
+          setMerinoTitle(title.content_value);
+        }
+
+        const newBlocks = [...merinoBlocks];
+        for (let i = 0; i < 4; i++) {
+          const blockTitle = data.find(item => item.section_name === `merino_block_${i + 1}_title`);
+          const blockText = data.find(item => item.section_name === `merino_block_${i + 1}_text`);
+          
+          if (blockTitle || blockText) {
+            newBlocks[i] = {
+              title: blockTitle?.content_value || newBlocks[i].title,
+              text: blockText?.content_value || newBlocks[i].text
+            };
+          }
+        }
+        setMerinoBlocks(newBlocks);
       }
     } catch (error) {
       console.error('Error loading home page settings:', error);
@@ -42,36 +71,73 @@ const HomePageSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data: existing } = await supabase
+      // Prepare all content items
+      const contentItems = [
+        {
+          section_name: 'show_merino_section',
+          content_type: 'setting',
+          content_value: showMerinoSection.toString(),
+          display_order: 0
+        },
+        {
+          section_name: 'merino_title',
+          content_type: 'text',
+          content_value: merinoTitle,
+          display_order: 1
+        }
+      ];
+
+      // Add block titles and texts
+      merinoBlocks.forEach((block, index) => {
+        contentItems.push({
+          section_name: `merino_block_${index + 1}_title`,
+          content_type: 'text',
+          content_value: block.title,
+          display_order: (index + 1) * 2
+        });
+        contentItems.push({
+          section_name: `merino_block_${index + 1}_text`,
+          content_type: 'text',
+          content_value: block.text,
+          display_order: (index + 1) * 2 + 1
+        });
+      });
+
+      // Get existing content
+      const { data: existingContent } = await supabase
         .from('page_content')
-        .select('id')
+        .select('*')
         .eq('page_name', 'home')
-        .eq('section_name', 'show_merino_section')
-        .single();
+        .in('section_name', contentItems.map(item => item.section_name));
 
-      if (existing) {
-        const { error } = await supabase
-          .from('page_content')
-          .update({
-            content_value: showMerinoSection.toString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existing.id);
+      // Update or insert each item
+      for (const item of contentItems) {
+        const existing = existingContent?.find(e => e.section_name === item.section_name);
+        
+        if (existing) {
+          const { error } = await supabase
+            .from('page_content')
+            .update({
+              content_value: item.content_value,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existing.id);
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('page_content')
-          .insert({
-            page_name: 'home',
-            section_name: 'show_merino_section',
-            content_type: 'setting',
-            content_value: showMerinoSection.toString(),
-            display_order: 0,
-            is_active: true
-          });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('page_content')
+            .insert({
+              page_name: 'home',
+              section_name: item.section_name,
+              content_type: item.content_type,
+              content_value: item.content_value,
+              display_order: item.display_order,
+              is_active: true
+            });
 
-        if (error) throw error;
+          if (error) throw error;
+        }
       }
 
       toast({
@@ -111,9 +177,9 @@ const HomePageSettings = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="show-merino">Секция "О мериносовой шерсти"</Label>
+            <Label htmlFor="show-merino">Показывать секцию</Label>
             <p className="text-sm text-muted-foreground">
-              Показывать информацию о свойствах мериносовой шерсти
+              Отображать секцию "О мериносовой шерсти" на главной странице
             </p>
           </div>
           <Switch
@@ -121,6 +187,58 @@ const HomePageSettings = () => {
             checked={showMerinoSection}
             onCheckedChange={setShowMerinoSection}
           />
+        </div>
+
+        <div className="space-y-4 pt-4 border-t">
+          <div className="space-y-2">
+            <Label htmlFor="merino-title">Заголовок секции</Label>
+            <Input
+              id="merino-title"
+              value={merinoTitle}
+              onChange={(e) => setMerinoTitle(e.target.value)}
+              placeholder="Мериносовая шерсть"
+            />
+          </div>
+
+          <div className="space-y-4 pt-4">
+            <h3 className="text-lg font-semibold">Блоки информации</h3>
+            {merinoBlocks.map((block, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-base">Блок {index + 1}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`block-${index}-title`}>Заголовок блока</Label>
+                    <Input
+                      id={`block-${index}-title`}
+                      value={block.title}
+                      onChange={(e) => {
+                        const newBlocks = [...merinoBlocks];
+                        newBlocks[index] = { ...newBlocks[index], title: e.target.value };
+                        setMerinoBlocks(newBlocks);
+                      }}
+                      placeholder="Заголовок"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`block-${index}-text`}>Текст блока</Label>
+                    <Textarea
+                      id={`block-${index}-text`}
+                      value={block.text}
+                      onChange={(e) => {
+                        const newBlocks = [...merinoBlocks];
+                        newBlocks[index] = { ...newBlocks[index], text: e.target.value };
+                        setMerinoBlocks(newBlocks);
+                      }}
+                      placeholder="Описание"
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <div className="pt-4 border-t">
