@@ -203,40 +203,35 @@ const HomePageSettings = () => {
           <div className="space-y-4 pt-4">
             <h3 className="text-lg font-semibold">Блоки информации</h3>
             {merinoBlocks.map((block, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-base">Блок {index + 1}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`block-${index}-title`}>Заголовок блока</Label>
-                    <Input
-                      id={`block-${index}-title`}
-                      value={block.title}
-                      onChange={(e) => {
-                        const newBlocks = [...merinoBlocks];
-                        newBlocks[index] = { ...newBlocks[index], title: e.target.value };
-                        setMerinoBlocks(newBlocks);
-                      }}
-                      placeholder="Заголовок"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`block-${index}-text`}>Текст блока</Label>
-                    <Textarea
-                      id={`block-${index}-text`}
-                      value={block.text}
-                      onChange={(e) => {
-                        const newBlocks = [...merinoBlocks];
-                        newBlocks[index] = { ...newBlocks[index], text: e.target.value };
-                        setMerinoBlocks(newBlocks);
-                      }}
-                      placeholder="Описание"
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <div key={index} className="space-y-3 pb-4 border-b last:border-b-0">
+                <div className="space-y-2">
+                  <Label htmlFor={`block-${index}-title`}>Блок {index + 1} - Заголовок</Label>
+                  <Input
+                    id={`block-${index}-title`}
+                    value={block.title}
+                    onChange={(e) => {
+                      const newBlocks = [...merinoBlocks];
+                      newBlocks[index] = { ...newBlocks[index], title: e.target.value };
+                      setMerinoBlocks(newBlocks);
+                    }}
+                    placeholder="Заголовок"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`block-${index}-text`}>Блок {index + 1} - Текст</Label>
+                  <Textarea
+                    id={`block-${index}-text`}
+                    value={block.text}
+                    onChange={(e) => {
+                      const newBlocks = [...merinoBlocks];
+                      newBlocks[index] = { ...newBlocks[index], text: e.target.value };
+                      setMerinoBlocks(newBlocks);
+                    }}
+                    placeholder="Описание"
+                    rows={2}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </div>
