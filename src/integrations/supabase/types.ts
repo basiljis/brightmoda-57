@@ -553,34 +553,43 @@ export type Database = {
       }
       page_views: {
         Row: {
+          city: string | null
+          country: string | null
           created_at: string
           id: string
           ip_address: unknown | null
           page_path: string
           page_title: string | null
           referrer: string | null
+          region: string | null
           session_id: string | null
           user_agent: string | null
           user_id: string | null
         }
         Insert: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           ip_address?: unknown | null
           page_path: string
           page_title?: string | null
           referrer?: string | null
+          region?: string | null
           session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
         Update: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           ip_address?: unknown | null
           page_path?: string
           page_title?: string | null
           referrer?: string | null
+          region?: string | null
           session_id?: string | null
           user_agent?: string | null
           user_id?: string | null

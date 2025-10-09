@@ -30,7 +30,8 @@ import {
   Mail,
   TrendingUp,
   Calendar,
-  Filter
+  Filter,
+  MapPin
 } from 'lucide-react';
 
 interface AnalyticsData {
@@ -55,6 +56,20 @@ interface AnalyticsData {
     favorites: number;
     cart_additions: number;
   }>;
+  geo_stats: {
+    by_city: Array<{
+      city: string;
+      views: number;
+    }>;
+    by_region: Array<{
+      region: string;
+      views: number;
+    }>;
+    by_country: Array<{
+      country: string;
+      views: number;
+    }>;
+  };
   summary: {
     total_page_views: number;
     total_unique_visitors: number;
@@ -138,12 +153,14 @@ const AnalyticsDashboard = () => {
       const dailyStats = processDailyStats(summaryData || []);
       const topPages = processTopPages(pageViews || []);
       const topProducts = await processTopProducts(productActions || []);
+      const geoStats = processGeoStats(pageViews || []);
       const summary = calculateSummary(summaryData || []);
 
       setAnalyticsData({
         daily_stats: dailyStats,
         top_pages: topPages,
         top_products: topProducts,
+        geo_stats: geoStats,
         summary: summary
       });
 
@@ -217,6 +234,39 @@ const AnalyticsDashboard = () => {
       .map(([page_path, views]) => ({ page_path, views }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 10);
+  };
+
+  const processGeoStats = (pageViews: any[]) => {
+    const cityCount = new Map();
+    const regionCount = new Map();
+    const countryCount = new Map();
+    
+    pageViews.forEach(view => {
+      if (view.city) {
+        cityCount.set(view.city, (cityCount.get(view.city) || 0) + 1);
+      }
+      if (view.region) {
+        regionCount.set(view.region, (regionCount.get(view.region) || 0) + 1);
+      }
+      if (view.country) {
+        countryCount.set(view.country, (countryCount.get(view.country) || 0) + 1);
+      }
+    });
+
+    return {
+      by_city: Array.from(cityCount.entries())
+        .map(([city, views]) => ({ city, views }))
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 15),
+      by_region: Array.from(regionCount.entries())
+        .map(([region, views]) => ({ region, views }))
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 15),
+      by_country: Array.from(countryCount.entries())
+        .map(([country, views]) => ({ country, views }))
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 15)
+    };
   };
 
   const processTopProducts = async (actions: any[]) => {
@@ -469,6 +519,7 @@ const AnalyticsDashboard = () => {
               <TabsTrigger value="overview">Обзор</TabsTrigger>
               <TabsTrigger value="pages">Страницы</TabsTrigger>
               <TabsTrigger value="products">Товары</TabsTrigger>
+              <TabsTrigger value="geography">География</TabsTrigger>
               <TabsTrigger value="conversion">Конверсия</TabsTrigger>
             </TabsList>
 
@@ -543,6 +594,76 @@ const AnalyticsDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="geography" className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      По странам
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {analyticsData.geo_stats.by_country.map((item, index) => (
+                        <div key={item.country} className="flex items-center justify-between">
+                          <span className="text-sm">{item.country || 'Не определено'}</span>
+                          <span className="text-sm font-medium">{item.views}</span>
+                        </div>
+                      ))}
+                      {analyticsData.geo_stats.by_country.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Нет данных</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      По регионам
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {analyticsData.geo_stats.by_region.map((item, index) => (
+                        <div key={item.region} className="flex items-center justify-between">
+                          <span className="text-sm">{item.region || 'Не определено'}</span>
+                          <span className="text-sm font-medium">{item.views}</span>
+                        </div>
+                      ))}
+                      {analyticsData.geo_stats.by_region.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Нет данных</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      По городам
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {analyticsData.geo_stats.by_city.map((item, index) => (
+                        <div key={item.city} className="flex items-center justify-between">
+                          <span className="text-sm">{item.city || 'Не определено'}</span>
+                          <span className="text-sm font-medium">{item.views}</span>
+                        </div>
+                      ))}
+                      {analyticsData.geo_stats.by_city.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Нет данных</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="conversion" className="space-y-4">

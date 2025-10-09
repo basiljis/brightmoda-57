@@ -18,11 +18,30 @@ export const useAnalytics = () => {
   const { user } = useAuth();
   const sessionId = getSessionId();
 
+  // Get geolocation data
+  const getGeolocation = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          city: data.city || null,
+          region: data.region || null,
+          country: data.country_name || null
+        };
+      }
+    } catch (error) {
+      console.error('Failed to fetch geolocation:', error);
+    }
+    return { city: null, region: null, country: null };
+  };
+
   // Track page view
   const trackPageView = useCallback(async (pagePath?: string, pageTitle?: string) => {
     try {
       const path = pagePath || location.pathname;
       const title = pageTitle || document.title;
+      const geo = await getGeolocation();
       
       await supabase.from('page_views').insert({
         user_id: user?.id || null,
@@ -30,7 +49,10 @@ export const useAnalytics = () => {
         page_title: title,
         referrer: document.referrer || null,
         user_agent: navigator.userAgent,
-        session_id: sessionId
+        session_id: sessionId,
+        city: geo.city,
+        region: geo.region,
+        country: geo.country
       });
     } catch (error) {
       console.error('Failed to track page view:', error);
