@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Save, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Save, Trash2, ArrowUp, ArrowDown, Edit, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface MenuItem {
   id: string;
@@ -18,16 +19,21 @@ interface MenuItem {
   menu_location: 'none' | 'header' | 'footer' | 'both';
   display_order: number;
   is_active: boolean;
+  parent_id?: string | null;
+  children?: MenuItem[];
 }
+
+const EXCLUDED_PAGES = ['home', 'cart', 'profile', 'favorites'];
 
 export default function MenuManagement() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'header' | 'footer'>('all');
   const [search, setSearch] = useState('');
-  const SYSTEM_PAGES = useMemo(() => new Set(['home', 'catalog', 'about', 'contacts']), []);
-  const isSystem = (pageName?: string | null) => !!pageName && SYSTEM_PAGES.has(pageName);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemLocation, setNewItemLocation] = useState<'header' | 'footer' | 'both'>('header');
 
   useEffect(() => {
     load();
@@ -37,37 +43,158 @@ export default function MenuManagement() {
     try {
       const { data, error } = await supabase
         .from('page_content')
-        .select('id, page_name, section_name, menu_label, content_value, menu_location, display_order, is_active')
+        .select('*')
         .in('menu_location', ['header', 'footer', 'both'])
-        .order('page_name', { ascending: true })
+        .not('page_name', 'in', `(${EXCLUDED_PAGES.join(',')})`)
         .order('display_order', { ascending: true });
+      
       if (error) throw error;
-      setItems((data as any) || []);
+      
+      // Build hierarchy
+      const itemsMap = new Map<string, MenuItem>();
+      const rootItems: MenuItem[] = [];
+      
+      (data || []).forEach((item: any) => {
+        itemsMap.set(item.id, { ...item, children: [] });
+      });
+      
+      itemsMap.forEach((item) => {
+        if (item.parent_id) {
+          const parent = itemsMap.get(item.parent_id);
+          if (parent) {
+            parent.children = parent.children || [];
+            parent.children.push(item);
+          } else {
+            rootItems.push(item);
+          }
+        } else {
+          rootItems.push(item);
+        }
+      });
+      
+      setItems(rootItems);
     } catch (e) {
       console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось загрузить меню', variant: 'destructive' });
     }
   };
 
-  const grouped = useMemo(() => {
-    const list = items.filter(i => {
-      if (!search.trim()) return true;
+  const filteredItems = items.filter(item => {
+    if (search.trim()) {
       const q = search.toLowerCase();
-      return (
-        i.page_name?.toLowerCase().includes(q) ||
-        i.menu_label?.toLowerCase().includes(q) ||
-        i.section_name?.toLowerCase().includes(q)
-      );
-    }).filter(i => filter === 'all' ? true : filter === 'header' ? (i.menu_location === 'header' || i.menu_location === 'both') : (i.menu_location === 'footer' || i.menu_location === 'both'));
-    return list.reduce((acc: Record<string, MenuItem[]>, it) => {
-      const key = it.page_name || 'misc';
-      acc[key] = acc[key] || [];
-      acc[key].push(it);
-      return acc;
-    }, {});
-  }, [items, filter, search]);
+      const matches = (i: MenuItem): boolean => {
+        const directMatch = i.page_name?.toLowerCase().includes(q) ||
+          i.menu_label?.toLowerCase().includes(q) ||
+          i.section_name?.toLowerCase().includes(q);
+        const childMatch = i.children?.some(matches) || false;
+        return directMatch || childMatch;
+      };
+      if (!matches(item)) return false;
+    }
+    
+    if (filter === 'all') return true;
+    return item.menu_location === filter || item.menu_location === 'both';
+  });
 
-  const updateItem = async (patch: Partial<MenuItem> & { id: string }) => {
-    setItems(prev => prev.map(it => it.id === patch.id ? { ...it, ...patch } : it));
+  const createNewItem = async () => {
+    if (!newItemName.trim()) {
+      toast({ title: 'Ошибка', description: 'Укажите название пункта меню', variant: 'destructive' });
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const maxOrder = items.reduce((max, item) => Math.max(max, item.display_order), 0);
+      
+      const { data, error } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: newItemName.toLowerCase().replace(/\s+/g, '_'),
+          section_name: 'menu_item',
+          menu_label: newItemName,
+          content_value: `/${newItemName.toLowerCase().replace(/\s+/g, '-')}`,
+          menu_location: newItemLocation,
+          display_order: maxOrder + 1,
+          is_active: true,
+          content_type: 'link'
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      toast({ title: 'Создано', description: 'Новый пункт меню создан' });
+      setNewItemName('');
+      load();
+      
+      // Navigate to page editor
+      if (data) {
+        navigate(`/admin?tab=content-pages&page=${data.page_name}`);
+      }
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось создать пункт меню', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createSubItem = async (parentId: string, parentItem: MenuItem) => {
+    const name = prompt('Введите название подраздела:');
+    if (!name?.trim()) return;
+    
+    try {
+      setLoading(true);
+      const maxOrder = (parentItem.children || []).reduce((max, child) => Math.max(max, child.display_order), parentItem.display_order);
+      
+      const { data, error } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: parentItem.page_name,
+          section_name: 'submenu_item',
+          menu_label: name,
+          content_value: `${parentItem.content_value}/${name.toLowerCase().replace(/\s+/g, '-')}`,
+          menu_location: parentItem.menu_location,
+          display_order: maxOrder + 1,
+          parent_id: parentId,
+          is_active: true,
+          content_type: 'link'
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      toast({ title: 'Создано', description: 'Подраздел добавлен' });
+      load();
+      
+      // Navigate to page editor
+      if (data) {
+        navigate(`/admin?tab=content-pages&page=${data.page_name}&section=${data.section_name}`);
+      }
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось создать подраздел', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateItem = (id: string, patch: Partial<MenuItem>) => {
+    setItems(prev => {
+      const update = (items: MenuItem[]): MenuItem[] => {
+        return items.map(item => {
+          if (item.id === id) {
+            return { ...item, ...patch };
+          }
+          if (item.children) {
+            return { ...item, children: update(item.children) };
+          }
+          return item;
+        });
+      };
+      return update(prev);
+    });
   };
 
   const persistItem = async (item: MenuItem) => {
@@ -76,124 +203,277 @@ export default function MenuManagement() {
       const { error } = await supabase
         .from('page_content')
         .update({
-          page_name: item.page_name,
           menu_label: item.menu_label || null,
           content_value: item.content_value,
           menu_location: item.menu_location,
           display_order: item.display_order,
-          is_active: item.is_active
+          is_active: item.is_active,
+          parent_id: item.parent_id || null
         })
         .eq('id', item.id);
+      
       if (error) throw error;
       toast({ title: 'Сохранено', description: 'Пункт меню обновлён' });
-      load();
     } catch (e) {
-      toast({ title: 'Ошибка', description: 'Не удалось сохранить пункт меню', variant: 'destructive' });
+      console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось сохранить', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const move = async (item: MenuItem, dir: -1 | 1) => {
-    const group = items.filter(i => i.page_name === item.page_name);
-    const idx = group.findIndex(i => i.id === item.id);
-    const target = group[idx + dir];
+  const deleteItem = async (id: string) => {
+    if (!confirm('Удалить этот пункт меню? Все подразделы также будут удалены.')) return;
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('page_content')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast({ title: 'Удалено', description: 'Пункт меню удалён' });
+      load();
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось удалить', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const move = async (item: MenuItem, dir: -1 | 1, siblings: MenuItem[]) => {
+    const idx = siblings.findIndex(i => i.id === item.id);
+    const target = siblings[idx + dir];
     if (!target) return;
-    await persistItem({ ...item, display_order: target.display_order } as MenuItem);
-    await persistItem({ ...target, display_order: item.display_order } as MenuItem);
+    
+    await persistItem({ ...item, display_order: target.display_order });
+    await persistItem({ ...target, display_order: item.display_order });
+    load();
+  };
+
+  const openPageEditor = (item: MenuItem) => {
+    navigate(`/admin?tab=content-pages&page=${item.page_name}`);
+  };
+
+  const renderMenuItem = (item: MenuItem, level: number = 0, siblings: MenuItem[] = items) => {
+    const findItem = (items: MenuItem[], id: string): MenuItem | undefined => {
+      for (const item of items) {
+        if (item.id === id) return item;
+        if (item.children) {
+          const found = findItem(item.children, id);
+          if (found) return found;
+        }
+      }
+    };
+    
+    const idx = siblings.findIndex(i => i.id === item.id);
+    
+    return (
+      <div key={item.id} className="space-y-2">
+        <div 
+          className="border rounded-lg p-3 hover:bg-muted/50 transition-colors" 
+          style={{ marginLeft: `${level * 1.5}rem` }}
+        >
+          <div className="flex items-center gap-3">
+            {level > 0 && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            
+            <div className="flex-1 grid grid-cols-12 gap-3 items-center">
+              <div className="col-span-3 space-y-1">
+                <Label className="text-xs">Подпись</Label>
+                <Input 
+                  value={item.menu_label || ''} 
+                  onChange={e => updateItem(item.id, { menu_label: e.target.value })} 
+                  placeholder="Название"
+                  className="h-9"
+                />
+              </div>
+              
+              <div className="col-span-3 space-y-1">
+                <Label className="text-xs">Ссылка</Label>
+                <Input 
+                  value={item.content_value} 
+                  onChange={e => updateItem(item.id, { content_value: e.target.value })} 
+                  placeholder="/about"
+                  className="h-9"
+                />
+              </div>
+              
+              <div className="col-span-2 space-y-1">
+                <Label className="text-xs">Расположение</Label>
+                <Select 
+                  value={item.menu_location} 
+                  onValueChange={v => updateItem(item.id, { menu_location: v as any })}
+                >
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Скрыто</SelectItem>
+                    <SelectItem value="header">Шапка</SelectItem>
+                    <SelectItem value="footer">Подвал</SelectItem>
+                    <SelectItem value="both">Оба</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="col-span-2 flex items-end gap-1 pb-1">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9"
+                  onClick={() => move(item, -1, siblings)} 
+                  disabled={idx === 0}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => move(item, 1, siblings)} 
+                  disabled={idx === siblings.length - 1}
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="col-span-1 flex items-end pb-1">
+                <Switch 
+                  checked={item.is_active} 
+                  onCheckedChange={v => updateItem(item.id, { is_active: v })} 
+                />
+              </div>
+              
+              <div className="col-span-1 flex items-end gap-1 pb-1">
+                {level === 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => createSubItem(item.id, item)}
+                    title="Добавить подраздел"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => openPageEditor(item)}
+                  title="Редактировать страницу"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => {
+                    const currentItem = findItem(items, item.id);
+                    if (currentItem) persistItem(currentItem);
+                  }}
+                  title="Сохранить"
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => deleteItem(item.id)}
+                  title="Удалить"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {item.children && item.children.length > 0 && (
+          <div className="space-y-2">
+            {item.children.map(child => renderMenuItem(child, level + 1, item.children || []))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-3 md:items-end">
-        <div className="flex-1 space-y-2">
-          <Label>Поиск</Label>
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Поиск по названию, группе..." />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Создать новый пункт меню</CardTitle>
+          <CardDescription>
+            Создайте пункт меню и перейдите к редактированию его страницы
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <Input 
+                value={newItemName}
+                onChange={e => setNewItemName(e.target.value)}
+                placeholder="Название пункта меню (например: О компании)"
+                onKeyDown={e => e.key === 'Enter' && createNewItem()}
+              />
+            </div>
+            <Select value={newItemLocation} onValueChange={v => setNewItemLocation(v as any)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="header">Шапка</SelectItem>
+                <SelectItem value="footer">Подвал</SelectItem>
+                <SelectItem value="both">Оба</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={createNewItem} disabled={loading}>
+              <Plus className="h-4 w-4 mr-2" />
+              Создать
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <Input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            placeholder="Поиск..."
+          />
         </div>
-        <div className="space-y-2">
-          <Label>Область</Label>
-          <Select value={filter} onValueChange={v => setFilter(v as any)}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Шапка и Подвал</SelectItem>
-              <SelectItem value="header">Только Шапка</SelectItem>
-              <SelectItem value="footer">Только Подвал</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={filter} onValueChange={v => setFilter(v as any)}>
+          <SelectTrigger className="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все</SelectItem>
+            <SelectItem value="header">Только шапка</SelectItem>
+            <SelectItem value="footer">Только подвал</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {Object.entries(grouped).map(([group, list]) => (
-        <Card key={group}>
-          <CardHeader>
-            <CardTitle className="text-base">Группа: {group}</CardTitle>
-            <CardDescription>Элементы, объединённые по page_name</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {list.map((it, index) => (
-              <div key={it.id} className="border rounded-lg p-3">
-                <div className="grid md:grid-cols-12 gap-3 items-center">
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Группа</Label>
-                    <Input 
-                      value={it.page_name} 
-                      onChange={e => !isSystem(it.page_name) && updateItem({ id: it.id, page_name: e.target.value })}
-                      disabled={isSystem(it.page_name)}
-                      title={isSystem(it.page_name) ? 'Системная страница — изменение группы запрещено' : ''}
-                    />
-                  </div>
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Подпись</Label>
-                    <Input value={it.menu_label || ''} onChange={e => updateItem({ id: it.id, menu_label: e.target.value })} placeholder={it.section_name} />
-                  </div>
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Ссылка</Label>
-                    <Input 
-                      value={it.content_value} 
-                      onChange={e => !isSystem(it.page_name) && updateItem({ id: it.id, content_value: e.target.value })} 
-                      placeholder="/about, https://..." 
-                      disabled={isSystem(it.page_name)}
-                      title={isSystem(it.page_name) ? 'Системная страница — изменение ссылок запрещено' : ''}
-                    />
-                  </div>
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Расположение</Label>
-                    <Select value={it.menu_location} onValueChange={v => updateItem({ id: it.id, menu_location: v as any })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Скрыто</SelectItem>
-                        <SelectItem value="header">Шапка</SelectItem>
-                        <SelectItem value="footer">Подвал</SelectItem>
-                        <SelectItem value="both">Шапка и Подвал</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="md:col-span-2 space-y-1">
-                    <Label className="text-xs">Порядок</Label>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" onClick={() => move(it, -1)} disabled={index === 0}><ArrowUp className="h-4 w-4" /></Button>
-                      <Button variant="outline" size="icon" onClick={() => move(it, 1)} disabled={index === list.length - 1}><ArrowDown className="h-4 w-4" /></Button>
-                      <span className="text-xs text-muted-foreground ml-2">{it.display_order}</span>
-                    </div>
-                  </div>
-                  <div className="md:col-span-1 space-y-1">
-                    <Label className="text-xs">Активно</Label>
-                    <div className="flex items-center h-10">
-                      <Switch checked={it.is_active} onCheckedChange={(v) => updateItem({ id: it.id, is_active: v })} />
-                    </div>
-                  </div>
-                  <div className="md:col-span-1 flex items-center justify-end gap-2">
-                    <Button variant="outline" size="icon" onClick={() => persistItem(items.find(x => x.id === it.id)!)} title="Сохранить"><Save className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
+      <Card>
+        <CardHeader>
+          <CardTitle>Пункты меню</CardTitle>
+          <CardDescription>
+            Управляйте структурой меню. Исключены: Главная, Корзина, Личный кабинет, Избранное
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {filteredItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              Нет пунктов меню. Создайте первый пункт выше.
+            </p>
+          ) : (
+            filteredItems.map(item => renderMenuItem(item))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-
-

@@ -162,12 +162,23 @@ const Footer = () => {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
-        .eq('menu_location', 'footer')
+        .in('menu_location', ['footer', 'both'])
         .eq('is_active', true)
         .order('display_order');
 
       if (error) throw error;
-      setFooterMenuItems(data || []);
+      
+      // Group by page_name for organized footer sections
+      const grouped: { [key: string]: PageContent[] } = {};
+      (data || []).forEach(item => {
+        if (!item.parent_id) {
+          const key = item.page_name || 'custom';
+          grouped[key] = grouped[key] || [];
+          grouped[key].push(item);
+        }
+      });
+      
+      setFooterMenuItems(Object.values(grouped).flat());
     } catch (error) {
       console.error('Error loading footer menu items:', error);
     }

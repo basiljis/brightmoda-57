@@ -229,16 +229,51 @@ const Header = () => {
                         >
                           КОНТАКТЫ
                         </Link>
-                        {headerMenuItems.map((item) => (
-                          <Link
-                            key={item.id}
-                            to={item.content_value}
-                            className="block text-sm font-medium py-2 hover:text-primary transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {item.menu_label || item.section_name}
-                          </Link>
-                        ))}
+                        
+                        {/* Custom menu items with submenus */}
+                        {(() => {
+                          const rootItems = headerMenuItems.filter((item: any) => !item.parent_id);
+                          const childrenMap = new Map<string, any[]>();
+                          
+                          headerMenuItems.forEach((item: any) => {
+                            if (item.parent_id) {
+                              if (!childrenMap.has(item.parent_id)) {
+                                childrenMap.set(item.parent_id, []);
+                              }
+                              childrenMap.get(item.parent_id)!.push(item);
+                            }
+                          });
+                          
+                          return rootItems.map((item: any) => {
+                            const children = childrenMap.get(item.id) || [];
+                            
+                            return (
+                              <div key={item.id} className="space-y-1">
+                                <Link
+                                  to={item.content_value}
+                                  className="block text-sm font-medium py-2 hover:text-primary transition-colors"
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                  {(item.menu_label || item.section_name).toUpperCase()}
+                                </Link>
+                                {children.length > 0 && (
+                                  <div className="pl-4 space-y-1">
+                                    {children.map((child: any) => (
+                                      <Link
+                                        key={child.id}
+                                        to={child.content_value}
+                                        className="block text-sm py-1 text-muted-foreground hover:text-primary transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                      >
+                                        {child.menu_label || child.section_name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          });
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -369,40 +404,60 @@ const Header = () => {
                   </Link>
                 </NavigationMenuItem>
                 
-                {/* Group top-level pages; if группа с одинаковым page_name > 1, сделать выпадающее */}
-                {Object.entries(
-                  headerMenuItems.reduce((acc: any, it: any) => {
-                    const key = it.page_name || it.section_name;
-                    acc[key] = acc[key] || [];
-                    acc[key].push(it);
-                    return acc;
-                  }, {})
-                ).map(([group, items]: any) => (
-                  <NavigationMenuItem key={group}>
-                    {items.length > 1 ? (
-                      <>
-                        <NavigationMenuTrigger className="text-sm font-light tracking-wide">
-                          {(items[0].menu_label || group).toUpperCase()}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          <div className="grid w-[400px] gap-2 p-4">
-                            {items.map((it: any) => (
-                              <NavigationMenuLink asChild key={it.id}>
-                                <Link to={it.content_value} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                  {(it.menu_label || it.section_name)}
-                                </Link>
-                              </NavigationMenuLink>
-                            ))}
-                          </div>
-                        </NavigationMenuContent>
-                      </>
-                    ) : (
-                      <Link to={items[0].content_value} className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
-                        {(items[0].menu_label || group).toUpperCase()}
-                      </Link>
-                    )}
-                  </NavigationMenuItem>
-                ))}
+                {/* Custom menu items with dropdown support */}
+                {(() => {
+                  // Build hierarchy
+                  const rootItems = headerMenuItems.filter((item: any) => !item.parent_id);
+                  const childrenMap = new Map<string, any[]>();
+                  
+                  headerMenuItems.forEach((item: any) => {
+                    if (item.parent_id) {
+                      if (!childrenMap.has(item.parent_id)) {
+                        childrenMap.set(item.parent_id, []);
+                      }
+                      childrenMap.get(item.parent_id)!.push(item);
+                    }
+                  });
+                  
+                  return rootItems.map((item: any) => {
+                    const children = childrenMap.get(item.id) || [];
+                    
+                    return (
+                      <NavigationMenuItem key={item.id}>
+                        {children.length > 0 ? (
+                          <>
+                            <NavigationMenuTrigger className="text-sm font-light tracking-wide">
+                              {(item.menu_label || item.section_name).toUpperCase()}
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent>
+                              <div className="grid w-[400px] gap-3 p-4">
+                                {children.map((child: any) => (
+                                  <NavigationMenuLink asChild key={child.id}>
+                                    <Link 
+                                      to={child.content_value} 
+                                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                    >
+                                      <div className="text-sm font-medium leading-none">
+                                        {child.menu_label || child.section_name}
+                                      </div>
+                                    </Link>
+                                  </NavigationMenuLink>
+                                ))}
+                              </div>
+                            </NavigationMenuContent>
+                          </>
+                        ) : (
+                          <Link 
+                            to={item.content_value} 
+                            className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}
+                          >
+                            {(item.menu_label || item.section_name).toUpperCase()}
+                          </Link>
+                        )}
+                      </NavigationMenuItem>
+                    );
+                  });
+                })()}
               </NavigationMenuList>
             </NavigationMenu>
 

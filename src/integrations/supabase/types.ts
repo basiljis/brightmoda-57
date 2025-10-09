@@ -520,6 +520,7 @@ export type Database = {
           menu_label: string | null
           menu_location: string | null
           page_name: string
+          parent_id: string | null
           section_name: string
           updated_at: string
         }
@@ -533,6 +534,7 @@ export type Database = {
           menu_label?: string | null
           menu_location?: string | null
           page_name: string
+          parent_id?: string | null
           section_name: string
           updated_at?: string
         }
@@ -546,10 +548,19 @@ export type Database = {
           menu_label?: string | null
           menu_location?: string | null
           page_name?: string
+          parent_id?: string | null
           section_name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "page_content_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "page_content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       page_views: {
         Row: {
