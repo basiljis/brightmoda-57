@@ -58,6 +58,7 @@ const HomePage = () => {
   const [categories, setCategories] = useState([]);
   const featuredProducts = products.slice(0, 4);
   const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
+  const [showMerinoSection, setShowMerinoSection] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -66,6 +67,7 @@ const HomePage = () => {
     loadHeaderCollections();
     loadCategories();
     loadMerinoBlocks();
+    loadMerinoSectionVisibility();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -128,6 +130,25 @@ const HomePage = () => {
       setMerinoBlocks(data || []);
     } catch (e) {
       console.error('Error loading merino blocks:', e);
+    }
+  };
+
+  const loadMerinoSectionVisibility = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('content_value')
+        .eq('page_name', 'home')
+        .eq('section_name', 'show_merino_section')
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (data) {
+        setShowMerinoSection(data.content_value === 'true');
+      }
+    } catch (e) {
+      console.error('Error loading merino section visibility:', e);
     }
   };
 
@@ -307,11 +328,13 @@ const HomePage = () => {
       </section>
 
       {/* About Merino Wool - editable via page_content (home) */}
-      <section className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <MerinoSection blocks={merinoBlocks} />
-        </div>
-      </section>
+      {showMerinoSection && (
+        <section className="py-24 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <MerinoSection blocks={merinoBlocks} />
+          </div>
+        </section>
+      )}
 
       {/* Email Subscription Section */}
       <EmailSubscriptionSection />
