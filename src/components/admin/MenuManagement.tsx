@@ -621,23 +621,25 @@ export default function MenuManagement() {
       </Card>
 
       <Dialog open={!!editingContent} onOpenChange={() => setEditingContent(null)}>
-        <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b">
             <DialogTitle>Редактирование контента: {editingContent?.menu_label}</DialogTitle>
             <DialogDescription>
               Настройте содержимое страницы {editingContent?.content_value}
             </DialogDescription>
           </DialogHeader>
-          {editingPageData && (
-            <PageEditor
-              initialPageData={editingPageData}
-              onSave={savePageContent}
-              onClose={() => {
-                setEditingContent(null);
-                setEditingPageData(null);
-              }}
-            />
-          )}
+          <div className="flex-1 overflow-hidden">
+            {editingPageData && (
+              <PageEditor
+                initialPageData={editingPageData}
+                onSave={savePageContent}
+                onClose={() => {
+                  setEditingContent(null);
+                  setEditingPageData(null);
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
