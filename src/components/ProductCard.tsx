@@ -189,6 +189,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </div>
               </div>
             )}
+            
+            {/* Add to Cart Button on card - full width at bottom */}
+            {settings.cart_position === 'on_card' && (
+              <div className={`absolute bottom-0 left-0 right-0 z-10 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2') : 'opacity-100 translate-y-0'} transition-all duration-300`}>
+                <Button
+                  onClick={handleAddToCart}
+                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-none font-light tracking-wider uppercase text-sm"
+                  size="lg"
+                >
+                  {settings.cart_button_type === 'text' ? 'Добавить в корзину' : <ShoppingCart className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </div>
           
           <div className={`p-6 space-y-3 ${getTextAlignmentClass()}`}>
@@ -225,7 +238,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               )}
             </div>
             
-            <div className={`flex items-center pt-2 ${settings.card_text_alignment === 'center' ? 'justify-center' : settings.card_text_alignment === 'right' ? 'justify-end' : 'justify-between'}`}>
+            <div className={`flex items-center pt-2 ${settings.card_text_alignment === 'center' ? 'justify-center' : settings.card_text_alignment === 'right' ? 'justify-end' : ''}`}>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-light text-foreground tracking-wide">
                   {product.price.toLocaleString()} ₽
@@ -236,19 +249,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   </span>
                 )}
               </div>
-              {settings.cart_position === 'on_card' && settings.card_text_alignment === 'left' && (
-                <Button
-                  size={getButtonSize()}
-                  variant="ghost"
-                  onClick={handleAddToCart}
-                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity`}
-                >
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                  {settings.cart_button_type === 'text' && (
-                    <span className="ml-2 text-xs">В корзину</span>
-                  )}
-                </Button>
-              )}
             </div>
             
             {/* Button below price inside card */}
