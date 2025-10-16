@@ -248,6 +248,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </Button>
               )}
             </div>
+            
+            {/* Button below price inside card */}
+            {settings.cart_position === 'below_price' && (
+              <div className={`pt-2 ${settings.card_text_alignment === 'center' ? 'flex justify-center' : settings.card_text_alignment === 'right' ? 'flex justify-end' : ''}`}>
+                <Button
+                  onClick={handleAddToCart}
+                  className={`${settings.cart_button_type === 'icon' ? 'w-auto px-4' : 'w-[calc(100%-1rem)]'} bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()} ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2') : 'opacity-100 translate-y-0'}`}
+                  variant="outline"
+                  size={getButtonSize()}
+                >
+                  <ShoppingCart className={`h-4 w-4 ${settings.cart_button_type === 'text' ? 'mr-2' : ''}`} />
+                  {settings.cart_button_type === 'text' && 'Добавить в корзину'}
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Favorite Button - positioned by settings */}

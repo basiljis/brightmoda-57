@@ -104,8 +104,9 @@ const CatalogSettings = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="on_card">На карточке</SelectItem>
+                  <SelectItem value="on_card">На карточке (справа сверху)</SelectItem>
                   <SelectItem value="below_card">Под карточкой</SelectItem>
+                  <SelectItem value="below_price">Под ценой (внутри карточки)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

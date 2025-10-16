@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CatalogSettings {
-  cart_position: 'on_card' | 'below_card';
+  cart_position: 'on_card' | 'below_card' | 'below_price';
   cart_button_type: 'icon' | 'text';
   cart_button_size: 'small' | 'medium' | 'large';
   favorite_icon_style: 'outline' | 'filled';
