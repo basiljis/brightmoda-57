@@ -199,7 +199,10 @@ export default function HeaderMenuSettings() {
         </div>
 
         <div className="space-y-4 border-t pt-4">
-          <h3 className="font-medium">Отображаемые элементы в меню</h3>
+          <h3 className="font-medium">Левая часть меню (списки)</h3>
+          <p className="text-sm text-muted-foreground">
+            Настройка отображения текстовых списков слева
+          </p>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -232,12 +235,19 @@ export default function HeaderMenuSettings() {
               }
             />
           </div>
+        </div>
+
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="font-medium">Правая часть меню (картинки)</h3>
+          <p className="text-sm text-muted-foreground">
+            Настройка отображения элементов с изображениями справа
+          </p>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="show-products">Показывать товары</Label>
               <p className="text-sm text-muted-foreground">
-                Отображать избранные товары с картинками в меню
+                Отображать избранные товары с картинками
               </p>
             </div>
             <Switch
@@ -252,10 +262,10 @@ export default function HeaderMenuSettings() {
 
         {settings.menu_style === 'fullwidth' && (
           <div className="space-y-4 border-t pt-4">
-            <h3 className="font-medium">Выбор отображаемых элементов</h3>
+            <h3 className="font-medium">Настройка правой части с картинками</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="right-side-content">Что показывать справа (где картинки)</Label>
+              <Label htmlFor="right-side-content">Тип контента справа</Label>
               <Select
                 value={settings.right_side_content}
                 onValueChange={(value) =>
@@ -272,7 +282,7 @@ export default function HeaderMenuSettings() {
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Выберите, какой контент отображать в правой части меню с изображениями
+                Выберите, какой контент отображать в правой части меню
               </p>
             </div>
 
