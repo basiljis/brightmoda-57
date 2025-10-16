@@ -264,12 +264,32 @@ const PageContentManagement = () => {
       </Card>
 
       {isPageEditorOpen && currentPageData && (
-        <div className="fixed inset-0 z-50 bg-background">
-          <PageEditor
-            initialPageData={currentPageData}
-            onSave={handlePageEditorSave}
-            onClose={() => setIsPageEditorOpen(false)}
-          />
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-background border rounded-lg shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h2 className="text-2xl font-bold">Редактирование контента</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Страница: {PAGE_OPTIONS.find(p => p.value === currentPageData.id)?.label || currentPageData.title}
+                </p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setIsPageEditorOpen(false)}
+                className="h-10 w-10"
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <PageEditor
+                initialPageData={currentPageData}
+                onSave={handlePageEditorSave}
+                onClose={() => setIsPageEditorOpen(false)}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
