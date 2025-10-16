@@ -519,6 +519,7 @@ export type Database = {
           selected_collection_ids: string[] | null
           selected_product_ids: string[] | null
           show_categories: boolean
+          show_categories_right: boolean
           show_collections: boolean
           show_collections_right: boolean
           show_featured_products: boolean
@@ -537,6 +538,7 @@ export type Database = {
           selected_collection_ids?: string[] | null
           selected_product_ids?: string[] | null
           show_categories?: boolean
+          show_categories_right?: boolean
           show_collections?: boolean
           show_collections_right?: boolean
           show_featured_products?: boolean
@@ -555,6 +557,7 @@ export type Database = {
           selected_collection_ids?: string[] | null
           selected_product_ids?: string[] | null
           show_categories?: boolean
+          show_categories_right?: boolean
           show_collections?: boolean
           show_collections_right?: boolean
           show_featured_products?: boolean

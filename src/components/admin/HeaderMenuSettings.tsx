@@ -18,13 +18,13 @@ interface HeaderMenuSettings {
   show_categories: boolean;
   show_collections_right: boolean;
   show_products_right: boolean;
+  show_categories_right: boolean;
   featured_products_count: number;
   featured_collections_count: number;
   selected_collection_ids?: string[];
   selected_product_ids?: string[];
   selected_category_ids?: string[];
   selected_category_ids_right?: string[];
-  right_side_content: 'products' | 'collections' | 'both';
 }
 
 interface Collection {
@@ -57,13 +57,13 @@ export default function HeaderMenuSettings() {
     show_categories: true,
     show_collections_right: true,
     show_products_right: true,
+    show_categories_right: false,
     featured_products_count: 3,
     featured_collections_count: 4,
     selected_collection_ids: [],
     selected_product_ids: [],
     selected_category_ids: [],
     selected_category_ids_right: [],
-    right_side_content: 'both',
   });
 
   const [availableCollections, setAvailableCollections] = useState<Collection[]>([]);
@@ -132,13 +132,13 @@ export default function HeaderMenuSettings() {
           show_categories: settings.show_categories,
           show_collections_right: settings.show_collections_right,
           show_products_right: settings.show_products_right,
+          show_categories_right: settings.show_categories_right,
           featured_products_count: settings.featured_products_count,
           featured_collections_count: settings.featured_collections_count,
           selected_collection_ids: settings.selected_collection_ids || [],
           selected_product_ids: settings.selected_product_ids || [],
           selected_category_ids: settings.selected_category_ids || [],
           selected_category_ids_right: settings.selected_category_ids_right || [],
-          right_side_content: settings.right_side_content,
         });
 
       if (error) throw error;
@@ -395,33 +395,27 @@ export default function HeaderMenuSettings() {
               }
             />
           </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="show-categories-right">Показывать категории</Label>
+              <p className="text-sm text-muted-foreground">
+                Отображать категории с картинками в правой части
+              </p>
+            </div>
+            <Switch
+              id="show-categories-right"
+              checked={settings.show_categories_right}
+              onCheckedChange={(checked) =>
+                setSettings({ ...settings, show_categories_right: checked })
+              }
+            />
+          </div>
         </div>
 
         {settings.menu_style === 'fullwidth' && (
           <div className="space-y-4 border-t pt-4">
             <h3 className="font-medium">Настройка правой части с картинками</h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="right-side-content">Тип контента справа</Label>
-              <Select
-                value={settings.right_side_content}
-                onValueChange={(value) =>
-                  setSettings({ ...settings, right_side_content: value as 'products' | 'collections' | 'both' })
-                }
-              >
-                <SelectTrigger id="right-side-content">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="products">Только товары</SelectItem>
-                  <SelectItem value="collections">Только коллекции</SelectItem>
-                  <SelectItem value="both">Товары и коллекции</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-muted-foreground">
-                Выберите, какой контент отображать в правой части меню
-              </p>
-            </div>
 
           {settings.show_collections_right && (
             <div className="space-y-3">
