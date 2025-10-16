@@ -66,13 +66,13 @@ export const useCatalogSettings = () => {
 
   const getGridClasses = () => {
     const horizontalSpacing = {
-      tight: 'gap-x-0',
+      tight: 'gap-x-px',
       normal: 'gap-x-6',
       loose: 'gap-x-8',
     };
 
     const verticalSpacing = {
-      tight: 'gap-y-0',
+      tight: 'gap-y-px',
       normal: 'gap-y-6',
       loose: 'gap-y-8',
     };
@@ -91,7 +91,7 @@ export const useCatalogSettings = () => {
       },
     };
 
-    return `grid grid-cols-1 ${cols.tablet[settings.cards_per_row_tablet as keyof typeof cols.tablet]} ${cols.desktop[settings.cards_per_row_desktop as keyof typeof cols.desktop]} ${horizontalSpacing[settings.card_spacing]} ${verticalSpacing[settings.card_vertical_spacing]}`;
+    return `grid grid-cols-1 ${cols.tablet[settings.cards_per_row_tablet as keyof typeof cols.tablet]} ${cols.desktop[settings.cards_per_row_desktop as keyof typeof cols.desktop]} ${horizontalSpacing[settings.card_spacing]} ${verticalSpacing[settings.card_vertical_spacing]} bg-background`;
   };
 
   const getRoundingClass = () => {
