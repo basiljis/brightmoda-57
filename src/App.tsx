@@ -28,6 +28,7 @@ import CategoryPage from "./components/CategoryPage";
 import CollectionPage from "./pages/CollectionPage";
 import CartPage from "./pages/CartPage";
 import NotFound from "./pages/NotFound";
+import DynamicPage from "./pages/DynamicPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -237,7 +238,8 @@ const App = () => {
                 <Route path="/returns-exchange" element={<CategoryPage title="Возврат и обмен" />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                {/* Dynamic pages from menu */}
+                <Route path="*" element={<DynamicPage />} />
               </Routes>
             </main>
             <Footer />

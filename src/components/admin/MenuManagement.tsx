@@ -168,6 +168,7 @@ export default function MenuManagement() {
   const checkPredefinedPages = async () => {
     try {
       for (const page of PREDEFINED_PAGES) {
+        // Check if menu item exists
         const { data: existing } = await supabase
           .from('page_content')
           .select('id')
@@ -195,6 +196,26 @@ export default function MenuManagement() {
             display_order: maxOrder + 1,
             is_active: true,
             content_type: 'page'
+          });
+        }
+
+        // Check if page content exists
+        const { data: contentExists } = await supabase
+          .from('page_content')
+          .select('id')
+          .eq('page_name', page.page_name)
+          .eq('section_name', 'content')
+          .maybeSingle();
+
+        if (!contentExists) {
+          await supabase.from('page_content').insert({
+            page_name: page.page_name,
+            section_name: 'content',
+            content_type: 'html',
+            content_value: `<h1>${page.label}</h1><p>Содержимое страницы...</p>`,
+            display_order: 1,
+            is_active: true,
+            menu_location: 'none'
           });
         }
       }
@@ -230,9 +251,10 @@ export default function MenuManagement() {
       setLoading(true);
       const maxOrder = items.reduce((max, item) => Math.max(max, item.display_order), 0);
       
-      const pageName = newItemName.toLowerCase().replace(/\s+/g, '_');
-      const url = `/${newItemName.toLowerCase().replace(/\s+/g, '-')}`;
+      const pageName = newItemName.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
+      const url = `/${newItemName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`;
 
+      // Create menu item
       const { data, error } = await supabase
         .from('page_content')
         .insert({
@@ -249,8 +271,26 @@ export default function MenuManagement() {
         .single();
       
       if (error) throw error;
+
+      // Create default page content
+      const { error: contentError } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: pageName,
+          section_name: 'content',
+          content_type: 'html',
+          content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
+          display_order: 1,
+          is_active: true,
+          menu_location: 'none'
+        });
+
+      if (contentError) throw contentError;
       
-      toast({ title: 'Создано', description: 'Новый пункт меню создан' });
+      toast({ 
+        title: 'Создано', 
+        description: `Пункт меню и страница созданы. Доступна по адресу: ${url}` 
+      });
       setNewItemName('');
       load();
     } catch (e) {
