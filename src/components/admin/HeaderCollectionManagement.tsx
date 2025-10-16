@@ -32,6 +32,8 @@ interface HeaderCollection {
   desktop_display_mode?: string;
   autoplay_enabled?: boolean;
   autoplay_speed?: string;
+  title_position?: string;
+  title_size?: string;
 }
 
 interface Collection {
@@ -493,6 +495,46 @@ const HeaderCollectionManagement = () => {
                       showRecommendations={true}
                       recommendationsFor="banner"
                     />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Позиция заголовка на изображении</Label>
+                    <Select
+                      value={headerCollection.title_position || 'center'}
+                      onValueChange={(value) => 
+                        handleInputChange(headerCollection.id, 'title_position', value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top">Вверху</SelectItem>
+                        <SelectItem value="center">По центру</SelectItem>
+                        <SelectItem value="bottom">Внизу</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Размер заголовка</Label>
+                    <Select
+                      value={headerCollection.title_size || 'large'}
+                      onValueChange={(value) => 
+                        handleInputChange(headerCollection.id, 'title_size', value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Маленький</SelectItem>
+                        <SelectItem value="medium">Средний</SelectItem>
+                        <SelectItem value="large">Большой</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
