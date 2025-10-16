@@ -43,13 +43,26 @@ const Header = () => {
   const [contactUrl, setContactUrl] = useState<string | null>(null);
   const [contactIconMode, setContactIconMode] = useState<string>('auto');
   const [contactCustomIcon, setContactCustomIcon] = useState<string | null>(null);
-  const [menuSettings, setMenuSettings] = useState({
+  const [menuSettings, setMenuSettings] = useState<{
+    menu_style: string;
+    show_featured_products: boolean;
+    show_collections: boolean;
+    show_categories: boolean;
+    featured_products_count: number;
+    featured_collections_count: number;
+    selected_collection_ids?: string[];
+    selected_product_ids?: string[];
+    selected_category_ids?: string[];
+  }>({
     menu_style: 'simple',
     show_featured_products: true,
     show_collections: true,
     show_categories: true,
     featured_products_count: 3,
     featured_collections_count: 4,
+    selected_collection_ids: [],
+    selected_product_ids: [],
+    selected_category_ids: [],
   });
   const [featuredProductsData, setFeaturedProductsData] = useState([]);
   const isMobile = useIsMobile();
@@ -334,48 +347,62 @@ const Header = () => {
                       <div className="grid w-[800px] gap-6 p-6">
                         <div className="grid grid-cols-3 gap-6">
                           {/* Dynamic Categories */}
-                          {menuSettings.show_categories && categories.map((category) => (
-                            <div key={category.id} className="space-y-3">
-                              <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
-                                {category.name}
-                              </h4>
-                              <div className="grid gap-2">
-                                {category.subcategories?.map((subcategory) => (
-                                  <NavigationMenuLink asChild key={subcategory.id}>
-                                    <Link 
-                                      to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
-                                      className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                      {subcategory.name}
-                                    </Link>
-                                  </NavigationMenuLink>
-                                ))}
+                          {menuSettings.show_categories && (() => {
+                            const displayedCategories = menuSettings.selected_category_ids && menuSettings.selected_category_ids.length > 0
+                              ? categories.filter((cat: any) => menuSettings.selected_category_ids?.includes(cat.id))
+                              : categories;
+                            return displayedCategories.map((category: any) => (
+                              <div key={category.id} className="space-y-3">
+                                <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
+                                  {category.name}
+                                </h4>
+                                <div className="grid gap-2">
+                                  {category.subcategories?.map((subcategory: any) => (
+                                    <NavigationMenuLink asChild key={subcategory.id}>
+                                      <Link 
+                                        to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
+                                        className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                      >
+                                        {subcategory.name}
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                           
                           {/* Collections Section */}
-                          {menuSettings.show_collections && collections.length > 0 && (
-                            <div className="space-y-3">
-                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
-                              <div className="grid gap-2">
-                                {collections.slice(0, menuSettings.featured_collections_count).map((collection) => (
-                                  <NavigationMenuLink asChild key={collection.id}>
-                                    <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                      {collection.name}
-                                    </Link>
-                                  </NavigationMenuLink>
-                                ))}
+                          {menuSettings.show_collections && (() => {
+                            const displayedCollections = menuSettings.selected_collection_ids && menuSettings.selected_collection_ids.length > 0
+                              ? collections.filter((col: any) => menuSettings.selected_collection_ids?.includes(col.id))
+                              : collections;
+                            return displayedCollections.length > 0 && (
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
+                                <div className="grid gap-2">
+                                  {displayedCollections.slice(0, menuSettings.featured_collections_count).map((collection: any) => (
+                                    <NavigationMenuLink asChild key={collection.id}>
+                                      <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                        {collection.name}
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                           
                           {/* Featured Products */}
-                          {menuSettings.show_featured_products && featuredProductsData.length > 0 && (
-                            <div className="space-y-3">
-                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
-                              <div className="space-y-4">
-                                {featuredProductsData.slice(0, 3).map((product: any) => {
+                          {menuSettings.show_featured_products && (() => {
+                            const displayedProducts = menuSettings.selected_product_ids && menuSettings.selected_product_ids.length > 0
+                              ? featuredProductsData.filter((prod: any) => menuSettings.selected_product_ids?.includes(prod.id))
+                              : featuredProductsData;
+                            return displayedProducts.length > 0 && (
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
+                                <div className="space-y-4">
+                                  {displayedProducts.slice(0, 3).map((product: any) => {
                                   const imageUrl = product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg';
                                   
                                   return (
@@ -409,10 +436,11 @@ const Header = () => {
                                       </Link>
                                     </NavigationMenuLink>
                                   );
-                                })}
+                                  })}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
                       </div>
                     </NavigationMenuContent>
@@ -588,9 +616,21 @@ const Header = () => {
             onMouseLeave={() => setIsCatalogMenuOpen(false)}
           >
             <FullWidthMegaMenu
-              categories={categories as any}
-              collections={collections as any}
-              products={featuredProductsData as any}
+              categories={
+                menuSettings.selected_category_ids && menuSettings.selected_category_ids.length > 0
+                  ? (categories as any[]).filter((cat: any) => menuSettings.selected_category_ids?.includes(cat.id))
+                  : categories as any
+              }
+              collections={
+                menuSettings.selected_collection_ids && menuSettings.selected_collection_ids.length > 0
+                  ? (collections as any[]).filter((col: any) => menuSettings.selected_collection_ids?.includes(col.id))
+                  : collections as any
+              }
+              products={
+                menuSettings.selected_product_ids && menuSettings.selected_product_ids.length > 0
+                  ? (featuredProductsData as any[]).filter((prod: any) => menuSettings.selected_product_ids?.includes(prod.id))
+                  : featuredProductsData as any
+              }
               showCategories={menuSettings.show_categories}
               showCollections={menuSettings.show_collections}
               showProducts={menuSettings.show_featured_products}

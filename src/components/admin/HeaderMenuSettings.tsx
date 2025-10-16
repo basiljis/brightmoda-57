@@ -247,8 +247,9 @@ export default function HeaderMenuSettings() {
           </div>
         </div>
 
-        <div className="space-y-4 border-t pt-4">
-          <h3 className="font-medium">Выбор отображаемых элементов</h3>
+        {settings.menu_style === 'fullwidth' && (
+          <div className="space-y-4 border-t pt-4">
+            <h3 className="font-medium">Выбор отображаемых элементов</h3>
 
           {settings.show_collections && (
             <div className="space-y-3">
@@ -409,10 +410,11 @@ export default function HeaderMenuSettings() {
             </div>
           )}
 
-          <p className="text-sm text-muted-foreground">
-            Если элементы не выбраны, будут отображаться автоматически выбранные товары/коллекции/категории
-          </p>
-        </div>
+            <p className="text-sm text-muted-foreground">
+              Если элементы не выбраны, будут отображаться автоматически выбранные товары/коллекции/категории
+            </p>
+          </div>
+        )}
 
         <div className="flex justify-end pt-4 border-t">
           <Button onClick={saveSettings} disabled={saving}>
