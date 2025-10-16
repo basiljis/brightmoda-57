@@ -13,7 +13,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import RichTextEditor from './RichTextEditor';
+import PageEditor from './PageEditor';
+import { PageData } from '@/types/page-editor';
 
 interface MenuItem {
   id: string;
@@ -41,7 +42,6 @@ interface SortableItemProps {
 
 function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSubmenu, level }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
-  const [isEditing, setIsEditing] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -122,8 +122,8 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSu
                 variant="outline" 
                 size="icon"
                 className="h-9 w-9"
-                onClick={() => setIsEditing(!isEditing)}
-                title="Редактировать контент страницы"
+                onClick={() => onEditContent(item)}
+                title="Редактировать страницу"
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
@@ -147,37 +147,6 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSu
               </Button>
             </div>
           </div>
-
-          {isEditing && (
-            <div className="border-t pt-3 mt-3">
-              <Label className="text-xs mb-2 block">Контент страницы</Label>
-              <Textarea
-                value={item.text_content || ''}
-                onChange={e => onUpdate(item.id, { text_content: e.target.value })}
-                placeholder="Введите содержимое страницы..."
-                className="min-h-[200px] font-mono text-sm"
-              />
-              <div className="flex gap-2 mt-2">
-                <Button 
-                  size="sm"
-                  onClick={() => {
-                    onSave(item);
-                    setIsEditing(false);
-                  }}
-                >
-                  <Save className="h-3 w-3 mr-1" />
-                  Сохранить контент
-                </Button>
-                <Button 
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Отмена
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -196,7 +165,7 @@ export default function MenuManagement() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemLocation, setNewItemLocation] = useState<'header' | 'footer' | 'both'>('header');
   const [editingContent, setEditingContent] = useState<MenuItem | null>(null);
-  const [contentText, setContentText] = useState('');
+  const [editingPageData, setEditingPageData] = useState<PageData | null>(null);
   const [parentItemForSubmenu, setParentItemForSubmenu] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -319,24 +288,28 @@ export default function MenuManagement() {
       
       if (error) throw error;
 
-      // Create default page content for all menu items (including submenus)
-      const { error: contentError } = await supabase
+      // Automatically create page with block-based structure
+      const { error: pageError } = await supabase
         .from('page_content')
         .insert({
           page_name: pageName,
-          section_name: 'content',
-          content_type: 'html',
-          content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
+          section_name: 'page_blocks',
+          content_type: 'json',
+          content_value: JSON.stringify({
+            id: data.id,
+            title: newItemName,
+            blocks: []
+          }),
           display_order: 1,
           is_active: true,
           menu_location: 'none'
         });
 
-      if (contentError) throw contentError;
+      if (pageError) throw pageError;
       
       toast({ 
         title: 'Создано', 
-        description: parentId ? 'Подменю создано' : `Пункт меню и страница созданы. Доступна по адресу: ${url}` 
+        description: parentId ? 'Подменю и страница созданы' : `Пункт меню и страница созданы. Доступна по адресу: ${url}` 
       });
       setNewItemName('');
       setParentItemForSubmenu(null);
@@ -459,65 +432,67 @@ export default function MenuManagement() {
   const openContentEditor = async (item: MenuItem) => {
     setEditingContent(item);
     
-    // Load existing content for this page
+    // Load page blocks data
     try {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
         .eq('page_name', item.page_name)
-        .neq('section_name', 'menu_item')
-        .order('display_order', { ascending: true });
+        .eq('section_name', 'page_blocks')
+        .maybeSingle();
       
       if (error) throw error;
       
-      // Combine all content blocks into one text
-      const combined = (data || [])
-        .map(block => block.content_value)
-        .join('\n\n');
-      
-      setContentText(combined || '');
+      if (data && data.content_value) {
+        const pageData = JSON.parse(data.content_value);
+        setEditingPageData(pageData);
+      } else {
+        // Create new empty page data
+        setEditingPageData({
+          id: item.id,
+          title: item.menu_label || item.page_name,
+          blocks: []
+        });
+      }
     } catch (e) {
       console.error(e);
-      setContentText('');
+      setEditingPageData({
+        id: item.id,
+        title: item.menu_label || item.page_name,
+        blocks: []
+      });
     }
   };
 
-  const saveContent = async () => {
+  const savePageContent = async (pageData: PageData) => {
     if (!editingContent) return;
     
     try {
       setLoading(true);
       
-      // Delete existing content blocks for this page (except menu item)
-      await supabase
+      // Save page blocks data
+      const { error } = await supabase
         .from('page_content')
-        .delete()
-        .eq('page_name', editingContent.page_name)
-        .neq('section_name', 'menu_item');
+        .upsert({
+          page_name: editingContent.page_name,
+          section_name: 'page_blocks',
+          content_type: 'json',
+          content_value: JSON.stringify(pageData),
+          display_order: 1,
+          is_active: true,
+          menu_location: 'none'
+        }, {
+          onConflict: 'page_name,section_name'
+        });
       
-      // Create new content block
-      if (contentText.trim()) {
-        const { error } = await supabase
-          .from('page_content')
-          .insert({
-            page_name: editingContent.page_name,
-            section_name: 'content',
-            content_type: 'html',
-            content_value: contentText,
-            display_order: 1,
-            is_active: true,
-            menu_location: 'none'
-          });
-        
-        if (error) throw error;
-      }
+      if (error) throw error;
       
-      toast({ title: 'Сохранено', description: 'Контент страницы обновлен' });
+      toast({ title: 'Сохранено', description: 'Страница успешно обновлена' });
       setEditingContent(null);
-      setContentText('');
+      setEditingPageData(null);
     } catch (e) {
       console.error(e);
-      toast({ title: 'Ошибка', description: 'Не удалось сохранить контент', variant: 'destructive' });
+      toast({ title: 'Ошибка', description: 'Не удалось сохранить страницу', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -627,25 +602,16 @@ export default function MenuManagement() {
               Настройте содержимое страницы {editingContent?.content_value}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Контент страницы</Label>
-              <RichTextEditor
-                value={contentText}
-                onChange={setContentText}
-                placeholder="Введите содержимое страницы..."
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setEditingContent(null)}>
-                Отмена
-              </Button>
-              <Button onClick={saveContent} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
-                Сохранить контент
-              </Button>
-            </div>
-          </div>
+          {editingPageData && (
+            <PageEditor
+              initialPageData={editingPageData}
+              onSave={savePageContent}
+              onClose={() => {
+                setEditingContent(null);
+                setEditingPageData(null);
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

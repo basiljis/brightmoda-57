@@ -147,6 +147,28 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
         </div>
       );
 
+    case 'yandex_map':
+      return (
+        <div className="w-full">
+          {block.props.embedUrl ? (
+            <iframe
+              src={block.props.embedUrl}
+              width="100%"
+              height={block.props.height}
+              className="border-0 rounded-lg"
+              allowFullScreen
+            />
+          ) : (
+            <div 
+              className="w-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground"
+              style={{ height: `${block.props.height}px` }}
+            >
+              Вставьте ссылку на карту Яндекс
+            </div>
+          )}
+        </div>
+      );
+
     default:
       return (
         <div className="text-muted-foreground">

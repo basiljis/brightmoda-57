@@ -5,7 +5,8 @@ export type BlockType =
   | 'gallery'
   | 'button'
   | 'form'
-  | 'divider';
+  | 'divider'
+  | 'yandex_map';
 
 export interface BaseBlock {
   id: string;
@@ -64,6 +65,14 @@ export interface DividerBlock extends BaseBlock {
   props: Record<string, never>;
 }
 
+export interface YandexMapBlock extends BaseBlock {
+  type: 'yandex_map';
+  props: {
+    embedUrl: string;
+    height: number;
+  };
+}
+
 export type Block =
   | HeadingBlock
   | ParagraphBlock
@@ -71,7 +80,8 @@ export type Block =
   | GalleryBlock
   | ButtonBlock
   | FormBlock
-  | DividerBlock;
+  | DividerBlock
+  | YandexMapBlock;
 
 export interface PageData {
   id: string;

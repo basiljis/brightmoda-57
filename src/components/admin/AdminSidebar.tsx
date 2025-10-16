@@ -60,7 +60,7 @@ const sections: AdminSection[] = [
       { value: "content-lookbook", label: "Lookbook" },
       { value: "content-catalog", label: "Каталог" },
       { value: "content-menus", label: "Меню" },
-      { value: "settings-header-menu", label: "Настройки меню шапки" },
+      { value: "content-menu-settings", label: "Настройки меню шапки" },
     ],
   },
   {

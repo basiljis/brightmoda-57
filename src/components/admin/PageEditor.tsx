@@ -55,6 +55,12 @@ const BLOCK_TEMPLATES: BlockTemplate[] = [
     label: 'Разделитель',
     icon: '➖',
     description: 'Добавить разделитель'
+  },
+  {
+    type: 'yandex_map',
+    label: 'Яндекс Карта',
+    icon: '🗺️',
+    description: 'Добавить карту Яндекс'
   }
 ];
 
@@ -219,6 +225,15 @@ const PageEditor: React.FC<PageEditorProps> = ({
           id,
           type: 'divider',
           props: {}
+        };
+      case 'yandex_map':
+        return {
+          id,
+          type: 'yandex_map',
+          props: {
+            embedUrl: '',
+            height: 400
+          }
         };
       default:
         throw new Error(`Unknown block type: ${type}`);

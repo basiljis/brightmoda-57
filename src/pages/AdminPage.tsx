@@ -691,8 +691,8 @@ const AdminPage = () => {
               </div>
             )}
 
-            {/* Settings - Header Menu */}
-            {activeTab === "settings-header-menu" && (
+            {/* Content - Menu Settings */}
+            {activeTab === "content-menu-settings" && (
               <div className="space-y-6">
                 <HeaderMenuSettings />
               </div>

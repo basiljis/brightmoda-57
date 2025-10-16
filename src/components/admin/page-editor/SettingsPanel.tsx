@@ -277,6 +277,36 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
           </div>
         );
 
+      case 'yandex_map':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="embedUrl">Ссылка для встраивания</Label>
+              <Textarea
+                id="embedUrl"
+                value={selectedBlock.props.embedUrl}
+                onChange={(e) => handlePropChange('embedUrl', e.target.value)}
+                placeholder="https://yandex.ru/map-widget/..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Вставьте ссылку для встраивания из Яндекс.Карт
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="height">Высота (px)</Label>
+              <Input
+                id="height"
+                type="number"
+                min={200}
+                max={800}
+                value={selectedBlock.props.height}
+                onChange={(e) => handlePropChange('height', parseInt(e.target.value))}
+              />
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
