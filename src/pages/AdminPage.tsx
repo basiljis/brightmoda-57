@@ -30,6 +30,7 @@ import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
+import FooterSettings from '@/components/admin/FooterSettings';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -659,6 +660,13 @@ const AdminPage = () => {
                     <HeaderMenuSettings />
                   </TabsContent>
                 </Tabs>
+              </div>
+            )}
+
+            {/* Content - Footer */}
+            {activeTab === "content-footer" && (
+              <div className="space-y-6">
+                <FooterSettings />
               </div>
             )}
 
