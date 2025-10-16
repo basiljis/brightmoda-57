@@ -123,7 +123,7 @@ const AnalyticsDashboard = () => {
       // Get top pages
       const { data: pageViews, error: pageError } = await supabase
         .from('page_views')
-        .select('page_path, city, region, country')
+        .select('page_path')
         .gte('created_at', `${start}T00:00:00`)
         .lte('created_at', `${end}T23:59:59`);
 
