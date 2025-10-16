@@ -515,8 +515,7 @@ export default function MenuManagement() {
       if (error) throw error;
       
       toast({ title: 'Сохранено', description: 'Страница успешно обновлена' });
-      setEditingContent(null);
-      setEditingPageData(null);
+      // Не закрываем модалку, чтобы пользователь мог продолжить редактирование
     } catch (e) {
       console.error(e);
       toast({ title: 'Ошибка', description: 'Не удалось сохранить страницу', variant: 'destructive' });
