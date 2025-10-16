@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
 import { Instagram, Facebook, Send, Youtube, Music } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 interface Category {
   id: string;
@@ -40,6 +41,7 @@ const Footer = () => {
   const [copyrightText, setCopyrightText] = useState('© 2024 BRIGHT. Все права защищены.');
   const [footerDescription, setFooterDescription] = useState('Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
   const [socialLinks, setSocialLinks] = useState<{[key: string]: string}>({});
+  const { getContainerClass } = useCatalogSettings();
 
   const currentFooterLogo = theme === 'dark' && footerLogoDarkUrl ? footerLogoDarkUrl : footerLogoUrl;
   const isFooterLogoReady = Boolean(currentFooterLogo && typeof currentFooterLogo === 'string' && currentFooterLogo.length > 0);
@@ -216,7 +218,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-background border-t border-border">
-      <div className="container mx-auto px-4 py-12">
+      <div className={`${getContainerClass()} py-12`}>
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo and Brand */}
           <div className="space-y-4">

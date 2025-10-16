@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart"; 
 import { useFavorites } from "@/hooks/useFavorites";
 import { supabase } from "@/integrations/supabase/client";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 const Header = () => {
   const location = useLocation();
@@ -42,6 +43,7 @@ const Header = () => {
   const [contactCustomIcon, setContactCustomIcon] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
+  const { getContainerClass } = useCatalogSettings();
 
   const currentLogo = theme === 'dark' && logoDarkUrl ? logoDarkUrl : logoUrl;
   const isLogoReady = Boolean(currentLogo && typeof currentLogo === 'string' && currentLogo.length > 0);
@@ -144,7 +146,7 @@ const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="container mx-auto px-4">
+        <div className={getContainerClass()}>
           <div className="flex items-center justify-between h-16">
             {/* Mobile Menu Button */}
             {isMobile && (
