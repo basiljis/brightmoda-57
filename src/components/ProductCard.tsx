@@ -218,12 +218,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </div>
               {settings.cart_position === 'on_card' && (
                 <Button
-                  size="sm"
+                  size={settings.cart_button_type === 'icon' ? 'sm' : 'sm'}
                   variant="ghost"
                   onClick={handleAddToCart}
-                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity p-2`}
+                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity ${settings.cart_button_type === 'icon' ? 'p-2' : 'px-3 py-2'}`}
                 >
                   <ShoppingCart className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                  {settings.cart_button_type === 'text' && (
+                    <span className="ml-2 text-xs">В корзину</span>
+                  )}
                 </Button>
               )}
             </div>
@@ -254,11 +257,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className={`mt-3 transition-all duration-300 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2') : 'opacity-100 translate-y-0'}`}>
           <Button
             onClick={handleAddToCart}
-            className={`w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()}`}
+            className={`${settings.cart_button_type === 'icon' ? 'w-auto px-4' : 'w-full'} bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()}`}
             variant="outline"
+            size={settings.cart_button_type === 'icon' ? 'icon' : 'default'}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Добавить в корзину
+            <ShoppingCart className={`h-4 w-4 ${settings.cart_button_type === 'text' ? 'mr-2' : ''}`} />
+            {settings.cart_button_type === 'text' && 'Добавить в корзину'}
           </Button>
         </div>
       )}

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface CatalogSettings {
   cart_position: 'on_card' | 'below_card';
+  cart_button_type: 'icon' | 'text';
   favorite_icon_style: 'outline' | 'filled';
   favorite_position: 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left';
   card_spacing: 'tight' | 'normal' | 'loose';
@@ -17,6 +18,7 @@ export interface CatalogSettings {
 
 const defaultSettings: CatalogSettings = {
   cart_position: 'below_card',
+  cart_button_type: 'text',
   favorite_icon_style: 'outline',
   favorite_position: 'top_right',
   card_spacing: 'normal',

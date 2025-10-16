@@ -13,6 +13,7 @@ const CatalogSettings = () => {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     cart_position: 'on_card',
+    cart_button_type: 'text',
     favorite_icon_style: 'outline',
     favorite_position: 'top_right',
     card_spacing: 'normal',
@@ -88,7 +89,7 @@ const CatalogSettings = () => {
         <Card>
           <CardHeader>
             <CardTitle>Кнопка корзины</CardTitle>
-            <CardDescription>Расположение кнопки "Добавить в корзину"</CardDescription>
+            <CardDescription>Расположение и вид кнопки "Добавить в корзину"</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -103,6 +104,21 @@ const CatalogSettings = () => {
                 <SelectContent>
                   <SelectItem value="on_card">На карточке</SelectItem>
                   <SelectItem value="below_card">Под карточкой</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Тип отображения</Label>
+              <Select
+                value={settings.cart_button_type}
+                onValueChange={(value) => setSettings({ ...settings, cart_button_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="icon">Иконка</SelectItem>
+                  <SelectItem value="text">Кнопка с текстом</SelectItem>
                 </SelectContent>
               </Select>
             </div>

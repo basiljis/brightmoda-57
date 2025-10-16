@@ -120,6 +120,7 @@ export type Database = {
           cards_per_row_desktop: number
           cards_per_row_mobile: number
           cards_per_row_tablet: number
+          cart_button_type: string
           cart_position: string
           created_at: string
           favorite_icon_style: string
@@ -136,6 +137,7 @@ export type Database = {
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number
+          cart_button_type?: string
           cart_position?: string
           created_at?: string
           favorite_icon_style?: string
@@ -152,6 +154,7 @@ export type Database = {
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number
+          cart_button_type?: string
           cart_position?: string
           created_at?: string
           favorite_icon_style?: string
