@@ -116,6 +116,7 @@ export type Database = {
         Row: {
           card_rounding: string
           card_spacing: string
+          card_vertical_spacing: string
           cards_per_row_desktop: number
           cards_per_row_mobile: number
           cards_per_row_tablet: number
@@ -131,6 +132,7 @@ export type Database = {
         Insert: {
           card_rounding?: string
           card_spacing?: string
+          card_vertical_spacing?: string
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number
@@ -146,6 +148,7 @@ export type Database = {
         Update: {
           card_rounding?: string
           card_spacing?: string
+          card_vertical_spacing?: string
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number

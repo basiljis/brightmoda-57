@@ -16,6 +16,7 @@ const CatalogSettings = () => {
     favorite_icon_style: 'outline',
     favorite_position: 'top_right',
     card_spacing: 'normal',
+    card_vertical_spacing: 'normal',
     cards_per_row_desktop: 3,
     cards_per_row_tablet: 2,
     cards_per_row_mobile: 1,
@@ -158,10 +159,26 @@ const CatalogSettings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Расстояние между карточками</Label>
+              <Label>Расстояние между карточками (по горизонтали)</Label>
               <Select
                 value={settings.card_spacing}
                 onValueChange={(value) => setSettings({ ...settings, card_spacing: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tight">Вплотную</SelectItem>
+                  <SelectItem value="normal">Нормальное</SelectItem>
+                  <SelectItem value="loose">Широкое</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Расстояние между карточками (по вертикали)</Label>
+              <Select
+                value={settings.card_vertical_spacing}
+                onValueChange={(value) => setSettings({ ...settings, card_vertical_spacing: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
