@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface CatalogSettings {
   cart_position: 'on_card' | 'below_card';
   cart_button_type: 'icon' | 'text';
+  cart_button_size: 'small' | 'medium' | 'large';
   favorite_icon_style: 'outline' | 'filled';
   favorite_position: 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left';
   card_spacing: 'tight' | 'normal' | 'loose';
@@ -12,6 +13,7 @@ export interface CatalogSettings {
   cards_per_row_tablet: number;
   cards_per_row_mobile: number;
   card_rounding: 'none' | 'small' | 'medium' | 'large' | 'full';
+  card_text_alignment: 'left' | 'center' | 'right';
   full_width_layout: boolean;
   show_hover_effects: boolean;
 }
@@ -19,6 +21,7 @@ export interface CatalogSettings {
 const defaultSettings: CatalogSettings = {
   cart_position: 'below_card',
   cart_button_type: 'text',
+  cart_button_size: 'medium',
   favorite_icon_style: 'outline',
   favorite_position: 'top_right',
   card_spacing: 'normal',
@@ -27,6 +30,7 @@ const defaultSettings: CatalogSettings = {
   cards_per_row_tablet: 2,
   cards_per_row_mobile: 1,
   card_rounding: 'medium',
+  card_text_alignment: 'left',
   full_width_layout: false,
   show_hover_effects: true,
 };

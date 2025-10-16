@@ -46,6 +46,24 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { addToCart } = useCart();
   const { settings, getRoundingClass } = useCatalogSettings();
+  
+  const getButtonSize = () => {
+    const sizes = {
+      small: 'sm',
+      medium: 'default',
+      large: 'lg',
+    };
+    return sizes[settings.cart_button_size] as 'sm' | 'default' | 'lg';
+  };
+
+  const getTextAlignmentClass = () => {
+    const alignments = {
+      left: 'text-left',
+      center: 'text-center',
+      right: 'text-right',
+    };
+    return alignments[settings.card_text_alignment];
+  };
 
   // Получаем изображения для выбранного цвета в карточке товара
   const getDisplayImages = () => {
@@ -171,15 +189,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
             )}
           </div>
           
-          <div className="p-6 space-y-3">
+          <div className={`p-6 space-y-3 ${getTextAlignmentClass()}`}>
             <div className="space-y-2">
-              <h3 className="font-light text-lg text-foreground tracking-wide group-hover:text-primary transition-colors">
+              <h3 className={`font-light text-lg text-foreground tracking-wide group-hover:text-primary transition-colors ${getTextAlignmentClass()}`}>
                 {product.name}
               </h3>
               
               {/* Color circles - приоритет данным из Supabase */}
               {((product as any).product_colors && (product as any).product_colors.length > 0) ? (
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${settings.card_text_alignment === 'center' ? 'justify-center' : settings.card_text_alignment === 'right' ? 'justify-end' : ''}`}>
                   {(product as any).product_colors.map((pc: any, index: number) => (
                     <div
                       key={index}
@@ -191,7 +209,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </div>
               ) : (
                 product.colors && product.colors.length > 0 && (
-                  <div className="flex items-center space-x-2">
+                  <div className={`flex items-center space-x-2 ${settings.card_text_alignment === 'center' ? 'justify-center' : settings.card_text_alignment === 'right' ? 'justify-end' : ''}`}>
                     {product.colors.map((color, index) => (
                       <div
                         key={index}
@@ -205,7 +223,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               )}
             </div>
             
-            <div className="flex items-center justify-between pt-2">
+            <div className={`flex items-center pt-2 ${settings.card_text_alignment === 'center' ? 'justify-center' : settings.card_text_alignment === 'right' ? 'justify-end' : 'justify-between'}`}>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-light text-foreground tracking-wide">
                   {product.price.toLocaleString()} ₽
@@ -216,12 +234,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   </span>
                 )}
               </div>
-              {settings.cart_position === 'on_card' && (
+              {settings.cart_position === 'on_card' && settings.card_text_alignment === 'left' && (
                 <Button
-                  size={settings.cart_button_type === 'icon' ? 'sm' : 'sm'}
+                  size={getButtonSize()}
                   variant="ghost"
                   onClick={handleAddToCart}
-                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity ${settings.cart_button_type === 'icon' ? 'p-2' : 'px-3 py-2'}`}
+                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity`}
                 >
                   <ShoppingCart className="h-4 w-4 text-muted-foreground hover:text-primary" />
                   {settings.cart_button_type === 'text' && (
@@ -259,7 +277,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             onClick={handleAddToCart}
             className={`${settings.cart_button_type === 'icon' ? 'w-auto px-4' : 'w-full'} bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()}`}
             variant="outline"
-            size={settings.cart_button_type === 'icon' ? 'icon' : 'default'}
+            size={getButtonSize()}
           >
             <ShoppingCart className={`h-4 w-4 ${settings.cart_button_type === 'text' ? 'mr-2' : ''}`} />
             {settings.cart_button_type === 'text' && 'Добавить в корзину'}

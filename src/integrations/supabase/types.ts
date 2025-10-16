@@ -116,10 +116,12 @@ export type Database = {
         Row: {
           card_rounding: string
           card_spacing: string
+          card_text_alignment: string
           card_vertical_spacing: string
           cards_per_row_desktop: number
           cards_per_row_mobile: number
           cards_per_row_tablet: number
+          cart_button_size: string
           cart_button_type: string
           cart_position: string
           created_at: string
@@ -133,10 +135,12 @@ export type Database = {
         Insert: {
           card_rounding?: string
           card_spacing?: string
+          card_text_alignment?: string
           card_vertical_spacing?: string
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number
+          cart_button_size?: string
           cart_button_type?: string
           cart_position?: string
           created_at?: string
@@ -150,10 +154,12 @@ export type Database = {
         Update: {
           card_rounding?: string
           card_spacing?: string
+          card_text_alignment?: string
           card_vertical_spacing?: string
           cards_per_row_desktop?: number
           cards_per_row_mobile?: number
           cards_per_row_tablet?: number
+          cart_button_size?: string
           cart_button_type?: string
           cart_position?: string
           created_at?: string

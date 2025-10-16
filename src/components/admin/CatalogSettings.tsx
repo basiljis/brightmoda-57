@@ -14,6 +14,7 @@ const CatalogSettings = () => {
   const [settings, setSettings] = useState({
     cart_position: 'on_card',
     cart_button_type: 'text',
+    cart_button_size: 'medium',
     favorite_icon_style: 'outline',
     favorite_position: 'top_right',
     card_spacing: 'normal',
@@ -22,6 +23,7 @@ const CatalogSettings = () => {
     cards_per_row_tablet: 2,
     cards_per_row_mobile: 1,
     card_rounding: 'medium',
+    card_text_alignment: 'left',
     full_width_layout: false,
     show_hover_effects: true,
   });
@@ -119,6 +121,22 @@ const CatalogSettings = () => {
                 <SelectContent>
                   <SelectItem value="icon">Иконка</SelectItem>
                   <SelectItem value="text">Кнопка с текстом</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Размер кнопки</Label>
+              <Select
+                value={settings.cart_button_size}
+                onValueChange={(value) => setSettings({ ...settings, cart_button_size: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="small">Маленький</SelectItem>
+                  <SelectItem value="medium">Средний</SelectItem>
+                  <SelectItem value="large">Большой</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -287,6 +305,32 @@ const CatalogSettings = () => {
                 checked={settings.show_hover_effects}
                 onCheckedChange={(checked) => setSettings({ ...settings, show_hover_effects: checked })}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Выравнивание текста */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Текст на карточках</CardTitle>
+            <CardDescription>Выравнивание названия, цвета и цены</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Выравнивание текста</Label>
+              <Select
+                value={settings.card_text_alignment}
+                onValueChange={(value) => setSettings({ ...settings, card_text_alignment: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">По левому краю</SelectItem>
+                  <SelectItem value="center">По центру</SelectItem>
+                  <SelectItem value="right">По правому краю</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
