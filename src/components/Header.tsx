@@ -53,6 +53,7 @@ const Header = () => {
     selected_collection_ids?: string[];
     selected_product_ids?: string[];
     selected_category_ids?: string[];
+    right_side_content?: 'products' | 'collections' | 'both';
   }>({
     menu_style: 'simple',
     show_featured_products: true,
@@ -63,6 +64,7 @@ const Header = () => {
     selected_collection_ids: [],
     selected_product_ids: [],
     selected_category_ids: [],
+    right_side_content: 'both',
   });
   const [featuredProductsData, setFeaturedProductsData] = useState([]);
   const isMobile = useIsMobile();
@@ -124,7 +126,10 @@ const Header = () => {
         .maybeSingle();
       
       if (!menuSettingsError && menuSettingsData) {
-        setMenuSettings(menuSettingsData);
+        setMenuSettings({
+          ...menuSettingsData,
+          right_side_content: (menuSettingsData.right_side_content || 'both') as 'products' | 'collections' | 'both',
+        });
       }
 
       // Load featured products from database
@@ -646,6 +651,7 @@ const Header = () => {
               showCategories={menuSettings.show_categories}
               showCollections={menuSettings.show_collections}
               showProducts={menuSettings.show_featured_products}
+              rightSideContent={menuSettings.right_side_content}
               onClose={() => setIsCatalogMenuOpen(false)}
             />
           </div>

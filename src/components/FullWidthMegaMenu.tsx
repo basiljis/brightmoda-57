@@ -35,6 +35,7 @@ interface FullWidthMegaMenuProps {
   showCategories: boolean;
   showCollections: boolean;
   showProducts: boolean;
+  rightSideContent?: 'products' | 'collections' | 'both';
   onClose: () => void;
 }
 
@@ -45,6 +46,7 @@ export function FullWidthMegaMenu({
   showCategories,
   showCollections,
   showProducts,
+  rightSideContent = 'both',
   onClose,
 }: FullWidthMegaMenuProps) {
   return (
@@ -130,7 +132,7 @@ export function FullWidthMegaMenu({
 
           {/* Right side with featured products and collections */}
           <div className="col-span-9">
-            {showProducts && products.length > 0 && (
+            {(rightSideContent === 'products' || rightSideContent === 'both') && showProducts && products.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Избранные товары
@@ -180,7 +182,7 @@ export function FullWidthMegaMenu({
               </div>
             )}
 
-            {showCollections && collections.length > 0 && (
+            {(rightSideContent === 'collections' || rightSideContent === 'both') && showCollections && collections.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Коллекции

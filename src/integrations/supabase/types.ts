@@ -513,6 +513,7 @@ export type Database = {
           featured_products_count: number
           id: string
           menu_style: string
+          right_side_content: string
           selected_category_ids: string[] | null
           selected_collection_ids: string[] | null
           selected_product_ids: string[] | null
@@ -527,6 +528,7 @@ export type Database = {
           featured_products_count?: number
           id?: string
           menu_style?: string
+          right_side_content?: string
           selected_category_ids?: string[] | null
           selected_collection_ids?: string[] | null
           selected_product_ids?: string[] | null
@@ -541,6 +543,7 @@ export type Database = {
           featured_products_count?: number
           id?: string
           menu_style?: string
+          right_side_content?: string
           selected_category_ids?: string[] | null
           selected_collection_ids?: string[] | null
           selected_product_ids?: string[] | null

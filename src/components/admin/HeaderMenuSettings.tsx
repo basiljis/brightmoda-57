@@ -21,6 +21,7 @@ interface HeaderMenuSettings {
   selected_collection_ids?: string[];
   selected_product_ids?: string[];
   selected_category_ids?: string[];
+  right_side_content: 'products' | 'collections' | 'both';
 }
 
 interface Collection {
@@ -56,6 +57,7 @@ export default function HeaderMenuSettings() {
     selected_collection_ids: [],
     selected_product_ids: [],
     selected_category_ids: [],
+    right_side_content: 'both',
   });
 
   const [availableCollections, setAvailableCollections] = useState<Collection[]>([]);
@@ -127,6 +129,7 @@ export default function HeaderMenuSettings() {
           selected_collection_ids: settings.selected_collection_ids || [],
           selected_product_ids: settings.selected_product_ids || [],
           selected_category_ids: settings.selected_category_ids || [],
+          right_side_content: settings.right_side_content,
         });
 
       if (error) throw error;
@@ -250,6 +253,28 @@ export default function HeaderMenuSettings() {
         {settings.menu_style === 'fullwidth' && (
           <div className="space-y-4 border-t pt-4">
             <h3 className="font-medium">Выбор отображаемых элементов</h3>
+
+            <div className="space-y-2">
+              <Label htmlFor="right-side-content">Что показывать справа (где картинки)</Label>
+              <Select
+                value={settings.right_side_content}
+                onValueChange={(value) =>
+                  setSettings({ ...settings, right_side_content: value as 'products' | 'collections' | 'both' })
+                }
+              >
+                <SelectTrigger id="right-side-content">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="products">Только товары</SelectItem>
+                  <SelectItem value="collections">Только коллекции</SelectItem>
+                  <SelectItem value="both">Товары и коллекции</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                Выберите, какой контент отображать в правой части меню с изображениями
+              </p>
+            </div>
 
           {settings.show_collections && (
             <div className="space-y-3">
