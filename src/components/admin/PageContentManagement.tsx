@@ -84,47 +84,50 @@ const PageContentManagement = () => {
 
   const openPageEditor = async (pageName: string) => {
     try {
-      const { data: existingContent, error } = await supabase
+      // Пытаемся загрузить page_blocks (JSON формат с блоками)
+      const { data: pageBlocksData, error: blocksError } = await supabase
         .from('page_content')
         .select('*')
         .eq('page_name', pageName)
-        .order('display_order', { ascending: true });
+        .eq('section_name', 'page_blocks')
+        .maybeSingle();
 
-      if (error) throw error;
+      let pageData: PageData;
 
-      const pageData: PageData = {
-        id: pageName,
-        title: pageName.charAt(0).toUpperCase() + pageName.slice(1).replace('_', ' '),
-        blocks: existingContent?.map(item => {
-          // Map old content_type to new block types
-          let blockType: BlockType = 'paragraph';
-          if (item.content_type === 'image') blockType = 'image';
-          if (item.content_type === 'heading') blockType = 'heading';
-          
-          return {
-            id: item.id,
-            type: blockType,
-            props: blockType === 'paragraph' ? {
-              content: item.content_value
-            } : blockType === 'image' ? {
-              url: item.content_value,
-              alt: item.section_name || '',
-              caption: item.menu_label || undefined
-            } : blockType === 'heading' ? {
-              text: item.content_value,
-              level: 2 as const,
-              align: 'left' as const
-            } : {}
-          } as Block;
-        }) || []
-      };
+      if (!blocksError && pageBlocksData && pageBlocksData.content_value) {
+        // Если есть сохраненные блоки, используем их
+        try {
+          const savedData = JSON.parse(pageBlocksData.content_value);
+          pageData = {
+            id: pageName,
+            title: savedData.title || pageName.charAt(0).toUpperCase() + pageName.slice(1).replace('_', ' '),
+            blocks: savedData.blocks || []
+          };
+        } catch (e) {
+          console.error('Error parsing page_blocks:', e);
+          // Если не удалось распарсить, создаем пустую страницу
+          pageData = {
+            id: pageName,
+            title: pageName.charAt(0).toUpperCase() + pageName.slice(1).replace('_', ' '),
+            blocks: []
+          };
+        }
+      } else {
+        // Если нет page_blocks, создаем новую пустую страницу
+        pageData = {
+          id: pageName,
+          title: pageName.charAt(0).toUpperCase() + pageName.slice(1).replace('_', ' '),
+          blocks: []
+        };
+      }
 
       setCurrentPageData(pageData);
       setIsPageEditorOpen(true);
     } catch (error) {
+      console.error('Error opening page editor:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось загрузить данные страницы',
+        description: 'Не удалось открыть редактор страницы',
         variant: 'destructive'
       });
     }
@@ -132,35 +135,70 @@ const PageContentManagement = () => {
 
   const handlePageEditorSave = async (pageData: PageData) => {
     try {
+      // Сначала сохраняем menu_item и page_blocks
+      const { data: menuItems } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', pageData.id)
+        .in('section_name', ['menu_item', 'page_blocks']);
+
+      // Удаляем только контентные блоки, НЕ трогаем menu_item и page_blocks
       await supabase
         .from('page_content')
         .delete()
-        .eq('page_name', pageData.id);
+        .eq('page_name', pageData.id)
+        .not('section_name', 'in', '(menu_item,page_blocks)');
 
-      const blocksToSave = pageData.blocks.map((block, index) => ({
-        page_name: pageData.id,
-        section_name: `${block.type}_${index}`,
-        content_type: block.type,
-        content_value: block.type === 'paragraph' 
-          ? (block as ParagraphBlock).props.content 
-          : block.type === 'image' 
-            ? (block as ImageBlock).props.url 
-            : block.type === 'heading'
-              ? (block as HeadingBlock).props.text
-              : JSON.stringify(block.props),
-        display_order: index + 1,
-        is_active: true,
-        menu_label: null,
-        menu_location: 'none'
-      }));
+      // Создаем один основной контент из всех блоков
+      const htmlContent = pageData.blocks.map(block => {
+        if (block.type === 'paragraph') {
+          return `<p>${(block as ParagraphBlock).props.content}</p>`;
+        } else if (block.type === 'heading') {
+          const level = (block as HeadingBlock).props.level || 'h2';
+          return `<${level}>${(block as HeadingBlock).props.text}</${level}>`;
+        } else if (block.type === 'image') {
+          return `<img src="${(block as ImageBlock).props.url}" alt="${(block as ImageBlock).props.alt || ''}" />`;
+        }
+        return '';
+      }).join('\n');
 
-      if (blocksToSave.length > 0) {
-        const { error } = await supabase
-          .from('page_content')
-          .insert(blocksToSave);
+      // Сохраняем как единый контент
+      const { error: contentError } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: pageData.id,
+          section_name: 'content',
+          content_type: 'html',
+          content_value: htmlContent,
+          display_order: 0,
+          is_active: true,
+          menu_label: null,
+          menu_location: 'none'
+        });
 
-        if (error) throw error;
-      }
+      if (contentError) throw contentError;
+
+      // Также сохраняем page_blocks для редактора
+      const pageBlocksData = {
+        id: pageData.id,
+        title: pageData.title,
+        blocks: pageData.blocks
+      };
+
+      const { error: blocksError } = await supabase
+        .from('page_content')
+        .upsert({
+          page_name: pageData.id,
+          section_name: 'page_blocks',
+          content_type: 'json',
+          content_value: JSON.stringify(pageBlocksData),
+          display_order: -1,
+          is_active: true,
+          menu_label: null,
+          menu_location: 'none'
+        });
+
+      if (blocksError) throw blocksError;
 
       toast({
         title: 'Сохранено',
@@ -170,9 +208,10 @@ const PageContentManagement = () => {
       setIsPageEditorOpen(false);
       loadContent();
     } catch (error) {
+      console.error('Error saving page:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось сохранить страницу',
+        description: `Не удалось сохранить страницу: ${(error as any).message}`,
         variant: 'destructive'
       });
     }
@@ -265,7 +304,7 @@ const PageContentManagement = () => {
 
       {isPageEditorOpen && currentPageData && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-background border rounded-lg shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
+          <div className="bg-background border rounded-lg shadow-2xl w-full max-w-[95vw] h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h2 className="text-2xl font-bold">Редактирование контента</h2>
