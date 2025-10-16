@@ -201,7 +201,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ pageData, className = '' }) =
   };
 
   return (
-    <div className={`min-h-screen bg-white ${className}`}>
+    <div className={`h-full overflow-y-auto bg-white ${className}`}>
       {/* Заголовок страницы */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 py-6 px-8">
         <div className="max-w-4xl mx-auto">
