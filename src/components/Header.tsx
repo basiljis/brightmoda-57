@@ -314,9 +314,7 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
-              <NavigationMenuList 
-                onMouseLeave={() => setIsCatalogMenuOpen(false)}
-              >
+              <NavigationMenuList>
                 {menuSettings.menu_style === 'fullwidth' ? (
                   <NavigationMenuItem>
                     <button
