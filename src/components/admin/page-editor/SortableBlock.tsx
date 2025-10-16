@@ -54,7 +54,7 @@ const SortableBlock: React.FC<SortableBlockProps> = ({
       onClick={onClick}
     >
       {/* Block Content */}
-      <div className="bg-background border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-background border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow max-h-[600px] overflow-y-auto">
         <BlockRenderer block={block} />
       </div>
 
