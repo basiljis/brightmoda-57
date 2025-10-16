@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Block } from '@/types/page-editor';
 import { Settings, Palette } from 'lucide-react';
+import FileUploadField from '@/components/admin/FileUploadField';
 
 interface SettingsPanelProps {
   selectedBlock: Block | null;
@@ -115,15 +116,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
       case 'image':
         return (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="url">URL изображения</Label>
-              <Input
-                id="url"
-                value={selectedBlock.props.url}
-                onChange={(e) => handlePropChange('url', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
+            <FileUploadField
+              field="image-url"
+              label="Изображение"
+              description="Загрузите изображение или вставьте URL"
+              value={selectedBlock.props.url}
+              onChange={(value) => handlePropChange('url', value)}
+              accept="image/*"
+              bucket="product-images"
+              folder="page-images"
+              showRecommendations={true}
+              recommendationsFor="gallery"
+            />
             <div>
               <Label htmlFor="alt">Альтернативный текст</Label>
               <Input
@@ -166,37 +170,50 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
             </div>
             <div>
               <Label>Изображения</Label>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {selectedBlock.props.images.map((image, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
+                  <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Изображение {index + 1}</span>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          const newImages = selectedBlock.props.images.filter((_, i) => i !== index);
+                          handlePropChange('images', newImages);
+                        }}
+                      >
+                        Удалить
+                      </Button>
+                    </div>
+                    <FileUploadField
+                      field={`gallery-image-${index}`}
+                      label="Изображение"
+                      description="Загрузите изображение или вставьте URL"
                       value={image.url}
-                      onChange={(e) => {
+                      onChange={(value) => {
                         const newImages = [...selectedBlock.props.images];
-                        newImages[index] = { ...image, url: e.target.value };
+                        newImages[index] = { ...image, url: value };
                         handlePropChange('images', newImages);
                       }}
-                      placeholder="URL изображения"
+                      accept="image/*"
+                      bucket="product-images"
+                      folder="page-images"
+                      showRecommendations={false}
                     />
-                    <Input
-                      value={image.alt}
-                      onChange={(e) => {
-                        const newImages = [...selectedBlock.props.images];
-                        newImages[index] = { ...image, alt: e.target.value };
-                        handlePropChange('images', newImages);
-                      }}
-                      placeholder="Alt текст"
-                    />
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => {
-                        const newImages = selectedBlock.props.images.filter((_, i) => i !== index);
-                        handlePropChange('images', newImages);
-                      }}
-                    >
-                      ×
-                    </Button>
+                    <div>
+                      <Label htmlFor={`alt-${index}`}>Альтернативный текст</Label>
+                      <Input
+                        id={`alt-${index}`}
+                        value={image.alt}
+                        onChange={(e) => {
+                          const newImages = [...selectedBlock.props.images];
+                          newImages[index] = { ...image, alt: e.target.value };
+                          handlePropChange('images', newImages);
+                        }}
+                        placeholder="Описание изображения"
+                      />
+                    </div>
                   </div>
                 ))}
                 <Button
@@ -206,6 +223,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
                     const newImages = [...selectedBlock.props.images, { url: '', alt: '' }];
                     handlePropChange('images', newImages);
                   }}
+                  className="w-full"
                 >
                   + Добавить изображение
                 </Button>
