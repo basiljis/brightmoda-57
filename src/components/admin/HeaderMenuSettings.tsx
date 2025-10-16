@@ -23,6 +23,7 @@ interface HeaderMenuSettings {
   selected_collection_ids?: string[];
   selected_product_ids?: string[];
   selected_category_ids?: string[];
+  selected_category_ids_right?: string[];
   right_side_content: 'products' | 'collections' | 'both';
 }
 
@@ -61,6 +62,7 @@ export default function HeaderMenuSettings() {
     selected_collection_ids: [],
     selected_product_ids: [],
     selected_category_ids: [],
+    selected_category_ids_right: [],
     right_side_content: 'both',
   });
 
@@ -135,6 +137,7 @@ export default function HeaderMenuSettings() {
           selected_collection_ids: settings.selected_collection_ids || [],
           selected_product_ids: settings.selected_product_ids || [],
           selected_category_ids: settings.selected_category_ids || [],
+          selected_category_ids_right: settings.selected_category_ids_right || [],
           right_side_content: settings.right_side_content,
         });
 
@@ -473,6 +476,60 @@ export default function HeaderMenuSettings() {
             </div>
           )}
 
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="select-categories-right">Выбрать категории для отображения в правой части</Label>
+              <Select
+                onValueChange={(value) => {
+                  if (!settings.selected_category_ids_right?.includes(value)) {
+                    setSettings({
+                      ...settings,
+                      selected_category_ids_right: [...(settings.selected_category_ids_right || []), value]
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger id="select-categories-right">
+                  <SelectValue placeholder="Выберите категорию..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Оставьте пустым для автоматического выбора
+              </p>
+            </div>
+            {settings.selected_category_ids_right && settings.selected_category_ids_right.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Выбранные категории:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {settings.selected_category_ids_right.map((id) => {
+                    const category = availableCategories.find(c => c.id === id);
+                    return category ? (
+                      <Badge key={id} variant="secondary" className="gap-1">
+                        {category.name}
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-destructive"
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              selected_category_ids_right: settings.selected_category_ids_right?.filter(cid => cid !== id)
+                            });
+                          }}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           {settings.show_products_right && (
             <div className="space-y-3">
               <div className="space-y-2">
@@ -529,7 +586,7 @@ export default function HeaderMenuSettings() {
           {settings.show_categories && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="select-categories">Выбрать категории для отображения</Label>
+                <Label htmlFor="select-categories">Выбрать категории для отображения (старая секция - удалить?)</Label>
                 <Select
                   onValueChange={(value) => {
                     if (!settings.selected_category_ids?.includes(value)) {
