@@ -163,11 +163,11 @@ const Header = () => {
       
       setCategories(processedCategories);
 
-      // Load header menu items
+      // Load header menu items (including submenus)
       const { data: headerMenuData, error: headerMenuError } = await supabase
         .from('page_content')
         .select('*')
-        .in('menu_location', ['header', 'both'])
+        .or('menu_location.in.(header,both),and(parent_id.not.is.null,is_active.eq.true)')
         .eq('is_active', true)
         .order('display_order');
       

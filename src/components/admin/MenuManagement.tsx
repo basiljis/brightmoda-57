@@ -41,6 +41,7 @@ interface SortableItemProps {
 
 function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSubmenu, level }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const [isEditing, setIsEditing] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -76,6 +77,7 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSu
               <Select 
                 value={item.menu_location} 
                 onValueChange={v => onUpdate(item.id, { menu_location: v as any })}
+                disabled={level > 0}
               >
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -120,7 +122,7 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSu
                 variant="outline" 
                 size="icon"
                 className="h-9 w-9"
-                onClick={() => onEditContent(item)}
+                onClick={() => setIsEditing(!isEditing)}
                 title="Редактировать контент страницы"
               >
                 <Edit2 className="h-4 w-4" />
@@ -145,6 +147,37 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSu
               </Button>
             </div>
           </div>
+
+          {isEditing && (
+            <div className="border-t pt-3 mt-3">
+              <Label className="text-xs mb-2 block">Контент страницы</Label>
+              <Textarea
+                value={item.text_content || ''}
+                onChange={e => onUpdate(item.id, { text_content: e.target.value })}
+                placeholder="Введите содержимое страницы..."
+                className="min-h-[200px] font-mono text-sm"
+              />
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    onSave(item);
+                    setIsEditing(false);
+                  }}
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  Сохранить контент
+                </Button>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -243,7 +276,7 @@ export default function MenuManagement() {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
-        .in('menu_location', ['header', 'footer', 'both'])
+        .or('menu_location.in.(header,footer,both),parent_id.not.is.null')
         .order('display_order', { ascending: true });
       
       if (error) throw error;
@@ -351,6 +384,33 @@ export default function MenuManagement() {
   const saveItem = async (item: MenuItem) => {
     try {
       setLoading(true);
+      
+      // If text_content is provided, update page content
+      if (item.text_content !== undefined) {
+        // Delete existing content blocks for this page (except menu item)
+        await supabase
+          .from('page_content')
+          .delete()
+          .eq('page_name', item.page_name)
+          .eq('section_name', 'content');
+        
+        // Create new content block
+        if (item.text_content.trim()) {
+          await supabase
+            .from('page_content')
+            .insert({
+              page_name: item.page_name,
+              section_name: 'content',
+              content_type: 'html',
+              content_value: item.text_content,
+              display_order: 1,
+              is_active: true,
+              menu_location: 'none'
+            });
+        }
+      }
+      
+      // Update menu item
       const { error } = await supabase
         .from('page_content')
         .update({
@@ -364,6 +424,9 @@ export default function MenuManagement() {
       
       if (error) throw error;
       toast({ title: 'Сохранено', description: 'Пункт меню обновлён' });
+      
+      // Reload to get fresh data
+      load();
     } catch (e) {
       console.error(e);
       toast({ title: 'Ошибка', description: 'Не удалось сохранить', variant: 'destructive' });
