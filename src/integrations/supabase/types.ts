@@ -571,6 +571,7 @@ export type Database = {
           block_type: string
           collection_card_style: string | null
           collection_id: string | null
+          collection_ids: string[] | null
           created_at: string
           display_order: number
           font_size: string | null
@@ -583,6 +584,7 @@ export type Database = {
           show_more_button_type: string | null
           show_more_link: string | null
           show_more_text: string | null
+          spacer_size: number | null
           text_content: string | null
           title: string | null
           title_alignment: string
@@ -592,6 +594,7 @@ export type Database = {
           block_type: string
           collection_card_style?: string | null
           collection_id?: string | null
+          collection_ids?: string[] | null
           created_at?: string
           display_order?: number
           font_size?: string | null
@@ -604,6 +607,7 @@ export type Database = {
           show_more_button_type?: string | null
           show_more_link?: string | null
           show_more_text?: string | null
+          spacer_size?: number | null
           text_content?: string | null
           title?: string | null
           title_alignment?: string
@@ -613,6 +617,7 @@ export type Database = {
           block_type?: string
           collection_card_style?: string | null
           collection_id?: string | null
+          collection_ids?: string[] | null
           created_at?: string
           display_order?: number
           font_size?: string | null
@@ -625,6 +630,7 @@ export type Database = {
           show_more_button_type?: string | null
           show_more_link?: string | null
           show_more_text?: string | null
+          spacer_size?: number | null
           text_content?: string | null
           title?: string | null
           title_alignment?: string
