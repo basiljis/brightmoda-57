@@ -22,6 +22,7 @@ import EmailSettings from '@/components/admin/EmailSettings';
 import HeaderCollectionManagement from '@/components/admin/HeaderCollectionManagement';
 import MenuManagement from '@/components/admin/MenuManagement';
 import SiteSettings from '@/components/admin/SiteSettings';
+import HeaderMenuSettings from '@/components/admin/HeaderMenuSettings';
 import SEOSettings from '@/components/admin/SEOSettings';
 import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
@@ -687,6 +688,13 @@ const AdminPage = () => {
             {activeTab === "settings-site" && (
               <div className="space-y-6">
                 <SiteSettings />
+              </div>
+            )}
+
+            {/* Settings - Header Menu */}
+            {activeTab === "settings-header-menu" && (
+              <div className="space-y-6">
+                <HeaderMenuSettings />
               </div>
             )}
 

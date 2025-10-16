@@ -16,6 +16,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FullWidthMegaMenu } from "@/components/FullWidthMegaMenu";
 import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,12 +36,22 @@ const Header = () => {
   const [headerMenuItems, setHeaderMenuItems] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCatalogMenuOpen, setIsCatalogMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(logo);
   const [logoDarkUrl, setLogoDarkUrl] = useState(logo);
   const [contactPlatform, setContactPlatform] = useState<string | null>(null);
   const [contactUrl, setContactUrl] = useState<string | null>(null);
   const [contactIconMode, setContactIconMode] = useState<string>('auto');
   const [contactCustomIcon, setContactCustomIcon] = useState<string | null>(null);
+  const [menuSettings, setMenuSettings] = useState({
+    menu_style: 'simple',
+    show_featured_products: true,
+    show_collections: true,
+    show_categories: true,
+    featured_products_count: 3,
+    featured_collections_count: 4,
+  });
+  const [featuredProductsData, setFeaturedProductsData] = useState([]);
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
   const { getContainerClass } = useCatalogSettings();
@@ -89,6 +100,30 @@ const Header = () => {
         setContactUrl(platform ? links[platform] || null : null);
         setContactIconMode(links.contact_us_icon_mode || 'auto');
         setContactCustomIcon(links.contact_us_custom_icon_url || null);
+      }
+
+      // Load header menu settings
+      const { data: menuSettingsData, error: menuSettingsError } = await supabase
+        .from('header_menu_settings')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (!menuSettingsError && menuSettingsData) {
+        setMenuSettings(menuSettingsData);
+      }
+
+      // Load featured products from database
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('id, name, price, images, is_new, is_preorder')
+        .eq('is_active', true)
+        .eq('is_featured', true)
+        .limit(menuSettingsData?.featured_products_count || 3);
+      
+      if (!productsError && productsData) {
+        setFeaturedProductsData(productsData as any);
       }
 
       // Load collections
@@ -280,91 +315,109 @@ const Header = () => {
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-sm font-light tracking-wide">
-                    КАТАЛОГ
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-[800px] gap-6 p-6">
-                      <div className="grid grid-cols-3 gap-6">
-                        {/* Dynamic Categories */}
-                        {categories.map((category) => (
-                          <div key={category.id} className="space-y-3">
-                            <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
-                              {category.name}
-                            </h4>
-                            <div className="grid gap-2">
-                              {category.subcategories?.map((subcategory) => (
-                                <NavigationMenuLink asChild key={subcategory.id}>
-                                  <Link 
-                                    to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
-                                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                                  >
-                                    {subcategory.name}
-                                  </Link>
-                                </NavigationMenuLink>
-                              ))}
+                {menuSettings.menu_style === 'fullwidth' ? (
+                  <NavigationMenuItem>
+                    <button
+                      className="inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-light tracking-wide transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                      onMouseEnter={() => setIsCatalogMenuOpen(true)}
+                      onClick={() => setIsCatalogMenuOpen(!isCatalogMenuOpen)}
+                    >
+                      КАТАЛОГ
+                    </button>
+                  </NavigationMenuItem>
+                ) : (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-light tracking-wide">
+                      КАТАЛОГ
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid w-[800px] gap-6 p-6">
+                        <div className="grid grid-cols-3 gap-6">
+                          {/* Dynamic Categories */}
+                          {menuSettings.show_categories && categories.map((category) => (
+                            <div key={category.id} className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
+                                {category.name}
+                              </h4>
+                              <div className="grid gap-2">
+                                {category.subcategories?.map((subcategory) => (
+                                  <NavigationMenuLink asChild key={subcategory.id}>
+                                    <Link 
+                                      to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
+                                      className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                      {subcategory.name}
+                                    </Link>
+                                  </NavigationMenuLink>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                        
-                        {/* Collections Section */}
-                        {collections.length > 0 && (
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
-                            <div className="grid gap-2">
-                              {collections.map((collection) => (
-                                <NavigationMenuLink asChild key={collection.id}>
-                                  <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                    {collection.name}
-                                  </Link>
-                                </NavigationMenuLink>
-                              ))}
+                          ))}
+                          
+                          {/* Collections Section */}
+                          {menuSettings.show_collections && collections.length > 0 && (
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
+                              <div className="grid gap-2">
+                                {collections.slice(0, menuSettings.featured_collections_count).map((collection) => (
+                                  <NavigationMenuLink asChild key={collection.id}>
+                                    <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                      {collection.name}
+                                    </Link>
+                                  </NavigationMenuLink>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                        
-                        {/* Новинки */}
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
-                          <div className="space-y-4">
-                            {featuredProducts.map((product) => (
-                              <NavigationMenuLink asChild key={product.id}>
-                                <Link to={`/product/${product.id}`} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                  <div className="relative">
-                                    <img 
-                                      src={product.image} 
-                                      alt={product.name}
-                                      className="w-12 h-12 object-cover rounded"
-                                    />
-                                    {product.isNew && (
-                                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs px-1 rounded">
-                                        NEW
-                                      </span>
-                                    )}
-                                    {product.isPreorder && (
-                                      <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
-                                        PRE
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-foreground truncate">
-                                      {product.name}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {product.price.toLocaleString()} ₽
-                                    </p>
-                                  </div>
-                                </Link>
-                              </NavigationMenuLink>
-                            ))}
-                          </div>
+                          )}
+                          
+                          {/* Featured Products */}
+                          {menuSettings.show_featured_products && featuredProductsData.length > 0 && (
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
+                              <div className="space-y-4">
+                                {featuredProductsData.slice(0, 3).map((product: any) => {
+                                  const imageUrl = product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg';
+                                  
+                                  return (
+                                    <NavigationMenuLink asChild key={product.id}>
+                                      <Link to={`/product/${product.id}`} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                        <div className="relative">
+                                          <img 
+                                            src={imageUrl} 
+                                            alt={product.name}
+                                            className="w-12 h-12 object-cover rounded"
+                                          />
+                                          {product.is_new && (
+                                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs px-1 rounded">
+                                              NEW
+                                            </span>
+                                          )}
+                                          {product.is_preorder && (
+                                            <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs px-1 rounded">
+                                              PRE
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-medium text-foreground truncate">
+                                            {product.name}
+                                          </p>
+                                          <p className="text-sm text-muted-foreground">
+                                            {product.price.toLocaleString()} ₽
+                                          </p>
+                                        </div>
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
                 
                 {/* Custom menu items with dropdown support */}
                 {(() => {
@@ -519,6 +572,30 @@ const Header = () => {
           onClose={() => setIsSearchOpen(false)} 
         />
       </header>
+
+      {/* Fullwidth mega menu */}
+      {menuSettings.menu_style === 'fullwidth' && isCatalogMenuOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsCatalogMenuOpen(false)}
+          />
+          <div 
+            className="relative z-50"
+            onMouseLeave={() => setIsCatalogMenuOpen(false)}
+          >
+            <FullWidthMegaMenu
+              categories={categories as any}
+              collections={collections as any}
+              products={featuredProductsData as any}
+              showCategories={menuSettings.show_categories}
+              showCollections={menuSettings.show_collections}
+              showProducts={menuSettings.show_featured_products}
+              onClose={() => setIsCatalogMenuOpen(false)}
+            />
+          </div>
+        </>
+      )}
 
       {/* Floating Contact button (bottom-right) */}
       {contactPlatform && contactUrl && (

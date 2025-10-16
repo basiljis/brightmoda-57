@@ -506,6 +506,42 @@ export type Database = {
           },
         ]
       }
+      header_menu_settings: {
+        Row: {
+          created_at: string
+          featured_collections_count: number
+          featured_products_count: number
+          id: string
+          menu_style: string
+          show_categories: boolean
+          show_collections: boolean
+          show_featured_products: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          featured_collections_count?: number
+          featured_products_count?: number
+          id?: string
+          menu_style?: string
+          show_categories?: boolean
+          show_collections?: boolean
+          show_featured_products?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          featured_collections_count?: number
+          featured_products_count?: number
+          id?: string
+          menu_style?: string
+          show_categories?: boolean
+          show_collections?: boolean
+          show_featured_products?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       home_page_blocks: {
         Row: {
           block_type: string
