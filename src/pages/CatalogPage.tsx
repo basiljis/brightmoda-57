@@ -142,9 +142,12 @@ const CatalogPage = () => {
   };
 
   
-  // Find current category and subcategory objects
+  // Find current category, subcategory and collection objects
   const currentCategory = categories.find(cat => cat.slug === selectedCategory);
   const currentSubcategory = subcategories.find(sub => sub.slug === selectedSubcategory);
+  const currentCollection = selectedCollections.length === 1 
+    ? collections.find(col => col.id === selectedCollections[0]) 
+    : null;
   
   // Filter products based on current filters
   const filteredProducts = products.filter(product => {
@@ -217,7 +220,8 @@ const CatalogPage = () => {
           <p className="text-muted-foreground">
             {currentSubcategory?.description || 
              currentCategory?.description || 
-             "Коллекция премиальной одежды из мериносовой шерсти"}
+             currentCollection?.description ||
+             ""}
           </p>
         </div>
 
