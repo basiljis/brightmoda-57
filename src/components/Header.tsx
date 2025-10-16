@@ -145,7 +145,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className={getContainerClass()}>
           <div className="flex items-center justify-between h-16">
             {/* Mobile Menu Button */}
@@ -210,28 +210,6 @@ const Header = () => {
                       </div>
                       
                       <div className="space-y-2 border-t pt-4">
-                        <Link
-                          to="/lookbook"
-                          className="block text-sm font-medium py-2 hover:text-primary transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          LOOKBOOK
-                        </Link>
-                        <Link
-                          to="/about"
-                          className="block text-sm font-medium py-2 hover:text-primary transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          О НАС
-                        </Link>
-                        <Link
-                          to="/contacts"
-                          className="block text-sm font-medium py-2 hover:text-primary transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          КОНТАКТЫ
-                        </Link>
-                        
                         {/* Custom menu items with submenus */}
                         {(() => {
                           const rootItems = headerMenuItems.filter((item: any) => !item.parent_id);
@@ -386,24 +364,6 @@ const Header = () => {
                       </div>
                     </div>
                   </NavigationMenuContent>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <Link to="/lookbook" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
-                    LOOKBOOK
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <Link to="/about" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
-                    О НАС
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <Link to="/contacts" className={`${navigationMenuTriggerStyle()} relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all hover:after:w-full`}>
-                    КОНТАКТЫ
-                  </Link>
                 </NavigationMenuItem>
                 
                 {/* Custom menu items with dropdown support */}

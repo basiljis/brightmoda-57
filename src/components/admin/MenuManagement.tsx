@@ -35,10 +35,11 @@ interface SortableItemProps {
   onDelete: (id: string) => void;
   onSave: (item: MenuItem) => void;
   onEditContent: (item: MenuItem) => void;
+  onAddSubmenu: (parentId: string) => void;
   level: number;
 }
 
-function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, level }: SortableItemProps) {
+function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, onAddSubmenu, level }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
 
   const style = {
@@ -104,6 +105,17 @@ function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, level }
             </div>
             
             <div className="md:col-span-3 flex items-end gap-1 pb-1">
+              {level === 0 && (
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => onAddSubmenu(item.id)}
+                  title="Добавить подменю"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="icon"
@@ -152,6 +164,7 @@ export default function MenuManagement() {
   const [newItemLocation, setNewItemLocation] = useState<'header' | 'footer' | 'both'>('header');
   const [editingContent, setEditingContent] = useState<MenuItem | null>(null);
   const [contentText, setContentText] = useState('');
+  const [parentItemForSubmenu, setParentItemForSubmenu] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -241,7 +254,7 @@ export default function MenuManagement() {
     }
   };
 
-  const createNewItem = async () => {
+  const createNewItem = async (parentId?: string) => {
     if (!newItemName.trim()) {
       toast({ title: 'Ошибка', description: 'Укажите название пункта меню', variant: 'destructive' });
       return;
@@ -262,36 +275,40 @@ export default function MenuManagement() {
           section_name: 'menu_item',
           menu_label: newItemName,
           content_value: url,
-          menu_location: newItemLocation,
+          menu_location: parentId ? 'none' : newItemLocation,
           display_order: maxOrder + 1,
           is_active: true,
-          content_type: 'page'
+          content_type: 'page',
+          parent_id: parentId || null
         })
         .select()
         .single();
       
       if (error) throw error;
 
-      // Create default page content
-      const { error: contentError } = await supabase
-        .from('page_content')
-        .insert({
-          page_name: pageName,
-          section_name: 'content',
-          content_type: 'html',
-          content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
-          display_order: 1,
-          is_active: true,
-          menu_location: 'none'
-        });
+      // Create default page content only if not a submenu
+      if (!parentId) {
+        const { error: contentError } = await supabase
+          .from('page_content')
+          .insert({
+            page_name: pageName,
+            section_name: 'content',
+            content_type: 'html',
+            content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
+            display_order: 1,
+            is_active: true,
+            menu_location: 'none'
+          });
 
-      if (contentError) throw contentError;
+        if (contentError) throw contentError;
+      }
       
       toast({ 
         title: 'Создано', 
-        description: `Пункт меню и страница созданы. Доступна по адресу: ${url}` 
+        description: parentId ? 'Подменю создано' : `Пункт меню и страница созданы. Доступна по адресу: ${url}` 
       });
       setNewItemName('');
+      setParentItemForSubmenu(null);
       load();
     } catch (e) {
       console.error(e);
@@ -299,6 +316,10 @@ export default function MenuManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addSubmenu = (parentId: string) => {
+    setParentItemForSubmenu(parentId);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -445,9 +466,14 @@ export default function MenuManagement() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Создать новый пункт меню</CardTitle>
+          <CardTitle>
+            {parentItemForSubmenu ? 'Создать подменю' : 'Создать новый пункт меню'}
+          </CardTitle>
           <CardDescription>
-            Создайте пункт меню и настройте контент его страницы
+            {parentItemForSubmenu 
+              ? 'Добавьте подпункт к выбранному пункту меню'
+              : 'Создайте пункт меню и настройте контент его страницы'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -457,22 +483,30 @@ export default function MenuManagement() {
                 value={newItemName}
                 onChange={e => setNewItemName(e.target.value)}
                 placeholder="Название пункта меню (например: О компании)"
-                onKeyDown={e => e.key === 'Enter' && createNewItem()}
+                onKeyDown={e => e.key === 'Enter' && createNewItem(parentItemForSubmenu || undefined)}
               />
             </div>
-            <Select value={newItemLocation} onValueChange={v => setNewItemLocation(v as any)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="header">Шапка</SelectItem>
-                <SelectItem value="footer">Подвал</SelectItem>
-                <SelectItem value="both">Оба</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={createNewItem} disabled={loading}>
+            {!parentItemForSubmenu && (
+              <Select value={newItemLocation} onValueChange={v => setNewItemLocation(v as any)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="header">Шапка</SelectItem>
+                  <SelectItem value="footer">Подвал</SelectItem>
+                  <SelectItem value="both">Оба</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            {parentItemForSubmenu && (
+              <Button variant="outline" onClick={() => setParentItemForSubmenu(null)}>
+                <X className="h-4 w-4 mr-2" />
+                Отмена
+              </Button>
+            )}
+            <Button onClick={() => createNewItem(parentItemForSubmenu || undefined)} disabled={loading}>
               <Plus className="h-4 w-4 mr-2" />
-              Создать
+              {parentItemForSubmenu ? 'Создать подменю' : 'Создать'}
             </Button>
           </div>
         </CardContent>
@@ -493,16 +527,30 @@ export default function MenuManagement() {
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                {items.map((item) => (
-                  <SortableItem
-                    key={item.id}
-                    item={item}
-                    onUpdate={updateItem}
-                    onSave={saveItem}
-                    onDelete={deleteItem}
-                    onEditContent={openContentEditor}
-                    level={0}
-                  />
+                {items.filter(item => !item.parent_id).map((item) => (
+                  <div key={item.id}>
+                    <SortableItem
+                      item={item}
+                      onUpdate={updateItem}
+                      onSave={saveItem}
+                      onDelete={deleteItem}
+                      onEditContent={openContentEditor}
+                      onAddSubmenu={addSubmenu}
+                      level={0}
+                    />
+                    {items.filter(child => child.parent_id === item.id).map((child) => (
+                      <SortableItem
+                        key={child.id}
+                        item={child}
+                        onUpdate={updateItem}
+                        onSave={saveItem}
+                        onDelete={deleteItem}
+                        onEditContent={openContentEditor}
+                        onAddSubmenu={addSubmenu}
+                        level={1}
+                      />
+                    ))}
+                  </div>
                 ))}
               </SortableContext>
             </DndContext>
