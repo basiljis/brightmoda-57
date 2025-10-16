@@ -617,7 +617,7 @@ const AdminPage = () => {
               </div>
             )}
 
-            {/* Content - Menus */}
+            {/* Content - Other Sections (Menus) */}
             {activeTab === "content-menus" && (
               <div className="space-y-6">
                 <MenuManagement />
@@ -641,7 +641,28 @@ const AdminPage = () => {
             {/* Content - Catalog Settings */}
             {activeTab === "content-catalog" && (
               <div className="space-y-6">
-                <CatalogSettings />
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Каталог</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Настройка отображения и меню каталога
+                  </p>
+                </div>
+                <Tabs defaultValue="display" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="display">Настройки отображения</TabsTrigger>
+                    <TabsTrigger value="header-menu">Настройки меню шапки</TabsTrigger>
+                    <TabsTrigger value="menu-items">Создание пунктов меню</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="display" className="mt-6">
+                    <CatalogSettings />
+                  </TabsContent>
+                  <TabsContent value="header-menu" className="mt-6">
+                    <HeaderMenuSettings />
+                  </TabsContent>
+                  <TabsContent value="menu-items" className="mt-6">
+                    <MenuManagement />
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
 
@@ -691,12 +712,6 @@ const AdminPage = () => {
               </div>
             )}
 
-            {/* Content - Menu Settings */}
-            {activeTab === "content-menu-settings" && (
-              <div className="space-y-6">
-                <HeaderMenuSettings />
-              </div>
-            )}
 
             {/* Settings - SEO */}
             {activeTab === "settings-seo" && (
