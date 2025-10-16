@@ -50,12 +50,13 @@ const Header = () => {
     show_categories: boolean;
     show_collections_right: boolean;
     show_products_right: boolean;
+    show_categories_right: boolean;
     featured_products_count: number;
     featured_collections_count: number;
     selected_collection_ids?: string[];
     selected_product_ids?: string[];
     selected_category_ids?: string[];
-    right_side_content?: 'products' | 'collections' | 'both';
+    selected_category_ids_right?: string[];
   }>({
     menu_style: 'simple',
     show_featured_products: true,
@@ -63,12 +64,13 @@ const Header = () => {
     show_categories: true,
     show_collections_right: true,
     show_products_right: true,
+    show_categories_right: false,
     featured_products_count: 3,
     featured_collections_count: 4,
     selected_collection_ids: [],
     selected_product_ids: [],
     selected_category_ids: [],
-    right_side_content: 'both',
+    selected_category_ids_right: [],
   });
   const [featuredProductsData, setFeaturedProductsData] = useState([]);
   const isMobile = useIsMobile();
@@ -130,10 +132,7 @@ const Header = () => {
         .maybeSingle();
       
       if (!menuSettingsError && menuSettingsData) {
-        setMenuSettings({
-          ...menuSettingsData,
-          right_side_content: (menuSettingsData.right_side_content || 'both') as 'products' | 'collections' | 'both',
-        });
+        setMenuSettings(menuSettingsData);
       }
 
       // Load featured products from database
@@ -656,7 +655,8 @@ const Header = () => {
               showCollectionsLeft={menuSettings.show_collections}
               showProductsRight={menuSettings.show_products_right}
               showCollectionsRight={menuSettings.show_collections_right}
-              rightSideContent={menuSettings.right_side_content}
+              showCategoriesRight={menuSettings.show_categories_right || false}
+              selectedCategoryIdsRight={menuSettings.selected_category_ids_right}
               onClose={() => setIsCatalogMenuOpen(false)}
             />
           </div>

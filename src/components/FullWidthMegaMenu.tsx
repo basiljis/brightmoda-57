@@ -36,7 +36,8 @@ interface FullWidthMegaMenuProps {
   showCollectionsLeft: boolean;
   showProductsRight: boolean;
   showCollectionsRight: boolean;
-  rightSideContent?: 'products' | 'collections' | 'both';
+  showCategoriesRight: boolean;
+  selectedCategoryIdsRight?: string[];
   onClose: () => void;
 }
 
@@ -48,9 +49,14 @@ export function FullWidthMegaMenu({
   showCollectionsLeft,
   showProductsRight,
   showCollectionsRight,
-  rightSideContent = 'both',
+  showCategoriesRight,
+  selectedCategoryIdsRight = [],
   onClose,
 }: FullWidthMegaMenuProps) {
+  // Filter categories for right side
+  const rightCategories = selectedCategoryIdsRight.length > 0
+    ? categories.filter(cat => selectedCategoryIdsRight.includes(cat.id))
+    : categories;
   return (
     <div 
       className="fixed left-0 right-0 top-[var(--header-height,80px)] bg-background border-b border-border shadow-lg z-40 max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto"
@@ -132,9 +138,38 @@ export function FullWidthMegaMenu({
             </div>
           </div>
 
-          {/* Right side with featured products and collections */}
+          {/* Right side with featured products, collections, and categories */}
           <div className="col-span-9">
-            {(rightSideContent === 'products' || rightSideContent === 'both') && showProductsRight && products.length > 0 && (
+            {showCategoriesRight && rightCategories.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
+                  Категории
+                </h3>
+                <div className="grid grid-cols-4 gap-6">
+                  {rightCategories.map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/catalog?category=${category.slug}`}
+                      className="group"
+                      onClick={onClose}
+                    >
+                      <div className="p-6 border border-border rounded-lg hover:border-primary transition-colors">
+                        <h4 className="text-sm font-medium mb-2 group-hover:text-primary transition-colors">
+                          {category.name}
+                        </h4>
+                        {category.subcategories && category.subcategories.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {category.subcategories.length} {category.subcategories.length === 1 ? 'подкатегория' : 'подкатегории'}
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {showProductsRight && products.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Избранные товары
@@ -184,7 +219,7 @@ export function FullWidthMegaMenu({
               </div>
             )}
 
-            {(rightSideContent === 'collections' || rightSideContent === 'both') && showCollectionsRight && collections.length > 0 && (
+            {showCollectionsRight && collections.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Коллекции
