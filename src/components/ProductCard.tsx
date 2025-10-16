@@ -163,11 +163,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           )}
           
-          <div className="aspect-square relative">
+          <div className="aspect-square relative overflow-hidden">
             <img 
               src={currentImage}
               alt={product.name}
-              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+              className={`w-full h-full object-cover transition-all duration-500 ${
+                settings.show_image_zoom_on_hover ? 'group-hover:scale-110' : ''
+              }`}
             />
             
             {/* Индикатор множественных изображений */}

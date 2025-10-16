@@ -26,6 +26,7 @@ const CatalogSettings = () => {
     card_text_alignment: 'left',
     full_width_layout: false,
     show_hover_effects: true,
+    show_image_zoom_on_hover: true,
   });
 
   useEffect(() => {
@@ -305,6 +306,19 @@ const CatalogSettings = () => {
                 id="hover-effects"
                 checked={settings.show_hover_effects}
                 onCheckedChange={(checked) => setSettings({ ...settings, show_hover_effects: checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label htmlFor="image-zoom">Увеличение картинки при наведении</Label>
+                <p className="text-xs text-muted-foreground">
+                  Эффект масштабирования изображения внутри карточки
+                </p>
+              </div>
+              <Switch
+                id="image-zoom"
+                checked={settings.show_image_zoom_on_hover}
+                onCheckedChange={(checked) => setSettings({ ...settings, show_image_zoom_on_hover: checked })}
               />
             </div>
           </CardContent>

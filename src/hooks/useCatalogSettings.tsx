@@ -16,6 +16,7 @@ export interface CatalogSettings {
   card_text_alignment: 'left' | 'center' | 'right';
   full_width_layout: boolean;
   show_hover_effects: boolean;
+  show_image_zoom_on_hover: boolean;
 }
 
 const defaultSettings: CatalogSettings = {
@@ -33,6 +34,7 @@ const defaultSettings: CatalogSettings = {
   card_text_alignment: 'left',
   full_width_layout: false,
   show_hover_effects: true,
+  show_image_zoom_on_hover: true,
 };
 
 export const useCatalogSettings = () => {

@@ -130,6 +130,7 @@ export type Database = {
           full_width_layout: boolean
           id: string
           show_hover_effects: boolean
+          show_image_zoom_on_hover: boolean
           updated_at: string
         }
         Insert: {
@@ -149,6 +150,7 @@ export type Database = {
           full_width_layout?: boolean
           id?: string
           show_hover_effects?: boolean
+          show_image_zoom_on_hover?: boolean
           updated_at?: string
         }
         Update: {
@@ -168,6 +170,7 @@ export type Database = {
           full_width_layout?: boolean
           id?: string
           show_hover_effects?: boolean
+          show_image_zoom_on_hover?: boolean
           updated_at?: string
         }
         Relationships: []
