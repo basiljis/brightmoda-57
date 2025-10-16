@@ -655,8 +655,6 @@ const Header = () => {
               showCollectionsLeft={menuSettings.show_collections}
               showProductsRight={menuSettings.show_products_right}
               showCollectionsRight={menuSettings.show_collections_right}
-              showCategoriesRight={menuSettings.show_categories_right || false}
-              selectedCategoryIdsRight={menuSettings.selected_category_ids_right}
               onClose={() => setIsCatalogMenuOpen(false)}
             />
           </div>
