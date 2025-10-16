@@ -9,58 +9,15 @@ import HeroCarousel from "@/components/HeroCarousel";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 import { BlockRenderer } from "@/components/home/BlockRenderer";
 
-function MerinoSection({ blocks = [] as any[] }) {
-  const by = (name: string) => blocks.find((b: any) => b.section_name === name)?.content_value || '';
-  const title = by('merino_title') || 'Мериносовая шерсть';
-  const items = [
-    { t: by('merino_block_1_title') || 'Терморегуляция', d: by('merino_block_1_text') || 'Естественная способность регулировать температуру тела в любых условиях.' },
-    { t: by('merino_block_2_title') || 'Комфорт', d: by('merino_block_2_text') || 'Тончайшие волокна обеспечивают мягкость и отсутствие раздражения.' },
-    { t: by('merino_block_3_title') || 'Антибактериальные свойства', d: by('merino_block_3_text') || 'Натуральная защита от неприятных запахов без химических добавок.' },
-    { t: by('merino_block_4_title') || 'Долговечность', d: by('merino_block_4_text') || 'Качество, которое сохраняется годами при правильном уходе.' },
-  ];
-  return (
-    <div className="max-w-4xl mx-auto text-center">
-      <h2 className="text-3xl md:text-4xl font-light text-foreground mb-8 tracking-wide">{title}</h2>
-      <div className="w-16 h-px bg-foreground mx-auto mb-12"></div>
-      <div className="grid md:grid-cols-2 gap-12 text-left">
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[0].t}</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">{items[0].d}</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[1].t}</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">{items[1].d}</p>
-          </div>
-        </div>
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[2].t}</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">{items[2].d}</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-light mb-3 text-foreground tracking-wide">{items[3].t}</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">{items[3].d}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const HomePage = () => {
   const [collections, setCollections] = useState([]);
   const [headerCollections, setHeaderCollections] = useState([]);
-  const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
-  const [showMerinoSection, setShowMerinoSection] = useState(true);
   const [homePageBlocks, setHomePageBlocks] = useState<any[]>([]);
   const { getContainerClass } = useCatalogSettings();
 
   useEffect(() => {
     loadCollections();
     loadHeaderCollections();
-    loadMerinoBlocks();
-    loadMerinoSectionVisibility();
     loadHomePageBlocks();
   }, []);
 
@@ -91,41 +48,6 @@ const HomePage = () => {
       setHeaderCollections(data || []);
     } catch (error) {
       console.error('Error loading header collections:', error);
-    }
-  };
-
-
-  const loadMerinoBlocks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('page_content')
-        .select('*')
-        .eq('page_name', 'home')
-        .in('section_name', ['merino_title', 'merino_block_1_title', 'merino_block_1_text', 'merino_block_2_title', 'merino_block_2_text', 'merino_block_3_title', 'merino_block_3_text', 'merino_block_4_title', 'merino_block_4_text'])
-        .order('display_order', { ascending: true });
-      if (error) throw error;
-      setMerinoBlocks(data || []);
-    } catch (e) {
-      console.error('Error loading merino blocks:', e);
-    }
-  };
-
-  const loadMerinoSectionVisibility = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('page_content')
-        .select('content_value')
-        .eq('page_name', 'home')
-        .eq('section_name', 'show_merino_section')
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (data) {
-        setShowMerinoSection(data.content_value === 'true');
-      }
-    } catch (e) {
-      console.error('Error loading merino section visibility:', e);
     }
   };
 
@@ -191,15 +113,6 @@ const HomePage = () => {
           </div>
         )}
       </section>
-
-      {/* About Merino Wool - editable via page_content (home) */}
-      {showMerinoSection && (
-        <section className="py-24 bg-muted/30">
-          <div className={getContainerClass()}>
-            <MerinoSection blocks={merinoBlocks} />
-          </div>
-        </section>
-      )}
 
       {/* Dynamic Home Page Blocks */}
       {homePageBlocks.map((block) => (
