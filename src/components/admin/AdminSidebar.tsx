@@ -55,12 +55,12 @@ const sections: AdminSection[] = [
     label: "Контент",
     icon: FileText,
     subItems: [
-      { value: "content-menus", label: "Меню" },
-      { value: "content-lookbook", label: "Lookbook" },
-      { value: "content-pages", label: "Контент страниц" },
-      { value: "content-header", label: "Коллекции в шапке" },
       { value: "content-home-blocks", label: "Главная" },
+      { value: "content-header", label: "Коллекции в шапке" },
+      { value: "content-lookbook", label: "Lookbook" },
       { value: "content-catalog", label: "Каталог" },
+      { value: "content-pages", label: "Контент страниц" },
+      { value: "content-menus", label: "Меню" },
     ],
   },
   {
