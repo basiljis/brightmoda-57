@@ -441,9 +441,17 @@ const HeaderCollectionManagement = () => {
                     <Label>Связанная коллекция (опционально)</Label>
                     <Select 
                       value={headerCollection.collection_id || "none"}
-                      onValueChange={(value) => 
-                        handleInputChange(headerCollection.id, 'collection_id', value === "none" ? null : value)
-                      }
+                      onValueChange={(value) => {
+                        handleInputChange(headerCollection.id, 'collection_id', value === "none" ? null : value);
+                        
+                        // Автоматически заполнить URL при выборе коллекции
+                        if (value !== "none") {
+                          const selectedCollection = collections.find(c => c.id === value);
+                          if (selectedCollection) {
+                            handleInputChange(headerCollection.id, 'link_url', `/collections/${selectedCollection.slug}`);
+                          }
+                        }
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Выберите коллекцию" />
