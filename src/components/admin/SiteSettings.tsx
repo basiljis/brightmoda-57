@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import FileUploadField from './FileUploadField';
@@ -18,6 +19,12 @@ const SiteSettings = () => {
     footer_logo_dark_url: '',
     copyright_text: '',
     footer_description: '',
+    cookie_consent_enabled: true,
+    cookie_consent_title: 'Использование файлов cookie',
+    cookie_consent_text: 'Мы используем файлы cookie для улучшения работы сайта и анализа трафика. Продолжая использовать сайт, вы соглашаетесь с нашей политикой обработки персональных данных.',
+    cookie_consent_button_text: 'Принять',
+    cookie_consent_position: 'bottom',
+    cookie_consent_privacy_link: '/privacy-policy',
     social_links: {
       instagram: '',
       facebook: '',
@@ -56,6 +63,12 @@ const SiteSettings = () => {
           footer_logo_dark_url: data.footer_logo_dark_url || '',
           copyright_text: data.copyright_text || '© 2024 BRIGHT. Все права защищены.',
           footer_description: data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.',
+          cookie_consent_enabled: data.cookie_consent_enabled ?? true,
+          cookie_consent_title: data.cookie_consent_title || 'Использование файлов cookie',
+          cookie_consent_text: data.cookie_consent_text || 'Мы используем файлы cookie для улучшения работы сайта и анализа трафика. Продолжая использовать сайт, вы соглашаетесь с нашей политикой обработки персональных данных.',
+          cookie_consent_button_text: data.cookie_consent_button_text || 'Принять',
+          cookie_consent_position: data.cookie_consent_position || 'bottom',
+          cookie_consent_privacy_link: data.cookie_consent_privacy_link || '/privacy-policy',
           social_links: {
             instagram: (data.social_links as any)?.instagram || '',
             facebook: (data.social_links as any)?.facebook || '',
@@ -95,6 +108,12 @@ const SiteSettings = () => {
         footer_logo_dark_url: settings.footer_logo_dark_url,
         copyright_text: settings.copyright_text,
         footer_description: settings.footer_description,
+        cookie_consent_enabled: settings.cookie_consent_enabled,
+        cookie_consent_title: settings.cookie_consent_title,
+        cookie_consent_text: settings.cookie_consent_text,
+        cookie_consent_button_text: settings.cookie_consent_button_text,
+        cookie_consent_position: settings.cookie_consent_position,
+        cookie_consent_privacy_link: settings.cookie_consent_privacy_link,
         social_links: settings.social_links
       }).select();
 
@@ -419,6 +438,87 @@ const SiteSettings = () => {
             <p className="text-xs text-muted-foreground">
               «Авто» — иконка подбирается по выбранной платформе (Telegram, Instagram и т.д.). «Стандартная» — универсальная иконка.
             </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 pt-6 border-t">
+          <h3 className="text-lg font-semibold">Уведомление о Cookie</h3>
+          <p className="text-sm text-muted-foreground">
+            Настройте окно с подтверждением обработки персональных данных и сбором информации
+          </p>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="cookie_consent_enabled">Показывать уведомление</Label>
+              <p className="text-sm text-muted-foreground">
+                Включить или отключить показ окна согласия с cookie
+              </p>
+            </div>
+            <Switch
+              id="cookie_consent_enabled"
+              checked={settings.cookie_consent_enabled}
+              onCheckedChange={(checked) => setSettings(prev => ({...prev, cookie_consent_enabled: checked}))}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cookie_consent_title">Заголовок</Label>
+            <Input
+              id="cookie_consent_title"
+              value={settings.cookie_consent_title}
+              onChange={(e) => setSettings(prev => ({...prev, cookie_consent_title: e.target.value}))}
+              placeholder="Использование файлов cookie"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cookie_consent_text">Текст уведомления</Label>
+            <Textarea
+              id="cookie_consent_text"
+              value={settings.cookie_consent_text}
+              onChange={(e) => setSettings(prev => ({...prev, cookie_consent_text: e.target.value}))}
+              placeholder="Мы используем файлы cookie..."
+              disabled={loading}
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cookie_consent_button_text">Текст кнопки</Label>
+            <Input
+              id="cookie_consent_button_text"
+              value={settings.cookie_consent_button_text}
+              onChange={(e) => setSettings(prev => ({...prev, cookie_consent_button_text: e.target.value}))}
+              placeholder="Принять"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cookie_consent_position">Позиция окна</Label>
+            <select
+              id="cookie_consent_position"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={settings.cookie_consent_position}
+              onChange={(e) => setSettings(prev => ({...prev, cookie_consent_position: e.target.value}))}
+              disabled={loading}
+            >
+              <option value="bottom">Снизу</option>
+              <option value="top">Сверху</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cookie_consent_privacy_link">Ссылка на политику конфиденциальности</Label>
+            <Input
+              id="cookie_consent_privacy_link"
+              value={settings.cookie_consent_privacy_link}
+              onChange={(e) => setSettings(prev => ({...prev, cookie_consent_privacy_link: e.target.value}))}
+              placeholder="/privacy-policy"
+              disabled={loading}
+            />
           </div>
         </div>
 

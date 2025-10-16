@@ -460,6 +460,8 @@ export type Database = {
           link_url: string | null
           position: number
           title: string
+          title_position: string | null
+          title_size: string | null
           updated_at: string
         }
         Insert: {
@@ -474,6 +476,8 @@ export type Database = {
           link_url?: string | null
           position: number
           title: string
+          title_position?: string | null
+          title_size?: string | null
           updated_at?: string
         }
         Update: {
@@ -488,6 +492,8 @@ export type Database = {
           link_url?: string | null
           position?: number
           title?: string
+          title_position?: string | null
+          title_size?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1126,6 +1132,12 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          cookie_consent_button_text: string | null
+          cookie_consent_enabled: boolean | null
+          cookie_consent_position: string | null
+          cookie_consent_privacy_link: string | null
+          cookie_consent_text: string | null
+          cookie_consent_title: string | null
           copyright_text: string | null
           created_at: string
           favicon_url: string | null
@@ -1139,6 +1151,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cookie_consent_button_text?: string | null
+          cookie_consent_enabled?: boolean | null
+          cookie_consent_position?: string | null
+          cookie_consent_privacy_link?: string | null
+          cookie_consent_text?: string | null
+          cookie_consent_title?: string | null
           copyright_text?: string | null
           created_at?: string
           favicon_url?: string | null
@@ -1152,6 +1170,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cookie_consent_button_text?: string | null
+          cookie_consent_enabled?: boolean | null
+          cookie_consent_position?: string | null
+          cookie_consent_privacy_link?: string | null
+          cookie_consent_text?: string | null
+          cookie_consent_title?: string | null
           copyright_text?: string | null
           created_at?: string
           favicon_url?: string | null

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Preloader from "@/components/Preloader";
+import { CookieConsent } from "@/components/CookieConsent";
 import HomePage from "./pages/HomePage";
 import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
@@ -190,6 +191,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
+            <CookieConsent />
             {!isAppReady && <Preloader />}
             <div className="min-h-screen bg-background flex flex-col" style={{ visibility: isAppReady ? 'visible' : 'hidden' }}>
               <Header />
