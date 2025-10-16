@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { useCatalogSettings } from '@/hooks/useCatalogSettings';
+import { ChevronDown } from 'lucide-react';
 
 interface HomePageBlock {
   id: string;
@@ -17,6 +18,8 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
+  show_more_button_size: 'small' | 'medium' | 'large' | null;
+  show_more_button_type: 'text' | 'icon' | null;
   collection_card_style: string | null;
 }
 
@@ -107,14 +110,25 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
 
           {block.show_more_button && remainingCount > 0 && (
             <div className={`mt-8 ${titleAlignClass}`}>
-              <Button 
-                onClick={handleShowMore}
-                variant="outline" 
-                size="lg" 
-                className="font-light tracking-widest uppercase px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
-              >
-                {block.show_more_text || 'Показать еще'} ({remainingCount})
-              </Button>
+              {block.show_more_button_type === 'icon' ? (
+                <Button 
+                  onClick={handleShowMore}
+                  variant="outline"
+                  size={block.show_more_button_size === 'small' ? 'sm' : block.show_more_button_size === 'large' ? 'lg' : 'default'}
+                  className="rounded-full border-foreground text-foreground hover:bg-foreground hover:text-background"
+                >
+                  <ChevronDown className="h-5 w-5" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleShowMore}
+                  variant="outline" 
+                  size={block.show_more_button_size === 'small' ? 'sm' : block.show_more_button_size === 'large' ? 'lg' : 'default'}
+                  className="font-light tracking-widest uppercase px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
+                >
+                  {block.show_more_text || 'Показать еще'} ({remainingCount})
+                </Button>
+              )}
             </div>
           )}
         </div>

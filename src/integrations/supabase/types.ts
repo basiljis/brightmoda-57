@@ -519,6 +519,8 @@ export type Database = {
           items_count: number | null
           show_all_collections: boolean | null
           show_more_button: boolean | null
+          show_more_button_size: string | null
+          show_more_button_type: string | null
           show_more_link: string | null
           show_more_text: string | null
           text_content: string | null
@@ -538,6 +540,8 @@ export type Database = {
           items_count?: number | null
           show_all_collections?: boolean | null
           show_more_button?: boolean | null
+          show_more_button_size?: string | null
+          show_more_button_type?: string | null
           show_more_link?: string | null
           show_more_text?: string | null
           text_content?: string | null
@@ -557,6 +561,8 @@ export type Database = {
           items_count?: number | null
           show_all_collections?: boolean | null
           show_more_button?: boolean | null
+          show_more_button_size?: string | null
+          show_more_button_type?: string | null
           show_more_link?: string | null
           show_more_text?: string | null
           text_content?: string | null

@@ -27,6 +27,8 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
+  show_more_button_size: 'small' | 'medium' | 'large' | null;
+  show_more_button_type: 'text' | 'icon' | null;
   collection_card_style: string | null;
 }
 
@@ -182,15 +184,52 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
                 </div>
 
                 {block.show_more_button && (
-                  <div className="pl-6">
-                    <div className="space-y-2">
-                      <Label>Текст кнопки</Label>
-                      <Input
-                        value={block.show_more_text || 'Показать еще'}
-                        onChange={(e) => onUpdate(block.id, { show_more_text: e.target.value })}
-                        placeholder="Показать еще"
-                      />
+                  <div className="pl-6 space-y-3">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Тип кнопки</Label>
+                        <Select
+                          value={block.show_more_button_type || 'text'}
+                          onValueChange={(value: 'text' | 'icon') => onUpdate(block.id, { show_more_button_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">С текстом</SelectItem>
+                            <SelectItem value="icon">Иконка</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Размер кнопки</Label>
+                        <Select
+                          value={block.show_more_button_size || 'medium'}
+                          onValueChange={(value: 'small' | 'medium' | 'large') => onUpdate(block.id, { show_more_button_size: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">Маленький</SelectItem>
+                            <SelectItem value="medium">Средний</SelectItem>
+                            <SelectItem value="large">Большой</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    {block.show_more_button_type !== 'icon' && (
+                      <div className="space-y-2">
+                        <Label>Текст кнопки</Label>
+                        <Input
+                          value={block.show_more_text || 'Показать еще'}
+                          onChange={(e) => onUpdate(block.id, { show_more_text: e.target.value })}
+                          placeholder="Показать еще"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
