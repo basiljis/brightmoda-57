@@ -15,13 +15,14 @@ import RichTextEditor from './RichTextEditor';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features' | 'spacer';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
   is_active: boolean;
   items_count: number | null;
   collection_id: string | null;
+  collection_ids?: string[];
   show_all_collections: boolean | null;
   text_content: string | null;
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
@@ -30,6 +31,7 @@ interface HomePageBlock {
   show_more_button_size: 'small' | 'medium' | 'large' | null;
   show_more_button_type: 'text' | 'icon' | null;
   collection_card_style: string | null;
+  spacer_size?: number;
 }
 
 interface Collection {
@@ -59,6 +61,7 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
       case 'text': return 'Текстовый блок';
       case 'collection_card': return 'Карточка коллекции';
       case 'features': return 'Преимущества';
+      case 'spacer': return 'Отступ';
       default: return type;
     }
   };
@@ -109,23 +112,43 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
           {block.block_type === 'collection_card' && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label>Коллекция</Label>
-                <Select
-                  value={block.collection_id || ''}
-                  onValueChange={(value) => onUpdate(block.id, { collection_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите коллекцию" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {collections.map((collection) => (
-                      <SelectItem key={collection.id} value={collection.id}>
+                <Label>Коллекции</Label>
+                <div className="space-y-2">
+                  {collections.map((collection) => (
+                    <div key={collection.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`collection-${block.id}-${collection.id}`}
+                        checked={(block.collection_ids || []).includes(collection.id)}
+                        onChange={(e) => {
+                          const currentIds = block.collection_ids || [];
+                          const newIds = e.target.checked
+                            ? [...currentIds, collection.id]
+                            : currentIds.filter(id => id !== collection.id);
+                          onUpdate(block.id, { collection_ids: newIds });
+                        }}
+                        className="rounded"
+                      />
+                      <Label htmlFor={`collection-${block.id}-${collection.id}`} className="cursor-pointer">
                         {collection.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
+          )}
+
+          {block.block_type === 'spacer' && (
+            <div className="space-y-2">
+              <Label>Размер отступа (px)</Label>
+              <Input
+                type="number"
+                min="0"
+                step="10"
+                value={block.spacer_size || 40}
+                onChange={(e) => onUpdate(block.id, { spacer_size: parseInt(e.target.value) || 40 })}
+              />
             </div>
           )}
 
@@ -357,7 +380,7 @@ const HomePageBlocks = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features'>('catalog');
+  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features' | 'spacer'>('catalog');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -416,13 +439,16 @@ const HomePageBlocks = () => {
         title_alignment: 'left' as const,
         display_order: maxOrder + 1,
         is_active: true,
-        items_count: newBlockType !== 'text' ? 4 : null,
+        items_count: newBlockType !== 'text' && newBlockType !== 'spacer' ? 4 : null,
         show_all_collections: newBlockType === 'catalog_filtered' ? false : null,
         font_size: newBlockType === 'text' ? ('medium' as const) : null,
         show_more_button: false,
         show_more_text: 'Показать еще',
         show_more_button_size: 'medium' as const,
         show_more_button_type: 'text' as const,
+        text_content: newBlockType === 'features' ? JSON.stringify({ items: [] }) : null,
+        spacer_size: newBlockType === 'spacer' ? 40 : null,
+        collection_ids: newBlockType === 'collection_card' ? [] : null,
       };
 
       const { data, error } = await supabase
@@ -550,6 +576,7 @@ const HomePageBlocks = () => {
                     <SelectItem value="text">Текстовый блок</SelectItem>
                     <SelectItem value="collection_card">Карточка коллекции</SelectItem>
                     <SelectItem value="features">Преимущества</SelectItem>
+                    <SelectItem value="spacer">Отступ</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

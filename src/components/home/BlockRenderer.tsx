@@ -6,13 +6,14 @@ import { ChevronDown } from 'lucide-react';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features' | 'spacer';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
   is_active: boolean;
   items_count: number | null;
   collection_id: string | null;
+  collection_ids?: string[];
   show_all_collections: boolean | null;
   text_content: string | null;
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
@@ -21,6 +22,7 @@ interface HomePageBlock {
   show_more_button_size: 'small' | 'medium' | 'large' | null;
   show_more_button_type: 'text' | 'icon' | null;
   collection_card_style: string | null;
+  spacer_size?: number;
 }
 
 interface BlockRendererProps {
@@ -136,10 +138,12 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
     );
   }
 
-  if (block.block_type === 'collection_card' && block.collection_id) {
-    const collection = collections.find(c => c.id === block.collection_id);
+  if (block.block_type === 'collection_card') {
+    const selectedCollections = (block.collection_ids || [])
+      .map(id => collections.find(c => c.id === id))
+      .filter(Boolean);
     
-    if (!collection) return null;
+    if (selectedCollections.length === 0) return null;
 
     return (
       <section className="py-12">
@@ -150,23 +154,28 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
             </h2>
           )}
           
-          <a 
-            href={`/catalog?collection=${collection.id}`}
-            className="block group relative overflow-hidden rounded-lg aspect-[16/9] bg-muted hover:shadow-xl transition-all duration-300"
-          >
-            {collection.image_url && (
-              <img 
-                src={collection.image_url} 
-                alt={collection.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center p-8">
-              <h3 className="text-white text-4xl font-light tracking-widest uppercase">
-                {collection.name}
-              </h3>
-            </div>
-          </a>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {selectedCollections.map((collection) => (
+              <a 
+                key={collection.id}
+                href={`/catalog?collection=${collection.id}`}
+                className="block group relative overflow-hidden rounded-lg aspect-[16/9] bg-muted hover:shadow-xl transition-all duration-300"
+              >
+                {collection.image_url && (
+                  <img 
+                    src={collection.image_url} 
+                    alt={collection.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center p-8">
+                  <h3 className="text-white text-4xl font-light tracking-widest uppercase">
+                    {collection.name}
+                  </h3>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -214,6 +223,10 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
         </div>
       </section>
     );
+  }
+
+  if (block.block_type === 'spacer') {
+    return <div style={{ height: `${block.spacer_size || 40}px` }} />;
   }
 
   return null;
