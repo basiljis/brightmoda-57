@@ -628,7 +628,7 @@ export default function MenuManagement() {
               Настройте содержимое страницы {editingContent?.content_value}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
             {editingPageData && (
               <PageEditor
                 initialPageData={editingPageData}
