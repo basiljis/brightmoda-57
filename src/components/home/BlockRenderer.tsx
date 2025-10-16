@@ -154,7 +154,7 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
             </h2>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={getGridClasses()}>
             {selectedCollections.map((collection) => (
               <a 
                 key={collection.id}
