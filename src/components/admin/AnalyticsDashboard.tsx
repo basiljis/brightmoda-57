@@ -31,8 +31,10 @@ import {
   TrendingUp,
   Calendar,
   Filter,
-  MapPin
+  MapPin,
+  Loader2
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnalyticsData {
   daily_stats: Array<{
@@ -88,6 +90,7 @@ const AnalyticsDashboard = () => {
   const { toast } = useToast();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [dateRange, setDateRange] = useState('7');
   const [totalActiveSubscribers, setTotalActiveSubscribers] = useState(0);
   const [startDate, setStartDate] = useState(() => {
@@ -101,6 +104,7 @@ const AnalyticsDashboard = () => {
 
   const loadAnalytics = async () => {
     setLoading(true);
+    setGeoLoading(true);
     try {
       const start = dateRange === 'custom' ? startDate : (() => {
         const date = new Date();
@@ -120,12 +124,14 @@ const AnalyticsDashboard = () => {
 
       if (summaryError) throw summaryError;
 
-      // Get top pages
-      const { data: pageViews, error: pageError } = await supabase
+      // Get top pages and geo data - load in background for geo section
+      const pageViewsPromise = supabase
         .from('page_views')
         .select('page_path, city, region, country')
         .gte('created_at', `${start}T00:00:00`)
         .lte('created_at', `${end}T23:59:59`);
+
+      const { data: pageViews, error: pageError } = await pageViewsPromise;
 
       if (pageError) throw pageError;
 
@@ -162,16 +168,25 @@ const AnalyticsDashboard = () => {
       const dailyStats = processDailyStats(summaryData || []);
       const topPages = processTopPages(pageViews || []);
       const topProducts = await processTopProducts(productActions || []);
-      const geoStats = processGeoStats(pageViews || []);
+      
+      // Set preliminary data without geo stats
       const summary = calculateSummary(summaryData || [], newSubscribersCount || 0);
-
       setAnalyticsData({
         daily_stats: dailyStats,
         top_pages: topPages,
         top_products: topProducts,
-        geo_stats: geoStats,
+        geo_stats: { by_city: [], by_region: [], by_country: [] },
         summary: summary
       });
+      setLoading(false);
+
+      // Process geo stats in background
+      const geoStats = processGeoStats(pageViews || []);
+      setAnalyticsData(prev => prev ? {
+        ...prev,
+        geo_stats: geoStats
+      } : null);
+      setGeoLoading(false);
 
     } catch (error) {
       console.error('Error loading analytics:', error);
@@ -180,8 +195,8 @@ const AnalyticsDashboard = () => {
         description: "Не удалось загрузить данные аналитики",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
+      setGeoLoading(false);
     }
   };
 
@@ -603,73 +618,98 @@ const AnalyticsDashboard = () => {
             </TabsContent>
 
             <TabsContent value="geography" className="space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      По странам
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analyticsData.geo_stats.by_country.map((item, index) => (
-                        <div key={item.country} className="flex items-center justify-between">
-                          <span className="text-sm">{item.country || 'Не определено'}</span>
-                          <span className="text-sm font-medium">{item.views}</span>
+              {geoLoading ? (
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <Skeleton className="h-4 w-24" />
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[1, 2, 3, 4, 5].map((j) => (
+                            <div key={j} className="flex items-center justify-between">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-8" />
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                      {analyticsData.geo_stats.by_country.length === 0 && (
-                        <p className="text-sm text-muted-foreground">Нет данных</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        По странам
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analyticsData.geo_stats.by_country.map((item, index) => (
+                          <div key={item.country} className="flex items-center justify-between">
+                            <span className="text-sm">{item.country || 'Не определено'}</span>
+                            <span className="text-sm font-medium">{item.views}</span>
+                          </div>
+                        ))}
+                        {analyticsData.geo_stats.by_country.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Нет данных</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      По регионам
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analyticsData.geo_stats.by_region.map((item, index) => (
-                        <div key={item.region} className="flex items-center justify-between">
-                          <span className="text-sm">{item.region || 'Не определено'}</span>
-                          <span className="text-sm font-medium">{item.views}</span>
-                        </div>
-                      ))}
-                      {analyticsData.geo_stats.by_region.length === 0 && (
-                        <p className="text-sm text-muted-foreground">Нет данных</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        По регионам
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analyticsData.geo_stats.by_region.map((item, index) => (
+                          <div key={item.region} className="flex items-center justify-between">
+                            <span className="text-sm">{item.region || 'Не определено'}</span>
+                            <span className="text-sm font-medium">{item.views}</span>
+                          </div>
+                        ))}
+                        {analyticsData.geo_stats.by_region.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Нет данных</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      По городам
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analyticsData.geo_stats.by_city.map((item, index) => (
-                        <div key={item.city} className="flex items-center justify-between">
-                          <span className="text-sm">{item.city || 'Не определено'}</span>
-                          <span className="text-sm font-medium">{item.views}</span>
-                        </div>
-                      ))}
-                      {analyticsData.geo_stats.by_city.length === 0 && (
-                        <p className="text-sm text-muted-foreground">Нет данных</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        По городам
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analyticsData.geo_stats.by_city.map((item, index) => (
+                          <div key={item.city} className="flex items-center justify-between">
+                            <span className="text-sm">{item.city || 'Не определено'}</span>
+                            <span className="text-sm font-medium">{item.views}</span>
+                          </div>
+                        ))}
+                        {analyticsData.geo_stats.by_city.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Нет данных</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="conversion" className="space-y-4">
