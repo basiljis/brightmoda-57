@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { ArrowRight } from 'lucide-react';
 import { useCatalogSettings } from '@/hooks/useCatalogSettings';
 
 interface HomePageBlock {
@@ -18,7 +17,6 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
-  show_more_link: string | null;
 }
 
 interface BlockRendererProps {
@@ -46,6 +44,7 @@ const getTitleAlignmentClass = (alignment: string) => {
 
 export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
   const { getGridClasses, getContainerClass } = useCatalogSettings();
+  const [visibleCount, setVisibleCount] = useState(block.items_count || 4);
 
   if (!block.is_active) return null;
 
@@ -76,8 +75,12 @@ export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
       filteredProducts = products.filter(p => p.collection_id === block.collection_id);
     }
 
-    const displayProducts = filteredProducts.slice(0, block.items_count || 4);
+    const displayProducts = filteredProducts.slice(0, visibleCount);
     const remainingCount = filteredProducts.length - displayProducts.length;
+
+    const handleShowMore = () => {
+      setVisibleCount(prev => prev + (block.items_count || 4));
+    };
 
     return (
       <section className="py-12">
@@ -100,17 +103,16 @@ export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
             ))}
           </div>
 
-          {block.show_more_button && remainingCount > 0 && block.show_more_link && (
+          {block.show_more_button && remainingCount > 0 && (
             <div className={`mt-8 ${titleAlignClass}`}>
-              <Link to={block.show_more_link}>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="font-light tracking-widest uppercase px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
-                >
-                  {block.show_more_text || 'Показать еще'} ({remainingCount})
-                </Button>
-              </Link>
+              <Button 
+                onClick={handleShowMore}
+                variant="outline" 
+                size="lg" 
+                className="font-light tracking-widest uppercase px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
+              >
+                {block.show_more_text || 'Показать еще'} ({remainingCount})
+              </Button>
             </div>
           )}
         </div>

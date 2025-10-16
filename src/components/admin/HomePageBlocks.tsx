@@ -27,7 +27,6 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
-  show_more_link: string | null;
 }
 
 interface Collection {
@@ -157,21 +156,13 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
                 </div>
 
                 {block.show_more_button && (
-                  <div className="grid gap-3 md:grid-cols-2 pl-6">
+                  <div className="pl-6">
                     <div className="space-y-2">
                       <Label>Текст кнопки</Label>
                       <Input
                         value={block.show_more_text || 'Показать еще'}
                         onChange={(e) => onUpdate(block.id, { show_more_text: e.target.value })}
                         placeholder="Показать еще"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Ссылка</Label>
-                      <Input
-                        value={block.show_more_link || ''}
-                        onChange={(e) => onUpdate(block.id, { show_more_link: e.target.value })}
-                        placeholder="/catalog"
                       />
                     </div>
                   </div>
@@ -286,7 +277,6 @@ const HomePageBlocks = () => {
         font_size: newBlockType === 'text' ? ('medium' as const) : null,
         show_more_button: false,
         show_more_text: 'Показать еще',
-        show_more_link: null,
       };
 
       const { data, error } = await supabase
