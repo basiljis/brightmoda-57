@@ -60,6 +60,7 @@ const sections: AdminSection[] = [
       { value: "content-lookbook", label: "Lookbook" },
       { value: "content-catalog", label: "Каталог" },
       { value: "content-menus", label: "Меню" },
+      { value: "settings-header-menu", label: "Настройки меню шапки" },
     ],
   },
   {
@@ -73,7 +74,6 @@ const sections: AdminSection[] = [
     icon: Settings,
     subItems: [
       { value: "settings-site", label: "Настройки сайта" },
-      { value: "settings-header-menu", label: "Меню шапки" },
       { value: "settings-seo", label: "SEO" },
       { value: "settings-fonts", label: "Шрифты" },
       { value: "settings-email", label: "Email" },

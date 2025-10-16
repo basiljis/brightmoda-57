@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface HeaderMenuSettings {
   id: string;
@@ -17,6 +18,27 @@ interface HeaderMenuSettings {
   show_categories: boolean;
   featured_products_count: number;
   featured_collections_count: number;
+  selected_collection_ids?: string[];
+  selected_product_ids?: string[];
+  selected_category_ids?: string[];
+}
+
+interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export default function HeaderMenuSettings() {
@@ -31,11 +53,35 @@ export default function HeaderMenuSettings() {
     show_categories: true,
     featured_products_count: 3,
     featured_collections_count: 4,
+    selected_collection_ids: [],
+    selected_product_ids: [],
+    selected_category_ids: [],
   });
+
+  const [availableCollections, setAvailableCollections] = useState<Collection[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     loadSettings();
+    loadAvailableData();
   }, []);
+
+  const loadAvailableData = async () => {
+    try {
+      const [collectionsRes, productsRes, categoriesRes] = await Promise.all([
+        supabase.from('collections').select('id, name, slug').eq('is_active', true).order('name'),
+        supabase.from('products').select('id, name, price').eq('is_active', true).order('name'),
+        supabase.from('categories').select('id, name, slug').eq('is_active', true).order('name')
+      ]);
+
+      if (collectionsRes.data) setAvailableCollections(collectionsRes.data);
+      if (productsRes.data) setAvailableProducts(productsRes.data);
+      if (categoriesRes.data) setAvailableCategories(categoriesRes.data);
+    } catch (error) {
+      console.error('Error loading available data:', error);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -78,6 +124,9 @@ export default function HeaderMenuSettings() {
           show_categories: settings.show_categories,
           featured_products_count: settings.featured_products_count,
           featured_collections_count: settings.featured_collections_count,
+          selected_collection_ids: settings.selected_collection_ids || [],
+          selected_product_ids: settings.selected_product_ids || [],
+          selected_category_ids: settings.selected_category_ids || [],
         });
 
       if (error) throw error;
@@ -198,49 +247,163 @@ export default function HeaderMenuSettings() {
           </div>
         </div>
 
-        {(settings.show_featured_products || settings.show_collections) && (
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="font-medium">Количество элементов</h3>
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="font-medium">Выбор отображаемых элементов</h3>
 
-            {settings.show_featured_products && (
+          {settings.show_collections && (
+            <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="products-count">Количество товаров</Label>
-                <Input
-                  id="products-count"
-                  type="number"
-                  min="1"
-                  max="12"
-                  value={settings.featured_products_count}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      featured_products_count: parseInt(e.target.value) || 3,
-                    })
-                  }
-                />
+                <Label htmlFor="select-collections">Выбрать коллекции для отображения</Label>
+                <Select
+                  onValueChange={(value) => {
+                    if (!settings.selected_collection_ids?.includes(value)) {
+                      setSettings({
+                        ...settings,
+                        selected_collection_ids: [...(settings.selected_collection_ids || []), value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id="select-collections">
+                    <SelectValue placeholder="Выберите коллекцию..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCollections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+              {settings.selected_collection_ids && settings.selected_collection_ids.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {settings.selected_collection_ids.map((id) => {
+                    const collection = availableCollections.find(c => c.id === id);
+                    return collection ? (
+                      <Badge key={id} variant="secondary">
+                        {collection.name}
+                        <X
+                          className="h-3 w-3 ml-1 cursor-pointer"
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              selected_collection_ids: settings.selected_collection_ids?.filter(cid => cid !== id)
+                            });
+                          }}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
-            {settings.show_collections && (
+          {settings.show_featured_products && (
+            <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="collections-count">Количество коллекций</Label>
-                <Input
-                  id="collections-count"
-                  type="number"
-                  min="1"
-                  max="12"
-                  value={settings.featured_collections_count}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      featured_collections_count: parseInt(e.target.value) || 4,
-                    })
-                  }
-                />
+                <Label htmlFor="select-products">Выбрать товары для отображения</Label>
+                <Select
+                  onValueChange={(value) => {
+                    if (!settings.selected_product_ids?.includes(value)) {
+                      setSettings({
+                        ...settings,
+                        selected_product_ids: [...(settings.selected_product_ids || []), value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id="select-products">
+                    <SelectValue placeholder="Выберите товар..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProducts.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name} - {product.price.toLocaleString()} ₽
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-          </div>
-        )}
+              {settings.selected_product_ids && settings.selected_product_ids.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {settings.selected_product_ids.map((id) => {
+                    const product = availableProducts.find(p => p.id === id);
+                    return product ? (
+                      <Badge key={id} variant="secondary">
+                        {product.name}
+                        <X
+                          className="h-3 w-3 ml-1 cursor-pointer"
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              selected_product_ids: settings.selected_product_ids?.filter(pid => pid !== id)
+                            });
+                          }}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {settings.show_categories && (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="select-categories">Выбрать категории для отображения</Label>
+                <Select
+                  onValueChange={(value) => {
+                    if (!settings.selected_category_ids?.includes(value)) {
+                      setSettings({
+                        ...settings,
+                        selected_category_ids: [...(settings.selected_category_ids || []), value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id="select-categories">
+                    <SelectValue placeholder="Выберите категорию..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {settings.selected_category_ids && settings.selected_category_ids.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {settings.selected_category_ids.map((id) => {
+                    const category = availableCategories.find(c => c.id === id);
+                    return category ? (
+                      <Badge key={id} variant="secondary">
+                        {category.name}
+                        <X
+                          className="h-3 w-3 ml-1 cursor-pointer"
+                          onClick={() => {
+                            setSettings({
+                              ...settings,
+                              selected_category_ids: settings.selected_category_ids?.filter(cid => cid !== id)
+                            });
+                          }}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          <p className="text-sm text-muted-foreground">
+            Если элементы не выбраны, будут отображаться автоматически выбранные товары/коллекции/категории
+          </p>
+        </div>
 
         <div className="flex justify-end pt-4 border-t">
           <Button onClick={saveSettings} disabled={saving}>
