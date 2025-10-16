@@ -648,19 +648,15 @@ const AdminPage = () => {
                   </p>
                 </div>
                 <Tabs defaultValue="display" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="display">Настройки отображения</TabsTrigger>
                     <TabsTrigger value="header-menu">Настройки меню шапки</TabsTrigger>
-                    <TabsTrigger value="menu-items">Создание пунктов меню</TabsTrigger>
                   </TabsList>
                   <TabsContent value="display" className="mt-6">
                     <CatalogSettings />
                   </TabsContent>
                   <TabsContent value="header-menu" className="mt-6">
                     <HeaderMenuSettings />
-                  </TabsContent>
-                  <TabsContent value="menu-items" className="mt-6">
-                    <MenuManagement />
                   </TabsContent>
                 </Tabs>
               </div>
