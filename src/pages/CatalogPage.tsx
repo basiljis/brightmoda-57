@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Grid, List, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +26,7 @@ const CatalogPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const { getGridClasses, getContainerClass } = useCatalogSettings();
   
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -208,9 +210,9 @@ const CatalogPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className={getContainerClass()}>
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 pt-8">
           <h1 className="text-3xl font-bold text-foreground mb-4">Каталог товаров</h1>
           <p className="text-muted-foreground">
             {currentSubcategory?.description || 
@@ -459,11 +461,7 @@ const CatalogPage = () => {
             </Button>
           </div>
         ) : (
-          <div className={`grid gap-6 ${
-            viewMode === "grid" 
-              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-              : "grid-cols-1"
-          }`}>
+          <div className={getGridClasses()}>
             {sortedProducts.map((product) => (
               <ProductCard 
                 key={product.id} 

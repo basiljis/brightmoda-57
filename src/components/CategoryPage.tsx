@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 interface CategoryPageProps {
   title: string;
@@ -9,6 +10,7 @@ interface CategoryPageProps {
 
 const CategoryPage = ({ title, description }: CategoryPageProps) => {
   const { collection } = useParams();
+  const { getGridClasses, getContainerClass } = useCatalogSettings();
   
   return (
     <div className="min-h-screen bg-background">
@@ -27,8 +29,8 @@ const CategoryPage = ({ title, description }: CategoryPageProps) => {
       </div>
 
       {/* Products Grid */}
-      <div className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className={getContainerClass()}>
+        <div className={getGridClasses()}>
           {/* Placeholder products */}
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="border-none shadow-sm hover:shadow-md transition-shadow">

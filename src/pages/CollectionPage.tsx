@@ -11,6 +11,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { Separator } from '@/components/ui/separator';
 import { Product } from '@/data/products';
+import { useCatalogSettings } from '@/hooks/useCatalogSettings';
 
 interface DBProduct {
   id: string;
@@ -46,6 +47,7 @@ const CollectionPage = () => {
   const [colors, setColors] = useState<Color[]>([]);
   const [productColors, setProductColors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const { getGridClasses, getContainerClass } = useCatalogSettings();
   
   const [sortBy, setSortBy] = useState('default');
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -222,9 +224,9 @@ const CollectionPage = () => {
       )}
 
       {/* Products Section */}
-      <div className="container mx-auto px-4 pb-16">
+      <div className={getContainerClass()}>
         {/* Filters Bar */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 pb-8">
           <div className="text-sm text-muted-foreground">
             Найдено товаров: {filteredProducts.length}
           </div>
@@ -315,7 +317,7 @@ const CollectionPage = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className={getGridClasses()}>
             {filteredProducts.map((product, index) => {
               // Convert DBProduct to Product format for ProductCard
               const productForCard: Product = {

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCart } from "@/hooks/useCart";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 interface ProductCardProps {
   product: Product;
@@ -44,6 +45,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { isFavorited, toggleFavorite } = useFavorites();
   const { addToCart } = useCart();
+  const { settings, getRoundingClass } = useCatalogSettings();
 
   // Получаем изображения для выбранного цвета в карточке товара
   const getDisplayImages = () => {
@@ -107,6 +109,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
     addToCart(String(product.id));
   };
 
+  const getFavoritePositionClass = () => {
+    const positions = {
+      top_right: 'top-3 right-3',
+      top_left: 'top-3 left-3',
+      bottom_right: 'bottom-3 right-3',
+      bottom_left: 'bottom-3 left-3',
+    };
+    return positions[settings.favorite_position];
+  };
+
+  const shouldShowOnHover = settings.show_hover_effects;
+
   return (
     <div 
       className="group cursor-pointer"
@@ -114,7 +128,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.id}`}>
-        <div className="relative overflow-hidden bg-card rounded-none shadow-soft hover:shadow-elegant transition-all duration-300">
+        <div className={`relative overflow-hidden bg-card shadow-soft hover:shadow-elegant transition-all duration-300 ${getRoundingClass()}`}>
           {/* Labels */}
           {(product.isNew || product.isPreorder) && (
             <div className="absolute top-3 left-3 z-10">
@@ -202,34 +216,52 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   {product.price.toLocaleString()} ₽
                 </span>
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleToggleFavorite}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-2"
-              >
-                <Heart 
-                  className={`h-4 w-4 transition-colors ${
-                    isFavorited(String(product.id)) ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'
-                  }`}
-                />
-              </Button>
+              {settings.cart_position === 'on_card' && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleAddToCart}
+                  className={`${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity p-2`}
+                >
+                  <ShoppingCart className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                </Button>
+              )}
             </div>
           </div>
+          
+          {/* Favorite Button - positioned by settings */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleToggleFavorite}
+            className={`absolute ${getFavoritePositionClass()} z-10 ${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity p-2 bg-background/80 backdrop-blur-sm`}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors ${
+                settings.favorite_icon_style === 'filled' && isFavorited(String(product.id))
+                  ? 'fill-primary text-primary' 
+                  : isFavorited(String(product.id))
+                  ? 'fill-primary text-primary'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
+            />
+          </Button>
         </div>
       </Link>
       
-      {/* Add to Cart Button - показывается под карточкой при наведении */}
-      <div className={`mt-3 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
-        <Button
-          onClick={handleAddToCart}
-          className="w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200"
-          variant="outline"
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Добавить в корзину
-        </Button>
-      </div>
+      {/* Add to Cart Button - показывается под карточкой при наведении (только если настройка = below_card) */}
+      {settings.cart_position === 'below_card' && (
+        <div className={`mt-3 transition-all duration-300 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2') : 'opacity-100 translate-y-0'}`}>
+          <Button
+            onClick={handleAddToCart}
+            className="w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200"
+            variant="outline"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Добавить в корзину
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

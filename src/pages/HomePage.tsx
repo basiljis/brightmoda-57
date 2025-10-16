@@ -11,6 +11,7 @@ import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import EmailSubscriptionSection from "@/components/EmailSubscriptionSection";
 import HeroCarousel from "@/components/HeroCarousel";
+import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 function MerinoSection({ blocks = [] as any[] }) {
   const by = (name: string) => blocks.find((b: any) => b.section_name === name)?.content_value || '';
@@ -59,6 +60,7 @@ const HomePage = () => {
   const featuredProducts = products.slice(0, 4);
   const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
   const [showMerinoSection, setShowMerinoSection] = useState(true);
+  const { getGridClasses } = useCatalogSettings();
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -310,7 +312,7 @@ const HomePage = () => {
             <div className="w-16 h-px bg-foreground mx-auto"></div>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className={getGridClasses()}>
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
