@@ -5,10 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Save, Trash2, ArrowUp, ArrowDown, Edit, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus, Save, Trash2, GripVertical, Edit2, X } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import RichTextEditor from './RichTextEditor';
 
 interface MenuItem {
   id: string;
@@ -20,24 +25,184 @@ interface MenuItem {
   display_order: number;
   is_active: boolean;
   parent_id?: string | null;
-  children?: MenuItem[];
+  content_type?: string;
+  text_content?: string;
 }
 
-const EXCLUDED_PAGES = ['home', 'cart', 'profile', 'favorites'];
+interface SortableItemProps {
+  item: MenuItem;
+  onUpdate: (id: string, updates: Partial<MenuItem>) => void;
+  onDelete: (id: string) => void;
+  onSave: (item: MenuItem) => void;
+  onEditContent: (item: MenuItem) => void;
+  level: number;
+}
+
+function SortableItem({ item, onUpdate, onDelete, onSave, onEditContent, level }: SortableItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={`bg-card border rounded-lg p-4 mb-2 ${level > 0 ? 'ml-8' : ''}`}
+    >
+      <div className="flex items-start gap-3">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing mt-2">
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </button>
+        
+        <div className="flex-1 space-y-3">
+          <div className="grid gap-3 md:grid-cols-12">
+            <div className="md:col-span-3 space-y-2">
+              <Label className="text-xs">Подпись в меню</Label>
+              <Input 
+                value={item.menu_label || ''} 
+                onChange={e => onUpdate(item.id, { menu_label: e.target.value })} 
+                placeholder="Название"
+                className="h-9"
+              />
+            </div>
+            
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-xs">Расположение</Label>
+              <Select 
+                value={item.menu_location} 
+                onValueChange={v => onUpdate(item.id, { menu_location: v as any })}
+              >
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Скрыто</SelectItem>
+                  <SelectItem value="header">Шапка</SelectItem>
+                  <SelectItem value="footer">Подвал</SelectItem>
+                  <SelectItem value="both">Оба</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="md:col-span-3 space-y-2">
+              <Label className="text-xs">URL ссылки</Label>
+              <Input 
+                value={item.content_value} 
+                onChange={e => onUpdate(item.id, { content_value: e.target.value })} 
+                placeholder="/about"
+                className="h-9"
+              />
+            </div>
+
+            <div className="md:col-span-1 flex items-end pb-1">
+              <Switch 
+                checked={item.is_active} 
+                onCheckedChange={v => onUpdate(item.id, { is_active: v })} 
+              />
+            </div>
+            
+            <div className="md:col-span-3 flex items-end gap-1 pb-1">
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => onEditContent(item)}
+                title="Редактировать контент страницы"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => onSave(item)}
+                title="Сохранить"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => onDelete(item.id)}
+                title="Удалить"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PREDEFINED_PAGES = [
+  { page_name: 'about', label: 'О нас', url: '/about' },
+  { page_name: 'contacts', label: 'Контакты', url: '/contacts' }
+];
 
 export default function MenuManagement() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'header' | 'footer'>('all');
-  const [search, setSearch] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemLocation, setNewItemLocation] = useState<'header' | 'footer' | 'both'>('header');
+  const [editingContent, setEditingContent] = useState<MenuItem | null>(null);
+  const [contentText, setContentText] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     load();
+    checkPredefinedPages();
   }, []);
+
+  const checkPredefinedPages = async () => {
+    try {
+      for (const page of PREDEFINED_PAGES) {
+        const { data: existing } = await supabase
+          .from('page_content')
+          .select('id')
+          .eq('page_name', page.page_name)
+          .in('menu_location', ['header', 'footer', 'both'])
+          .maybeSingle();
+
+        if (!existing) {
+          const maxOrderRes = await supabase
+            .from('page_content')
+            .select('display_order')
+            .in('menu_location', ['header', 'footer', 'both'])
+            .order('display_order', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          const maxOrder = maxOrderRes?.data?.display_order || 0;
+
+          await supabase.from('page_content').insert({
+            page_name: page.page_name,
+            section_name: 'menu_item',
+            menu_label: page.label,
+            content_value: page.url,
+            menu_location: 'header',
+            display_order: maxOrder + 1,
+            is_active: true,
+            content_type: 'page'
+          });
+        }
+      }
+      load();
+    } catch (e) {
+      console.error('Error checking predefined pages:', e);
+    }
+  };
 
   const load = async () => {
     try {
@@ -45,56 +210,15 @@ export default function MenuManagement() {
         .from('page_content')
         .select('*')
         .in('menu_location', ['header', 'footer', 'both'])
-        .not('page_name', 'in', `(${EXCLUDED_PAGES.join(',')})`)
         .order('display_order', { ascending: true });
       
       if (error) throw error;
-      
-      // Build hierarchy
-      const itemsMap = new Map<string, MenuItem>();
-      const rootItems: MenuItem[] = [];
-      
-      (data || []).forEach((item: any) => {
-        itemsMap.set(item.id, { ...item, children: [] });
-      });
-      
-      itemsMap.forEach((item) => {
-        if (item.parent_id) {
-          const parent = itemsMap.get(item.parent_id);
-          if (parent) {
-            parent.children = parent.children || [];
-            parent.children.push(item);
-          } else {
-            rootItems.push(item);
-          }
-        } else {
-          rootItems.push(item);
-        }
-      });
-      
-      setItems(rootItems);
+      setItems((data || []) as MenuItem[]);
     } catch (e) {
       console.error(e);
       toast({ title: 'Ошибка', description: 'Не удалось загрузить меню', variant: 'destructive' });
     }
   };
-
-  const filteredItems = items.filter(item => {
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      const matches = (i: MenuItem): boolean => {
-        const directMatch = i.page_name?.toLowerCase().includes(q) ||
-          i.menu_label?.toLowerCase().includes(q) ||
-          i.section_name?.toLowerCase().includes(q);
-        const childMatch = i.children?.some(matches) || false;
-        return directMatch || childMatch;
-      };
-      if (!matches(item)) return false;
-    }
-    
-    if (filter === 'all') return true;
-    return item.menu_location === filter || item.menu_location === 'both';
-  });
 
   const createNewItem = async () => {
     if (!newItemName.trim()) {
@@ -106,17 +230,20 @@ export default function MenuManagement() {
       setLoading(true);
       const maxOrder = items.reduce((max, item) => Math.max(max, item.display_order), 0);
       
+      const pageName = newItemName.toLowerCase().replace(/\s+/g, '_');
+      const url = `/${newItemName.toLowerCase().replace(/\s+/g, '-')}`;
+
       const { data, error } = await supabase
         .from('page_content')
         .insert({
-          page_name: newItemName.toLowerCase().replace(/\s+/g, '_'),
+          page_name: pageName,
           section_name: 'menu_item',
           menu_label: newItemName,
-          content_value: `/${newItemName.toLowerCase().replace(/\s+/g, '-')}`,
+          content_value: url,
           menu_location: newItemLocation,
           display_order: maxOrder + 1,
           is_active: true,
-          content_type: 'link'
+          content_type: 'page'
         })
         .select()
         .single();
@@ -126,11 +253,6 @@ export default function MenuManagement() {
       toast({ title: 'Создано', description: 'Новый пункт меню создан' });
       setNewItemName('');
       load();
-      
-      // Navigate to page editor
-      if (data) {
-        navigate(`/admin?tab=content-pages&page=${data.page_name}`);
-      }
     } catch (e) {
       console.error(e);
       toast({ title: 'Ошибка', description: 'Не удалось создать пункт меню', variant: 'destructive' });
@@ -139,65 +261,35 @@ export default function MenuManagement() {
     }
   };
 
-  const createSubItem = async (parentId: string, parentItem: MenuItem) => {
-    const name = prompt('Введите название подраздела:');
-    if (!name?.trim()) return;
-    
-    try {
-      setLoading(true);
-      const maxOrder = (parentItem.children || []).reduce((max, child) => Math.max(max, child.display_order), parentItem.display_order);
-      
-      const { data, error } = await supabase
-        .from('page_content')
-        .insert({
-          page_name: parentItem.page_name,
-          section_name: 'submenu_item',
-          menu_label: name,
-          content_value: `${parentItem.content_value}/${name.toLowerCase().replace(/\s+/g, '-')}`,
-          menu_location: parentItem.menu_location,
-          display_order: maxOrder + 1,
-          parent_id: parentId,
-          is_active: true,
-          content_type: 'link'
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      toast({ title: 'Создано', description: 'Подраздел добавлен' });
-      load();
-      
-      // Navigate to page editor
-      if (data) {
-        navigate(`/admin?tab=content-pages&page=${data.page_name}&section=${data.section_name}`);
-      }
-    } catch (e) {
-      console.error(e);
-      toast({ title: 'Ошибка', description: 'Не удалось создать подраздел', variant: 'destructive' });
-    } finally {
-      setLoading(false);
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        
+        // Update display_order for all items
+        reordered.forEach(async (item, index) => {
+          await supabase
+            .from('page_content')
+            .update({ display_order: index })
+            .eq('id', item.id);
+        });
+        
+        return reordered;
+      });
+
+      toast({ title: 'Порядок изменен', description: 'Последовательность пунктов меню обновлена' });
     }
   };
 
-  const updateItem = (id: string, patch: Partial<MenuItem>) => {
-    setItems(prev => {
-      const update = (items: MenuItem[]): MenuItem[] => {
-        return items.map(item => {
-          if (item.id === id) {
-            return { ...item, ...patch };
-          }
-          if (item.children) {
-            return { ...item, children: update(item.children) };
-          }
-          return item;
-        });
-      };
-      return update(prev);
-    });
+  const updateItem = (id: string, updates: Partial<MenuItem>) => {
+    setItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
   };
 
-  const persistItem = async (item: MenuItem) => {
+  const saveItem = async (item: MenuItem) => {
     try {
       setLoading(true);
       const { error } = await supabase
@@ -208,7 +300,6 @@ export default function MenuManagement() {
           menu_location: item.menu_location,
           display_order: item.display_order,
           is_active: item.is_active,
-          parent_id: item.parent_id || null
         })
         .eq('id', item.id);
       
@@ -223,7 +314,7 @@ export default function MenuManagement() {
   };
 
   const deleteItem = async (id: string) => {
-    if (!confirm('Удалить этот пункт меню? Все подразделы также будут удалены.')) return;
+    if (!confirm('Удалить этот пункт меню?')) return;
     
     try {
       setLoading(true);
@@ -243,161 +334,71 @@ export default function MenuManagement() {
     }
   };
 
-  const move = async (item: MenuItem, dir: -1 | 1, siblings: MenuItem[]) => {
-    const idx = siblings.findIndex(i => i.id === item.id);
-    const target = siblings[idx + dir];
-    if (!target) return;
+  const openContentEditor = async (item: MenuItem) => {
+    setEditingContent(item);
     
-    await persistItem({ ...item, display_order: target.display_order });
-    await persistItem({ ...target, display_order: item.display_order });
-    load();
+    // Load existing content for this page
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', item.page_name)
+        .neq('section_name', 'menu_item')
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Combine all content blocks into one text
+      const combined = (data || [])
+        .map(block => block.content_value)
+        .join('\n\n');
+      
+      setContentText(combined || '');
+    } catch (e) {
+      console.error(e);
+      setContentText('');
+    }
   };
 
-  const openPageEditor = (item: MenuItem) => {
-    navigate(`/admin?tab=content-pages&page=${item.page_name}`);
-  };
-
-  const renderMenuItem = (item: MenuItem, level: number = 0, siblings: MenuItem[] = items) => {
-    const findItem = (items: MenuItem[], id: string): MenuItem | undefined => {
-      for (const item of items) {
-        if (item.id === id) return item;
-        if (item.children) {
-          const found = findItem(item.children, id);
-          if (found) return found;
-        }
-      }
-    };
+  const saveContent = async () => {
+    if (!editingContent) return;
     
-    const idx = siblings.findIndex(i => i.id === item.id);
-    
-    return (
-      <div key={item.id} className="space-y-2">
-        <div 
-          className="border rounded-lg p-3 hover:bg-muted/50 transition-colors" 
-          style={{ marginLeft: `${level * 1.5}rem` }}
-        >
-          <div className="flex items-center gap-3">
-            {level > 0 && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-            
-            <div className="flex-1 grid grid-cols-12 gap-3 items-center">
-              <div className="col-span-3 space-y-1">
-                <Label className="text-xs">Подпись</Label>
-                <Input 
-                  value={item.menu_label || ''} 
-                  onChange={e => updateItem(item.id, { menu_label: e.target.value })} 
-                  placeholder="Название"
-                  className="h-9"
-                />
-              </div>
-              
-              <div className="col-span-3 space-y-1">
-                <Label className="text-xs">Ссылка</Label>
-                <Input 
-                  value={item.content_value} 
-                  onChange={e => updateItem(item.id, { content_value: e.target.value })} 
-                  placeholder="/about"
-                  className="h-9"
-                />
-              </div>
-              
-              <div className="col-span-2 space-y-1">
-                <Label className="text-xs">Расположение</Label>
-                <Select 
-                  value={item.menu_location} 
-                  onValueChange={v => updateItem(item.id, { menu_location: v as any })}
-                >
-                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Скрыто</SelectItem>
-                    <SelectItem value="header">Шапка</SelectItem>
-                    <SelectItem value="footer">Подвал</SelectItem>
-                    <SelectItem value="both">Оба</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="col-span-2 flex items-end gap-1 pb-1">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-9 w-9"
-                  onClick={() => move(item, -1, siblings)} 
-                  disabled={idx === 0}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => move(item, 1, siblings)} 
-                  disabled={idx === siblings.length - 1}
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="col-span-1 flex items-end pb-1">
-                <Switch 
-                  checked={item.is_active} 
-                  onCheckedChange={v => updateItem(item.id, { is_active: v })} 
-                />
-              </div>
-              
-              <div className="col-span-1 flex items-end gap-1 pb-1">
-                {level === 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    className="h-9 w-9"
-                    onClick={() => createSubItem(item.id, item)}
-                    title="Добавить подраздел"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => openPageEditor(item)}
-                  title="Редактировать страницу"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => {
-                    const currentItem = findItem(items, item.id);
-                    if (currentItem) persistItem(currentItem);
-                  }}
-                  title="Сохранить"
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => deleteItem(item.id)}
-                  title="Удалить"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+    try {
+      setLoading(true);
+      
+      // Delete existing content blocks for this page (except menu item)
+      await supabase
+        .from('page_content')
+        .delete()
+        .eq('page_name', editingContent.page_name)
+        .neq('section_name', 'menu_item');
+      
+      // Create new content block
+      if (contentText.trim()) {
+        const { error } = await supabase
+          .from('page_content')
+          .insert({
+            page_name: editingContent.page_name,
+            section_name: 'content',
+            content_type: 'html',
+            content_value: contentText,
+            display_order: 1,
+            is_active: true,
+            menu_location: 'none'
+          });
         
-        {item.children && item.children.length > 0 && (
-          <div className="space-y-2">
-            {item.children.map(child => renderMenuItem(child, level + 1, item.children || []))}
-          </div>
-        )}
-      </div>
-    );
+        if (error) throw error;
+      }
+      
+      toast({ title: 'Сохранено', description: 'Контент страницы обновлен' });
+      setEditingContent(null);
+      setContentText('');
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Ошибка', description: 'Не удалось сохранить контент', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -406,7 +407,7 @@ export default function MenuManagement() {
         <CardHeader>
           <CardTitle>Создать новый пункт меню</CardTitle>
           <CardDescription>
-            Создайте пункт меню и перейдите к редактированию его страницы
+            Создайте пункт меню и настройте контент его страницы
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -437,43 +438,67 @@ export default function MenuManagement() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <Input 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            placeholder="Поиск..."
-          />
-        </div>
-        <Select value={filter} onValueChange={v => setFilter(v as any)}>
-          <SelectTrigger className="w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            <SelectItem value="header">Только шапка</SelectItem>
-            <SelectItem value="footer">Только подвал</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Пункты меню</CardTitle>
           <CardDescription>
-            Управляйте структурой меню. Исключены: Главная, Корзина, Личный кабинет, Избранное
+            Управляйте структурой меню. Перетаскивайте для изменения порядка.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {filteredItems.length === 0 ? (
+          {items.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               Нет пунктов меню. Создайте первый пункт выше.
             </p>
           ) : (
-            filteredItems.map(item => renderMenuItem(item))
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                {items.map((item) => (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    onUpdate={updateItem}
+                    onSave={saveItem}
+                    onDelete={deleteItem}
+                    onEditContent={openContentEditor}
+                    level={0}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingContent} onOpenChange={() => setEditingContent(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Редактирование контента: {editingContent?.menu_label}</DialogTitle>
+            <DialogDescription>
+              Настройте содержимое страницы {editingContent?.content_value}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Контент страницы</Label>
+              <RichTextEditor
+                value={contentText}
+                onChange={setContentText}
+                placeholder="Введите содержимое страницы..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingContent(null)}>
+                Отмена
+              </Button>
+              <Button onClick={saveContent} disabled={loading}>
+                <Save className="h-4 w-4 mr-2" />
+                Сохранить контент
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

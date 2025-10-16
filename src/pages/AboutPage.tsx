@@ -21,7 +21,7 @@ const AboutPage = () => {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
-        .eq('page_name', 'about_us')
+        .eq('page_name', 'about')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
@@ -53,24 +53,15 @@ const AboutPage = () => {
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-light tracking-wide text-foreground">
-              {content.title || 'О НАС'}
+              О НАС
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {content.subtitle || 'История бренда BRIGHT и наша философия'}
-            </p>
           </div>
 
-          <div className="space-y-8 text-muted-foreground leading-relaxed">
-            {content.paragraph_1 && (
-              <p>{content.paragraph_1}</p>
-            )}
-            
-            {content.paragraph_2 && (
-              <p>{content.paragraph_2}</p>
-            )}
-            
-            {content.paragraph_3 && (
-              <p>{content.paragraph_3}</p>
+          <div className="prose prose-lg max-w-none text-muted-foreground">
+            {content.content ? (
+              <div dangerouslySetInnerHTML={{ __html: content.content }} />
+            ) : (
+              <p>Содержимое страницы не найдено. Настройте контент в административной панели.</p>
             )}
           </div>
         </div>

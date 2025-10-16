@@ -16,7 +16,6 @@ import ReferenceManagement from '@/components/admin/ReferenceManagement';
 import ProductForm from '@/components/admin/ProductForm';
 import ProductEdit from '@/components/admin/ProductEdit';
 import LookbookManagement from '@/components/admin/LookbookManagement';
-import PageContentManagement from '@/components/admin/PageContentManagement';
 import ProductImportExport from '@/components/admin/ProductImportExport';
 import EmailSubscriptionManagement from '@/components/admin/EmailSubscriptionManagement';
 import EmailSettings from '@/components/admin/EmailSettings';
@@ -28,7 +27,6 @@ import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
-import PageSyncStatus from '@/components/admin/PageSyncStatus';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
@@ -79,20 +77,18 @@ const AdminPage = () => {
     }
   }, [isAdmin]);
 
-  // Listen for cross-component navigation to content editor
+  // Listen for cross-component navigation to menu editor
   useEffect(() => {
     const handler = (e: any) => {
       const page = e?.detail?.page;
       if (page) {
-        setActiveTab('content-pages');
+        setActiveTab('content-menus');
       }
     };
     const visualEditorHandler = (e: any) => {
       const page = e?.detail?.page;
       if (page) {
-        setActiveTab('content-pages');
-        // Дополнительно можно передать информацию о том, что нужно открыть визуальный редактор
-        window.dispatchEvent(new CustomEvent('open-visual-editor-for', { detail: { page } }));
+        setActiveTab('content-menus');
       }
     };
     window.addEventListener('open-content-for', handler as any);
@@ -617,14 +613,6 @@ const AdminPage = () => {
             {activeTab === "content-lookbook" && (
               <div className="space-y-6">
                 <LookbookManagement />
-              </div>
-            )}
-
-            {/* Content - Pages */}
-            {activeTab === "content-pages" && (
-              <div className="space-y-6">
-                <PageSyncStatus />
-                <PageContentManagement />
               </div>
             )}
 
