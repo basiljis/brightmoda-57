@@ -318,7 +318,7 @@ const HomePage = () => {
             ))}
           </div>
 
-          <div className="text-center">
+          <div className="text-center mt-12">
             <Link to="/catalog">
               <Button variant="outline" size="lg" className="font-light tracking-wide px-8 border-foreground text-foreground hover:bg-foreground hover:text-background">
                 Смотреть все
