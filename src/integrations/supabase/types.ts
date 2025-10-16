@@ -511,6 +511,9 @@ export type Database = {
           is_active: boolean
           items_count: number | null
           show_all_collections: boolean | null
+          show_more_button: boolean | null
+          show_more_link: string | null
+          show_more_text: string | null
           text_content: string | null
           title: string | null
           title_alignment: string
@@ -526,6 +529,9 @@ export type Database = {
           is_active?: boolean
           items_count?: number | null
           show_all_collections?: boolean | null
+          show_more_button?: boolean | null
+          show_more_link?: string | null
+          show_more_text?: string | null
           text_content?: string | null
           title?: string | null
           title_alignment?: string
@@ -541,6 +547,9 @@ export type Database = {
           is_active?: boolean
           items_count?: number | null
           show_all_collections?: boolean | null
+          show_more_button?: boolean | null
+          show_more_link?: string | null
+          show_more_text?: string | null
           text_content?: string | null
           title?: string | null
           title_alignment?: string

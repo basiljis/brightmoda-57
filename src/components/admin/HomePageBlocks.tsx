@@ -25,6 +25,9 @@ interface HomePageBlock {
   show_all_collections: boolean | null;
   text_content: string | null;
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
+  show_more_button: boolean | null;
+  show_more_text: string | null;
+  show_more_link: string | null;
 }
 
 interface Collection {
@@ -100,44 +103,80 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
           </div>
 
           {(block.block_type === 'catalog' || block.block_type === 'catalog_filtered') && (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Количество карточек</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={block.items_count || 4}
-                  onChange={(e) => onUpdate(block.id, { items_count: parseInt(e.target.value) || 4 })}
-                />
+            <div className="space-y-3">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Количество карточек</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={block.items_count || 4}
+                    onChange={(e) => onUpdate(block.id, { items_count: parseInt(e.target.value) || 4 })}
+                  />
+                </div>
+
+                {block.block_type === 'catalog_filtered' && (
+                  <div className="space-y-2">
+                    <Label>Коллекция</Label>
+                    <Select
+                      value={block.show_all_collections ? 'all' : (block.collection_id || '')}
+                      onValueChange={(value) => {
+                        if (value === 'all') {
+                          onUpdate(block.id, { show_all_collections: true, collection_id: null });
+                        } else {
+                          onUpdate(block.id, { show_all_collections: false, collection_id: value });
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите коллекцию" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все коллекции</SelectItem>
+                        {collections.map((collection) => (
+                          <SelectItem key={collection.id} value={collection.id}>
+                            {collection.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
-              {block.block_type === 'catalog_filtered' && (
-                <div className="space-y-2">
-                  <Label>Коллекция</Label>
-                  <Select
-                    value={block.show_all_collections ? 'all' : (block.collection_id || '')}
-                    onValueChange={(value) => {
-                      if (value === 'all') {
-                        onUpdate(block.id, { show_all_collections: true, collection_id: null });
-                      } else {
-                        onUpdate(block.id, { show_all_collections: false, collection_id: value });
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите коллекцию" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Все коллекции</SelectItem>
-                      {collections.map((collection) => (
-                        <SelectItem key={collection.id} value={collection.id}>
-                          {collection.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="pt-3 border-t space-y-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`show-more-${block.id}`}
+                    checked={block.show_more_button || false}
+                    onChange={(e) => onUpdate(block.id, { show_more_button: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor={`show-more-${block.id}`}>Показывать кнопку "Показать еще"</Label>
                 </div>
-              )}
+
+                {block.show_more_button && (
+                  <div className="grid gap-3 md:grid-cols-2 pl-6">
+                    <div className="space-y-2">
+                      <Label>Текст кнопки</Label>
+                      <Input
+                        value={block.show_more_text || 'Показать еще'}
+                        onChange={(e) => onUpdate(block.id, { show_more_text: e.target.value })}
+                        placeholder="Показать еще"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Ссылка</Label>
+                      <Input
+                        value={block.show_more_link || ''}
+                        onChange={(e) => onUpdate(block.id, { show_more_link: e.target.value })}
+                        placeholder="/catalog"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -245,6 +284,9 @@ const HomePageBlocks = () => {
         items_count: newBlockType !== 'text' ? 4 : null,
         show_all_collections: newBlockType === 'catalog_filtered' ? false : null,
         font_size: newBlockType === 'text' ? ('medium' as const) : null,
+        show_more_button: false,
+        show_more_text: 'Показать еще',
+        show_more_link: null,
       };
 
       const { data, error } = await supabase

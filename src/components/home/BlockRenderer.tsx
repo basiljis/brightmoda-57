@@ -16,6 +16,9 @@ interface HomePageBlock {
   show_all_collections: boolean | null;
   text_content: string | null;
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
+  show_more_button: boolean | null;
+  show_more_text: string | null;
+  show_more_link: string | null;
 }
 
 interface BlockRendererProps {
@@ -74,6 +77,7 @@ export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
     }
 
     const displayProducts = filteredProducts.slice(0, block.items_count || 4);
+    const remainingCount = filteredProducts.length - displayProducts.length;
 
     return (
       <section className="py-12">
@@ -96,16 +100,15 @@ export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
             ))}
           </div>
 
-          {block.block_type === 'catalog_filtered' && block.collection_id && (
+          {block.show_more_button && remainingCount > 0 && block.show_more_link && (
             <div className={`mt-8 ${titleAlignClass}`}>
-              <Link to={`/collections/${filteredProducts[0]?.collection_slug || ''}`}>
+              <Link to={block.show_more_link}>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="font-light tracking-wide px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
+                  className="font-light tracking-widest uppercase px-8 border-foreground text-foreground hover:bg-foreground hover:text-background"
                 >
-                  Смотреть все
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {block.show_more_text || 'Показать еще'} ({remainingCount})
                 </Button>
               </Link>
             </div>
