@@ -16,6 +16,8 @@ interface HeaderMenuSettings {
   show_featured_products: boolean;
   show_collections: boolean;
   show_categories: boolean;
+  show_collections_right: boolean;
+  show_products_right: boolean;
   featured_products_count: number;
   featured_collections_count: number;
   selected_collection_ids?: string[];
@@ -52,6 +54,8 @@ export default function HeaderMenuSettings() {
     show_featured_products: true,
     show_collections: true,
     show_categories: true,
+    show_collections_right: true,
+    show_products_right: true,
     featured_products_count: 3,
     featured_collections_count: 4,
     selected_collection_ids: [],
@@ -124,6 +128,8 @@ export default function HeaderMenuSettings() {
           show_featured_products: settings.show_featured_products,
           show_collections: settings.show_collections,
           show_categories: settings.show_categories,
+          show_collections_right: settings.show_collections_right,
+          show_products_right: settings.show_products_right,
           featured_products_count: settings.featured_products_count,
           featured_collections_count: settings.featured_collections_count,
           selected_collection_ids: settings.selected_collection_ids || [],
@@ -245,16 +251,32 @@ export default function HeaderMenuSettings() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="show-products">Показывать товары</Label>
+              <Label htmlFor="show-products-right">Показывать товары</Label>
               <p className="text-sm text-muted-foreground">
-                Отображать избранные товары с картинками
+                Отображать избранные товары с картинками в правой части
               </p>
             </div>
             <Switch
-              id="show-products"
-              checked={settings.show_featured_products}
+              id="show-products-right"
+              checked={settings.show_products_right}
               onCheckedChange={(checked) =>
-                setSettings({ ...settings, show_featured_products: checked })
+                setSettings({ ...settings, show_products_right: checked })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="show-collections-right">Показывать коллекции</Label>
+              <p className="text-sm text-muted-foreground">
+                Отображать коллекции с картинками в правой части
+              </p>
+            </div>
+            <Switch
+              id="show-collections-right"
+              checked={settings.show_collections_right}
+              onCheckedChange={(checked) =>
+                setSettings({ ...settings, show_collections_right: checked })
               }
             />
           </div>
@@ -286,10 +308,10 @@ export default function HeaderMenuSettings() {
               </p>
             </div>
 
-          {settings.show_collections && (
+          {settings.show_collections_right && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="select-collections">Выбрать коллекции для отображения</Label>
+                <Label htmlFor="select-collections">Выбрать коллекции для отображения в правой части</Label>
                 <Select
                   onValueChange={(value) => {
                     if (!settings.selected_collection_ids?.includes(value)) {
@@ -339,10 +361,10 @@ export default function HeaderMenuSettings() {
             </div>
           )}
 
-          {settings.show_featured_products && (
+          {settings.show_products_right && (
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="select-products">Выбрать товары для отображения</Label>
+                <Label htmlFor="select-products">Выбрать товары для отображения в правой части</Label>
                 <Select
                   onValueChange={(value) => {
                     if (!settings.selected_product_ids?.includes(value)) {

@@ -48,6 +48,8 @@ const Header = () => {
     show_featured_products: boolean;
     show_collections: boolean;
     show_categories: boolean;
+    show_collections_right: boolean;
+    show_products_right: boolean;
     featured_products_count: number;
     featured_collections_count: number;
     selected_collection_ids?: string[];
@@ -59,6 +61,8 @@ const Header = () => {
     show_featured_products: true,
     show_collections: true,
     show_categories: true,
+    show_collections_right: true,
+    show_products_right: true,
     featured_products_count: 3,
     featured_collections_count: 4,
     selected_collection_ids: [],
@@ -649,8 +653,9 @@ const Header = () => {
                   : featuredProductsData as any
               }
               showCategories={menuSettings.show_categories}
-              showCollections={menuSettings.show_collections}
-              showProducts={menuSettings.show_featured_products}
+              showCollectionsLeft={menuSettings.show_collections}
+              showProductsRight={menuSettings.show_products_right}
+              showCollectionsRight={menuSettings.show_collections_right}
               rightSideContent={menuSettings.right_side_content}
               onClose={() => setIsCatalogMenuOpen(false)}
             />

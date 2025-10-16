@@ -519,7 +519,9 @@ export type Database = {
           selected_product_ids: string[] | null
           show_categories: boolean
           show_collections: boolean
+          show_collections_right: boolean
           show_featured_products: boolean
+          show_products_right: boolean
           updated_at: string
         }
         Insert: {
@@ -534,7 +536,9 @@ export type Database = {
           selected_product_ids?: string[] | null
           show_categories?: boolean
           show_collections?: boolean
+          show_collections_right?: boolean
           show_featured_products?: boolean
+          show_products_right?: boolean
           updated_at?: string
         }
         Update: {
@@ -549,7 +553,9 @@ export type Database = {
           selected_product_ids?: string[] | null
           show_categories?: boolean
           show_collections?: boolean
+          show_collections_right?: boolean
           show_featured_products?: boolean
+          show_products_right?: boolean
           updated_at?: string
         }
         Relationships: []
