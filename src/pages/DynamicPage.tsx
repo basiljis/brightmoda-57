@@ -14,21 +14,38 @@ export default function DynamicPage() {
       
       setLoading(true);
       try {
-        // Extract page name from slug (remove leading slash)
-        const pageName = slug.replace(/^\//, '').replace(/\/$/, '');
+        // Extract page path from slug (remove leading/trailing slashes)
+        const pagePath = '/' + slug.replace(/^\//, '').replace(/\/$/, '');
         
-        const { data, error } = await supabase
+        // First, try to find the page by matching the URL in menu items
+        const { data: menuItem, error: menuError } = await supabase
           .from('page_content')
-          .select('*')
-          .eq('page_name', pageName)
-          .eq('section_name', 'content')
+          .select('page_name')
+          .eq('section_name', 'menu_item')
+          .eq('content_value', pagePath)
           .eq('is_active', true)
           .maybeSingle();
 
-        if (error) throw error;
-        setContent(data);
+        if (menuError) throw menuError;
+        
+        // If we found the menu item, use its page_name to get the content
+        if (menuItem) {
+          const { data: pageContent, error: contentError } = await supabase
+            .from('page_content')
+            .select('*')
+            .eq('page_name', menuItem.page_name)
+            .eq('section_name', 'content')
+            .eq('is_active', true)
+            .maybeSingle();
+
+          if (contentError) throw contentError;
+          setContent(pageContent);
+        } else {
+          setContent(null);
+        }
       } catch (error) {
         console.error('Error loading page content:', error);
+        setContent(null);
       } finally {
         setLoading(false);
       }
