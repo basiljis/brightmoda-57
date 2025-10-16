@@ -29,7 +29,6 @@ import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import PageSyncStatus from '@/components/admin/PageSyncStatus';
-import HomePageSettings from '@/components/admin/HomePageSettings';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
@@ -640,13 +639,6 @@ const AdminPage = () => {
             {activeTab === "content-header" && (
               <div className="space-y-6">
                 <HeaderCollectionManagement />
-              </div>
-            )}
-
-            {/* Content - Home Page Settings */}
-            {activeTab === "content-home" && (
-              <div className="space-y-6">
-                <HomePageSettings />
               </div>
             )}
 
