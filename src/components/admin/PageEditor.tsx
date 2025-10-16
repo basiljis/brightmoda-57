@@ -231,8 +231,10 @@ const PageEditor: React.FC<PageEditorProps> = ({
           id,
           type: 'yandex_map',
           props: {
-            embedUrl: '',
-            height: 400
+            latitude: 55.751244,
+            longitude: 37.618423,
+            height: 400,
+            zoom: 15
           }
         };
       default:

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Block } from '@/types/page-editor';
 import { Settings, Palette } from 'lucide-react';
 import FileUploadField from '@/components/admin/FileUploadField';
@@ -298,19 +299,53 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ selectedBlock, onBlockUpd
       case 'yandex_map':
         return (
           <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Широта</Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="0.000001"
+                  value={selectedBlock.props.latitude}
+                  onChange={(e) => handlePropChange('latitude', parseFloat(e.target.value))}
+                  placeholder="55.751244"
+                />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Долгота</Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="0.000001"
+                  value={selectedBlock.props.longitude}
+                  onChange={(e) => handlePropChange('longitude', parseFloat(e.target.value))}
+                  placeholder="37.618423"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Например: Москва — 55.751244, 37.618423
+            </p>
+            
+            <Separator />
+            
             <div>
-              <Label htmlFor="embedUrl">Ссылка для встраивания</Label>
-              <Textarea
-                id="embedUrl"
-                value={selectedBlock.props.embedUrl}
-                onChange={(e) => handlePropChange('embedUrl', e.target.value)}
-                placeholder="https://yandex.ru/map-widget/..."
-                rows={3}
+              <Label htmlFor="zoom">Масштаб карты (опционально)</Label>
+              <Input
+                id="zoom"
+                type="number"
+                min={1}
+                max={19}
+                value={selectedBlock.props.zoom || 15}
+                onChange={(e) => handlePropChange('zoom', parseInt(e.target.value))}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Вставьте ссылку для встраивания из Яндекс.Карт
+                От 1 (весь мир) до 19 (максимальное приближение)
               </p>
             </div>
+            
+            <Separator />
+            
             <div>
               <Label htmlFor="height">Высота (px)</Label>
               <Input

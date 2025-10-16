@@ -150,9 +150,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
     case 'yandex_map':
       return (
         <div className="w-full">
-          {block.props.embedUrl ? (
+          {block.props.latitude && block.props.longitude ? (
             <iframe
-              src={block.props.embedUrl}
+              src={`https://yandex.ru/map-widget/v1/?ll=${block.props.longitude},${block.props.latitude}&z=${block.props.zoom || 15}&l=map&pt=${block.props.longitude},${block.props.latitude},pm2rdm`}
               width="100%"
               height={block.props.height}
               className="border-0 rounded-lg"
@@ -163,7 +163,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
               className="w-full bg-muted rounded-lg flex items-center justify-center text-muted-foreground"
               style={{ height: `${block.props.height}px` }}
             >
-              Вставьте ссылку на карту Яндекс
+              Укажите координаты карты
             </div>
           )}
         </div>

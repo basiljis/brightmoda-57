@@ -68,8 +68,10 @@ export interface DividerBlock extends BaseBlock {
 export interface YandexMapBlock extends BaseBlock {
   type: 'yandex_map';
   props: {
-    embedUrl: string;
+    latitude: number;
+    longitude: number;
     height: number;
+    zoom?: number;
   };
 }
 
