@@ -98,7 +98,7 @@ export const useCatalogSettings = () => {
   };
 
   const getContainerClass = () => {
-    return settings.full_width_layout ? 'w-full px-0' : 'container mx-auto px-4';
+    return settings.full_width_layout ? 'w-full' : 'container mx-auto px-4';
   };
 
   return {
