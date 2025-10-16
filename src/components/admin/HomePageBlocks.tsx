@@ -421,6 +421,8 @@ const HomePageBlocks = () => {
         font_size: newBlockType === 'text' ? ('medium' as const) : null,
         show_more_button: false,
         show_more_text: 'Показать еще',
+        show_more_button_size: 'medium' as const,
+        show_more_button_type: 'text' as const,
       };
 
       const { data, error } = await supabase
