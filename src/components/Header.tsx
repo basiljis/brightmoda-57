@@ -43,26 +43,13 @@ const Header = () => {
   const [contactUrl, setContactUrl] = useState<string | null>(null);
   const [contactIconMode, setContactIconMode] = useState<string>('auto');
   const [contactCustomIcon, setContactCustomIcon] = useState<string | null>(null);
-  const [menuSettings, setMenuSettings] = useState<{
-    menu_style: string;
-    show_featured_products: boolean;
-    show_collections: boolean;
-    show_categories: boolean;
-    featured_products_count: number;
-    featured_collections_count: number;
-    selected_category_ids?: string[];
-    selected_collection_ids?: string[];
-    selected_product_ids?: string[];
-  }>({
+  const [menuSettings, setMenuSettings] = useState({
     menu_style: 'simple',
     show_featured_products: true,
     show_collections: true,
     show_categories: true,
     featured_products_count: 3,
     featured_collections_count: 4,
-    selected_category_ids: [],
-    selected_collection_ids: [],
-    selected_product_ids: [],
   });
   const [featuredProductsData, setFeaturedProductsData] = useState([]);
   const isMobile = useIsMobile();
@@ -349,65 +336,48 @@ const Header = () => {
                       <div className="grid w-[800px] gap-6 p-6">
                         <div className="grid grid-cols-3 gap-6">
                           {/* Dynamic Categories */}
-                          {menuSettings.show_categories && (() => {
-                            const displayCategories = menuSettings.selected_category_ids && menuSettings.selected_category_ids.length > 0
-                              ? categories.filter(cat => menuSettings.selected_category_ids.includes(cat.id))
-                              : categories;
-                            
-                            return displayCategories.map((category) => (
-                              <div key={category.id} className="space-y-3">
-                                <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
-                                  {category.name}
-                                </h4>
-                                <div className="grid gap-2">
-                                  {category.subcategories?.map((subcategory) => (
-                                    <NavigationMenuLink asChild key={subcategory.id}>
-                                      <Link 
-                                        to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
-                                        className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                                      >
-                                        {subcategory.name}
-                                      </Link>
-                                    </NavigationMenuLink>
-                                  ))}
-                                </div>
+                          {menuSettings.show_categories && categories.map((category) => (
+                            <div key={category.id} className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80 uppercase">
+                                {category.name}
+                              </h4>
+                              <div className="grid gap-2">
+                                {category.subcategories?.map((subcategory) => (
+                                  <NavigationMenuLink asChild key={subcategory.id}>
+                                    <Link 
+                                      to={`/catalog?category=${category.slug}&subcategory=${subcategory.slug}`} 
+                                      className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                      {subcategory.name}
+                                    </Link>
+                                  </NavigationMenuLink>
+                                ))}
                               </div>
-                            ));
-                          })()}
+                            </div>
+                          ))}
                           
                           {/* Collections Section */}
-                          {menuSettings.show_collections && (() => {
-                            const displayCollections = menuSettings.selected_collection_ids && menuSettings.selected_collection_ids.length > 0
-                              ? collections.filter(col => menuSettings.selected_collection_ids.includes(col.id))
-                              : collections.slice(0, menuSettings.featured_collections_count);
-                            
-                            return displayCollections.length > 0 && (
-                              <div className="space-y-3">
-                                <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
-                                <div className="grid gap-2">
-                                  {displayCollections.map((collection) => (
-                                    <NavigationMenuLink asChild key={collection.id}>
-                                      <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                        {collection.name}
-                                      </Link>
-                                    </NavigationMenuLink>
-                                  ))}
-                                </div>
+                          {menuSettings.show_collections && collections.length > 0 && (
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">КОЛЛЕКЦИИ</h4>
+                              <div className="grid gap-2">
+                                {collections.slice(0, menuSettings.featured_collections_count).map((collection) => (
+                                  <NavigationMenuLink asChild key={collection.id}>
+                                    <Link to={`/collections/${collection.slug}`} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                      {collection.name}
+                                    </Link>
+                                  </NavigationMenuLink>
+                                ))}
                               </div>
-                            );
-                          })()}
+                            </div>
+                          )}
                           
                           {/* Featured Products */}
-                          {menuSettings.show_featured_products && (() => {
-                            const displayProducts = menuSettings.selected_product_ids && menuSettings.selected_product_ids.length > 0
-                              ? featuredProductsData.filter(prod => menuSettings.selected_product_ids?.includes(prod.id))
-                              : featuredProductsData;
-                            
-                            return displayProducts.length > 0 && (
-                              <div className="space-y-3">
-                                <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
-                                <div className="space-y-4">
-                                  {displayProducts.slice(0, 3).map((product: any) => {
+                          {menuSettings.show_featured_products && featuredProductsData.length > 0 && (
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium tracking-wide text-foreground/80">НОВИНКИ</h4>
+                              <div className="space-y-4">
+                                {featuredProductsData.slice(0, 3).map((product: any) => {
                                   const imageUrl = product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg';
                                   
                                   return (
@@ -444,8 +414,7 @@ const Header = () => {
                                 })}
                               </div>
                             </div>
-                            );
-                          })()}
+                          )}
                         </div>
                       </div>
                     </NavigationMenuContent>
@@ -621,21 +590,9 @@ const Header = () => {
             onMouseLeave={() => setIsCatalogMenuOpen(false)}
           >
             <FullWidthMegaMenu
-              categories={
-                menuSettings.selected_category_ids && menuSettings.selected_category_ids.length > 0
-                  ? (categories.filter((cat: any) => menuSettings.selected_category_ids?.includes(cat.id)) as any)
-                  : (categories as any)
-              }
-              collections={
-                menuSettings.selected_collection_ids && menuSettings.selected_collection_ids.length > 0
-                  ? (collections.filter((col: any) => menuSettings.selected_collection_ids?.includes(col.id)) as any)
-                  : (collections as any)
-              }
-              products={
-                menuSettings.selected_product_ids && menuSettings.selected_product_ids.length > 0
-                  ? (featuredProductsData.filter((prod: any) => menuSettings.selected_product_ids?.includes(prod.id)) as any)
-                  : (featuredProductsData as any)
-              }
+              categories={categories as any}
+              collections={collections as any}
+              products={featuredProductsData as any}
               showCategories={menuSettings.show_categories}
               showCollections={menuSettings.show_collections}
               showProducts={menuSettings.show_featured_products}
