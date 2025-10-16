@@ -149,12 +149,21 @@ const AnalyticsDashboard = () => {
       if (subscribersError) throw subscribersError;
       setTotalActiveSubscribers(activeSubscribersCount || 0);
 
+      // Get new subscribers count for the selected period
+      const { count: newSubscribersCount, error: newSubscribersError } = await supabase
+        .from('email_subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', `${start}T00:00:00`)
+        .lte('created_at', `${end}T23:59:59`);
+
+      if (newSubscribersError) throw newSubscribersError;
+
       // Process data
       const dailyStats = processDailyStats(summaryData || []);
       const topPages = processTopPages(pageViews || []);
       const topProducts = await processTopProducts(productActions || []);
       const geoStats = processGeoStats(pageViews || []);
-      const summary = calculateSummary(summaryData || []);
+      const summary = calculateSummary(summaryData || [], newSubscribersCount || 0);
 
       setAnalyticsData({
         daily_stats: dailyStats,
@@ -303,14 +312,14 @@ const AnalyticsDashboard = () => {
       .slice(0, 10);
   };
 
-  const calculateSummary = (data: any[]) => {
+  const calculateSummary = (data: any[], newSubscribersCount: number) => {
     const summary = {
       total_page_views: 0,
       total_unique_visitors: 0,
       total_favorites: 0,
       total_cart_additions: 0,
       total_purchases: 0,
-      total_subscribers: 0,
+      total_subscribers: newSubscribersCount,
       conversion_rate: 0,
       abandonment_rate: 0
     };
@@ -331,9 +340,6 @@ const AnalyticsDashboard = () => {
           break;
         case 'completed_purchases':
           summary.total_purchases += item.metric_value;
-          break;
-        case 'new_subscribers':
-          summary.total_subscribers += item.metric_value;
           break;
       }
     });
