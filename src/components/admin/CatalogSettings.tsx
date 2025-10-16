@@ -240,7 +240,12 @@ const CatalogSettings = () => {
               </Select>
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="full-width">На всю ширину экрана</Label>
+              <div className="space-y-1">
+                <Label htmlFor="full-width">На всю ширину экрана</Label>
+                <p className="text-xs text-muted-foreground">
+                  Растягивает контент до краев экрана на всех страницах (каталог, коллекции, главная)
+                </p>
+              </div>
               <Switch
                 id="full-width"
                 checked={settings.full_width_layout}

@@ -60,7 +60,7 @@ const HomePage = () => {
   const featuredProducts = products.slice(0, 4);
   const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
   const [showMerinoSection, setShowMerinoSection] = useState(true);
-  const { getGridClasses } = useCatalogSettings();
+  const { getGridClasses, getContainerClass } = useCatalogSettings();
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -263,7 +263,7 @@ const HomePage = () => {
       {/* Featured Collections */}
       {collections.length > 0 && (
         <section className="py-24 bg-muted/30">
-          <div className="container mx-auto px-4">
+          <div className={getContainerClass()}>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-light text-foreground mb-6 tracking-wide">
                 Коллекции
@@ -304,7 +304,7 @@ const HomePage = () => {
 
       {/* Featured Products */}
       <section className="py-24">
-        <div className="container mx-auto px-4">
+        <div className={getContainerClass()}>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-light text-foreground mb-6 tracking-wide">
               Новые поступления
@@ -332,7 +332,7 @@ const HomePage = () => {
       {/* About Merino Wool - editable via page_content (home) */}
       {showMerinoSection && (
         <section className="py-24 bg-muted/30">
-          <div className="container mx-auto px-4">
+          <div className={getContainerClass()}>
             <MerinoSection blocks={merinoBlocks} />
           </div>
         </section>
