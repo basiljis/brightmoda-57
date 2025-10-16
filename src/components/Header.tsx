@@ -314,7 +314,9 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
-              <NavigationMenuList>
+              <NavigationMenuList 
+                onMouseLeave={() => setIsCatalogMenuOpen(false)}
+              >
                 {menuSettings.menu_style === 'fullwidth' ? (
                   <NavigationMenuItem>
                     <button
@@ -438,7 +440,10 @@ const Header = () => {
                     const children = childrenMap.get(item.id) || [];
                     
                     return (
-                      <NavigationMenuItem key={item.id}>
+                      <NavigationMenuItem 
+                        key={item.id}
+                        onMouseEnter={() => setIsCatalogMenuOpen(false)}
+                      >
                         {children.length > 0 ? (
                           <>
                             <NavigationMenuTrigger className="text-sm font-light tracking-wide">

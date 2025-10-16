@@ -48,7 +48,10 @@ export function FullWidthMegaMenu({
   onClose,
 }: FullWidthMegaMenuProps) {
   return (
-    <div className="fixed left-0 right-0 top-[var(--header-height,80px)] bg-background border-b border-border shadow-lg z-40 max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto">
+    <div 
+      className="fixed left-0 right-0 top-[var(--header-height,80px)] bg-background border-b border-border shadow-lg z-40 max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto"
+      onMouseLeave={onClose}
+    >
       <div className="container mx-auto">
         <div className="grid grid-cols-12 gap-8 p-8 min-h-[400px]">
           {/* Left sidebar with categories */}
