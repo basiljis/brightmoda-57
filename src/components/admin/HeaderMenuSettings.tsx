@@ -226,6 +226,62 @@ export default function HeaderMenuSettings() {
             />
           </div>
 
+          {settings.show_categories && (
+            <div className="space-y-3 pl-4 border-l-2">
+              <div className="space-y-2">
+                <Label htmlFor="select-categories-left">Категории для отображения</Label>
+                <Select
+                  onValueChange={(value) => {
+                    if (!settings.selected_category_ids?.includes(value)) {
+                      setSettings({
+                        ...settings,
+                        selected_category_ids: [...(settings.selected_category_ids || []), value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id="select-categories-left">
+                    <SelectValue placeholder="Выберите категорию..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Оставьте пустым для отображения всех категорий
+                </p>
+              </div>
+              {settings.selected_category_ids && settings.selected_category_ids.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Выбранные категории:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.selected_category_ids.map((id) => {
+                      const category = availableCategories.find(c => c.id === id);
+                      return category ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {category.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => {
+                              setSettings({
+                                ...settings,
+                                selected_category_ids: settings.selected_category_ids?.filter(cid => cid !== id)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="show-collections">Показывать коллекции</Label>
@@ -241,6 +297,62 @@ export default function HeaderMenuSettings() {
               }
             />
           </div>
+
+          {settings.show_collections && (
+            <div className="space-y-3 pl-4 border-l-2">
+              <div className="space-y-2">
+                <Label htmlFor="select-collections-left">Коллекции для отображения</Label>
+                <Select
+                  onValueChange={(value) => {
+                    if (!settings.selected_collection_ids?.includes(value)) {
+                      setSettings({
+                        ...settings,
+                        selected_collection_ids: [...(settings.selected_collection_ids || []), value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id="select-collections-left">
+                    <SelectValue placeholder="Выберите коллекцию..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCollections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Оставьте пустым для отображения всех коллекций
+                </p>
+              </div>
+              {settings.selected_collection_ids && settings.selected_collection_ids.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Выбранные коллекции:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.selected_collection_ids.map((id) => {
+                      const collection = availableCollections.find(c => c.id === id);
+                      return collection ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {collection.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => {
+                              setSettings({
+                                ...settings,
+                                selected_collection_ids: settings.selected_collection_ids?.filter(cid => cid !== id)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="space-y-4 border-t pt-4">
