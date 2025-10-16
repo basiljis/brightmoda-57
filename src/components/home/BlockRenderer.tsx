@@ -5,7 +5,7 @@ import { useCatalogSettings } from '@/hooks/useCatalogSettings';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
@@ -153,6 +153,50 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
               </h3>
             </div>
           </a>
+        </div>
+      </section>
+    );
+  }
+
+  if (block.block_type === 'features') {
+    let features: Array<{ title: string; description: string }> = [];
+    
+    try {
+      const parsed = JSON.parse(block.text_content || '{"items":[]}');
+      features = parsed.items || [];
+    } catch {
+      features = [];
+    }
+
+    if (features.length === 0) return null;
+
+    return (
+      <section className="py-16">
+        <div className={getContainerClass()}>
+          {block.title && (
+            <div className={`mb-12 ${titleAlignClass}`}>
+              <h2 className="text-3xl md:text-4xl font-light text-foreground tracking-wide">
+                {block.title}
+              </h2>
+              <div className={`w-16 h-px bg-foreground mt-4 ${
+                block.title_alignment === 'center' ? 'mx-auto' : 
+                block.title_alignment === 'right' ? 'ml-auto' : ''
+              }`}></div>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8 max-w-4xl mx-auto">
+            {features.map((feature, index) => (
+              <div key={index} className="space-y-2">
+                <h3 className="text-lg font-normal text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );

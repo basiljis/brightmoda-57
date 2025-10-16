@@ -15,7 +15,7 @@ import RichTextEditor from './RichTextEditor';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
@@ -56,6 +56,7 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
       case 'catalog_filtered': return 'Каталог с фильтром';
       case 'text': return 'Текстовый блок';
       case 'collection_card': return 'Карточка коллекции';
+      case 'features': return 'Преимущества';
       default: return type;
     }
   };
@@ -226,8 +227,87 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
               </div>
             </div>
           )}
+
+          {block.block_type === 'features' && (
+            <div className="space-y-3">
+              <FeaturesEditor
+                features={(() => {
+                  try {
+                    const parsed = JSON.parse(block.text_content || '{"items":[]}');
+                    return parsed.items || [];
+                  } catch {
+                    return [];
+                  }
+                })()}
+                onChange={(features) => {
+                  onUpdate(block.id, { text_content: JSON.stringify({ items: features }) });
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function FeaturesEditor({ features, onChange }: { features: Array<{ title: string; description: string }>; onChange: (features: Array<{ title: string; description: string }>) => void }) {
+  const handleAdd = () => {
+    onChange([...features, { title: '', description: '' }]);
+  };
+
+  const handleRemove = (index: number) => {
+    onChange(features.filter((_, i) => i !== index));
+  };
+
+  const handleUpdate = (index: number, field: 'title' | 'description', value: string) => {
+    const updated = [...features];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label>Элементы преимуществ</Label>
+        <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+          <Plus className="h-4 w-4 mr-1" />
+          Добавить элемент
+        </Button>
+      </div>
+      
+      {features.map((feature, index) => (
+        <div key={index} className="border rounded-lg p-4 space-y-3 bg-muted/30">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Элемент {index + 1}</span>
+            <Button type="button" variant="ghost" size="sm" onClick={() => handleRemove(index)}>
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+          <div className="space-y-2">
+            <Label>Заголовок</Label>
+            <Input
+              value={feature.title}
+              onChange={(e) => handleUpdate(index, 'title', e.target.value)}
+              placeholder="Например: Терморегуляция"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Описание</Label>
+            <Input
+              value={feature.description}
+              onChange={(e) => handleUpdate(index, 'description', e.target.value)}
+              placeholder="Описание преимущества"
+            />
+          </div>
+        </div>
+      ))}
+      
+      {features.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Нет элементов. Добавьте первый элемент преимущества.
+        </p>
+      )}
     </div>
   );
 }
@@ -238,7 +318,7 @@ const HomePageBlocks = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text' | 'collection_card'>('catalog');
+  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text' | 'collection_card' | 'features'>('catalog');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -428,6 +508,7 @@ const HomePageBlocks = () => {
                     <SelectItem value="catalog_filtered">Каталог с фильтром по коллекции</SelectItem>
                     <SelectItem value="text">Текстовый блок</SelectItem>
                     <SelectItem value="collection_card">Карточка коллекции</SelectItem>
+                    <SelectItem value="features">Преимущества</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
