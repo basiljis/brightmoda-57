@@ -649,7 +649,8 @@ const Header = () => {
                   : featuredProductsData as any
               }
               showCategories={menuSettings.show_categories}
-              showCollectionsLeft={menuSettings.show_collections}
+              showCollections={menuSettings.show_collections}
+              showProducts={menuSettings.show_featured_products}
               rightSideContent={menuSettings.right_side_content}
               onClose={() => setIsCatalogMenuOpen(false)}
             />
