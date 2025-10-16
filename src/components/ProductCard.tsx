@@ -206,15 +206,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
             
             <div className="flex items-center justify-between pt-2">
-              <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-light text-foreground tracking-wide">
+                  {product.price.toLocaleString()} ₽
+                </span>
                 {product.originalPrice && (
                   <span className="text-sm text-muted-foreground line-through">
                     {product.originalPrice.toLocaleString()} ₽
                   </span>
                 )}
-                <span className="text-xl font-light text-foreground tracking-wide">
-                  {product.price.toLocaleString()} ₽
-                </span>
               </div>
               {settings.cart_position === 'on_card' && (
                 <Button
