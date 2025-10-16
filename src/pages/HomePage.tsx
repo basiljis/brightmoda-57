@@ -4,7 +4,7 @@ import { products } from "@/data/products";
 import menCollection from "@/assets/men-collection.jpg";
 import womenCollection from "@/assets/women-collection.jpg";
 import { supabase } from "@/integrations/supabase/client";
-
+import EmailSubscriptionSection from "@/components/EmailSubscriptionSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 import { BlockRenderer } from "@/components/home/BlockRenderer";
@@ -205,6 +205,9 @@ const HomePage = () => {
       {homePageBlocks.map((block) => (
         <BlockRenderer key={block.id} block={block} products={products} collections={collections} />
       ))}
+
+      {/* Email Subscription Section */}
+      <EmailSubscriptionSection />
     </div>
   );
 };
