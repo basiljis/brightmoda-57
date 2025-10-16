@@ -190,7 +190,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </div>
             )}
             
-            {/* Add to Cart Button on card - full width at bottom */}
+            {/* Add to Cart Button on card - with padding from edges */}
             {settings.cart_position === 'on_card' && (
               <div className={`absolute bottom-4 left-4 right-4 z-10 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2') : 'opacity-100 translate-y-0'} transition-all duration-300`}>
                 <Button
