@@ -254,7 +254,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className={`mt-3 transition-all duration-300 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2') : 'opacity-100 translate-y-0'}`}>
           <Button
             onClick={handleAddToCart}
-            className="w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200"
+            className={`w-full bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()}`}
             variant="outline"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
