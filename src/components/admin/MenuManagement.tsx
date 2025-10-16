@@ -470,21 +470,48 @@ export default function MenuManagement() {
     try {
       setLoading(true);
       
-      // Save page blocks data
-      const { error } = await supabase
+      // Save page blocks data without relying on ON CONFLICT (no unique constraint on page_name,section_name)
+      // 1) Check if a record already exists for this page/section
+      const { data: existing, error: selectError } = await supabase
         .from('page_content')
-        .upsert({
-          page_name: editingContent.page_name,
-          section_name: 'page_blocks',
-          content_type: 'json',
-          content_value: JSON.stringify(pageData),
-          display_order: 1,
-          is_active: true,
-          menu_location: 'none'
-        }, {
-          onConflict: 'page_name,section_name'
-        });
+        .select('id')
+        .eq('page_name', editingContent.page_name)
+        .eq('section_name', 'page_blocks')
+        .maybeSingle();
       
+      if (selectError) throw selectError;
+
+      let error: any = null;
+
+      if (existing?.id) {
+        // 2a) Update existing record
+        const { error: updateError } = await supabase
+          .from('page_content')
+          .update({
+            content_type: 'json',
+            content_value: JSON.stringify(pageData),
+            display_order: 1,
+            is_active: true,
+            menu_location: 'none'
+          })
+          .eq('id', existing.id);
+        error = updateError;
+      } else {
+        // 2b) Insert new record
+        const { error: insertError } = await supabase
+          .from('page_content')
+          .insert({
+            page_name: editingContent.page_name,
+            section_name: 'page_blocks',
+            content_type: 'json',
+            content_value: JSON.stringify(pageData),
+            display_order: 1,
+            is_active: true,
+            menu_location: 'none'
+          });
+        error = insertError;
+      }
+
       if (error) throw error;
       
       toast({ title: 'Сохранено', description: 'Страница успешно обновлена' });
@@ -595,7 +622,7 @@ export default function MenuManagement() {
       </Card>
 
       <Dialog open={!!editingContent} onOpenChange={() => setEditingContent(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Редактирование контента: {editingContent?.menu_label}</DialogTitle>
             <DialogDescription>
