@@ -277,24 +277,27 @@ export default function HeaderMenuSettings() {
                 </Select>
               </div>
               {settings.selected_collection_ids && settings.selected_collection_ids.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {settings.selected_collection_ids.map((id) => {
-                    const collection = availableCollections.find(c => c.id === id);
-                    return collection ? (
-                      <Badge key={id} variant="secondary">
-                        {collection.name}
-                        <X
-                          className="h-3 w-3 ml-1 cursor-pointer"
-                          onClick={() => {
-                            setSettings({
-                              ...settings,
-                              selected_collection_ids: settings.selected_collection_ids?.filter(cid => cid !== id)
-                            });
-                          }}
-                        />
-                      </Badge>
-                    ) : null;
-                  })}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Выбранные коллекции:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.selected_collection_ids.map((id) => {
+                      const collection = availableCollections.find(c => c.id === id);
+                      return collection ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {collection.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => {
+                              setSettings({
+                                ...settings,
+                                selected_collection_ids: settings.selected_collection_ids?.filter(cid => cid !== id)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -327,24 +330,27 @@ export default function HeaderMenuSettings() {
                 </Select>
               </div>
               {settings.selected_product_ids && settings.selected_product_ids.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {settings.selected_product_ids.map((id) => {
-                    const product = availableProducts.find(p => p.id === id);
-                    return product ? (
-                      <Badge key={id} variant="secondary">
-                        {product.name}
-                        <X
-                          className="h-3 w-3 ml-1 cursor-pointer"
-                          onClick={() => {
-                            setSettings({
-                              ...settings,
-                              selected_product_ids: settings.selected_product_ids?.filter(pid => pid !== id)
-                            });
-                          }}
-                        />
-                      </Badge>
-                    ) : null;
-                  })}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Выбранные товары:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.selected_product_ids.map((id) => {
+                      const product = availableProducts.find(p => p.id === id);
+                      return product ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {product.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => {
+                              setSettings({
+                                ...settings,
+                                selected_product_ids: settings.selected_product_ids?.filter(pid => pid !== id)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -377,24 +383,27 @@ export default function HeaderMenuSettings() {
                 </Select>
               </div>
               {settings.selected_category_ids && settings.selected_category_ids.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {settings.selected_category_ids.map((id) => {
-                    const category = availableCategories.find(c => c.id === id);
-                    return category ? (
-                      <Badge key={id} variant="secondary">
-                        {category.name}
-                        <X
-                          className="h-3 w-3 ml-1 cursor-pointer"
-                          onClick={() => {
-                            setSettings({
-                              ...settings,
-                              selected_category_ids: settings.selected_category_ids?.filter(cid => cid !== id)
-                            });
-                          }}
-                        />
-                      </Badge>
-                    ) : null;
-                  })}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Выбранные категории:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.selected_category_ids.map((id) => {
+                      const category = availableCategories.find(c => c.id === id);
+                      return category ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {category.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => {
+                              setSettings({
+                                ...settings,
+                                selected_category_ids: settings.selected_category_ids?.filter(cid => cid !== id)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
               )}
             </div>
