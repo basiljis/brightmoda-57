@@ -5,16 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import RichTextEditor from './RichTextEditor';
 
 const FooterSettings = () => {
   const { toast } = useToast();
   const [settings, setSettings] = useState({
     copyright_text: '',
     footer_description: '',
-    terms_of_use_url: '/terms-of-use',
-    privacy_policy_url: '/privacy-policy',
     social_links: {
       instagram: '',
       facebook: '',
@@ -27,10 +27,13 @@ const FooterSettings = () => {
       contact_us_custom_icon_url: ''
     }
   });
+  const [termsContent, setTermsContent] = useState('');
+  const [privacyContent, setPrivacyContent] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadSettings();
+    loadPageContent();
   }, []);
 
   const loadSettings = async () => {
@@ -48,8 +51,6 @@ const FooterSettings = () => {
         setSettings({
           copyright_text: data.copyright_text || '© 2024 BRIGHT. Все права защищены.',
           footer_description: data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.',
-          terms_of_use_url: (data as any).terms_of_use_url || '/terms-of-use',
-          privacy_policy_url: (data as any).privacy_policy_url || '/privacy-policy',
           social_links: {
             instagram: (data.social_links as any)?.instagram || '',
             facebook: (data.social_links as any)?.facebook || '',
@@ -68,6 +69,38 @@ const FooterSettings = () => {
     }
   };
 
+  const loadPageContent = async () => {
+    try {
+      // Load Terms of Use
+      const { data: termsData } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', 'terms_of_use')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (termsData && termsData.length > 0) {
+        const content = termsData.map(item => item.content_value).join('\n');
+        setTermsContent(content);
+      }
+
+      // Load Privacy Policy
+      const { data: privacyData } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page_name', 'privacy_policy')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (privacyData && privacyData.length > 0) {
+        const content = privacyData.map(item => item.content_value).join('\n');
+        setPrivacyContent(content);
+      }
+    } catch (error) {
+      console.error('Error loading page content:', error);
+    }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -82,8 +115,6 @@ const FooterSettings = () => {
         id: existingSettings?.id,
         copyright_text: settings.copyright_text,
         footer_description: settings.footer_description,
-        terms_of_use_url: settings.terms_of_use_url,
-        privacy_policy_url: settings.privacy_policy_url,
         social_links: settings.social_links
       }).select();
 
@@ -98,6 +129,45 @@ const FooterSettings = () => {
       toast({
         title: "Ошибка",
         description: "Не удалось сохранить настройки",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePageContent = async (pageName: 'terms_of_use' | 'privacy_policy', content: string) => {
+    setLoading(true);
+    try {
+      // Delete existing content for this page
+      await supabase
+        .from('page_content')
+        .delete()
+        .eq('page_name', pageName);
+
+      // Insert new content
+      const { error } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: pageName,
+          section_name: 'main',
+          content_type: 'html',
+          content_value: content,
+          is_active: true,
+          display_order: 0
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Контент сохранен",
+        description: `Содержимое страницы успешно обновлено`,
+      });
+    } catch (error) {
+      console.error('Error saving page content:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить контент",
         variant: "destructive",
       });
     } finally {
@@ -144,29 +214,51 @@ const FooterSettings = () => {
         <Separator />
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Ссылки на страницы</h3>
+          <h3 className="text-lg font-semibold">Страницы</h3>
+          <p className="text-sm text-muted-foreground">
+            Редактируйте содержимое страниц Условия использования и Политика конфиденциальности
+          </p>
           
-          <div className="space-y-2">
-            <Label htmlFor="terms_of_use_url">URL Условий использования</Label>
-            <Input
-              id="terms_of_use_url"
-              value={settings.terms_of_use_url}
-              onChange={(e) => setSettings(prev => ({...prev, terms_of_use_url: e.target.value}))}
-              placeholder="/terms-of-use"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="privacy_policy_url">URL Политики конфиденциальности</Label>
-            <Input
-              id="privacy_policy_url"
-              value={settings.privacy_policy_url}
-              onChange={(e) => setSettings(prev => ({...prev, privacy_policy_url: e.target.value}))}
-              placeholder="/privacy-policy"
-              disabled={loading}
-            />
-          </div>
+          <Tabs defaultValue="terms">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="terms">Условия использования</TabsTrigger>
+              <TabsTrigger value="privacy">Политика конфиденциальности</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="terms" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Содержимое страницы "Условия использования"</Label>
+                <RichTextEditor
+                  value={termsContent}
+                  onChange={setTermsContent}
+                  placeholder="Введите текст условий использования..."
+                />
+              </div>
+              <Button 
+                onClick={() => handleSavePageContent('terms_of_use', termsContent)}
+                disabled={loading}
+              >
+                {loading ? 'Сохранение...' : 'Сохранить условия использования'}
+              </Button>
+            </TabsContent>
+            
+            <TabsContent value="privacy" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Содержимое страницы "Политика конфиденциальности"</Label>
+                <RichTextEditor
+                  value={privacyContent}
+                  onChange={setPrivacyContent}
+                  placeholder="Введите текст политики конфиденциальности..."
+                />
+              </div>
+              <Button 
+                onClick={() => handleSavePageContent('privacy_policy', privacyContent)}
+                disabled={loading}
+              >
+                {loading ? 'Сохранение...' : 'Сохранить политику конфиденциальности'}
+              </Button>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <Separator />
