@@ -190,12 +190,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </div>
             )}
             
-            {/* Add to Cart Button on card - full width at bottom */}
+            {/* Add to Cart Button on card - with padding from edges */}
             {settings.cart_position === 'on_card' && (
-              <div className={`absolute bottom-0 left-0 right-0 z-10 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2') : 'opacity-100 translate-y-0'} transition-all duration-300`}>
+              <div className={`absolute bottom-4 left-4 right-4 z-10 ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2') : 'opacity-100 translate-y-0'} transition-all duration-300`}>
                 <Button
                   onClick={handleAddToCart}
-                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-none font-light tracking-wider uppercase text-sm"
+                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-sm font-light tracking-wider uppercase text-sm"
                   size="lg"
                 >
                   {settings.cart_button_type === 'text' ? 'Добавить в корзину' : <ShoppingCart className="h-4 w-4" />}
