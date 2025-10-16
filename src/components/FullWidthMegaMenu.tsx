@@ -33,8 +33,7 @@ interface FullWidthMegaMenuProps {
   collections: Collection[];
   products: Product[];
   showCategories: boolean;
-  showCollections: boolean;
-  showProducts: boolean;
+  showCollectionsLeft: boolean;
   rightSideContent?: 'products' | 'collections' | 'both';
   onClose: () => void;
 }
@@ -44,8 +43,7 @@ export function FullWidthMegaMenu({
   collections,
   products,
   showCategories,
-  showCollections,
-  showProducts,
+  showCollectionsLeft,
   rightSideContent = 'both',
   onClose,
 }: FullWidthMegaMenuProps) {
@@ -90,7 +88,7 @@ export function FullWidthMegaMenu({
               </div>
             )}
 
-            {showCollections && collections.length > 0 && (
+            {showCollectionsLeft && collections.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-border">
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-4">
                   Коллекции
@@ -118,7 +116,7 @@ export function FullWidthMegaMenu({
               >
                 ВСЕ ТОВАРЫ
               </Link>
-              {showCollections && (
+              {showCollectionsLeft && (
                 <Link
                   to="/collections"
                   className="block text-sm font-medium hover:text-primary transition-colors"
@@ -132,7 +130,7 @@ export function FullWidthMegaMenu({
 
           {/* Right side with featured products and collections */}
           <div className="col-span-9">
-            {(rightSideContent === 'products' || rightSideContent === 'both') && showProducts && products.length > 0 && (
+            {(rightSideContent === 'products' || rightSideContent === 'both') && products.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Избранные товары
@@ -182,7 +180,7 @@ export function FullWidthMegaMenu({
               </div>
             )}
 
-            {(rightSideContent === 'collections' || rightSideContent === 'both') && showCollections && collections.length > 0 && (
+            {(rightSideContent === 'collections' || rightSideContent === 'both') && collections.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground mb-6">
                   Коллекции
