@@ -497,6 +497,62 @@ export type Database = {
           },
         ]
       }
+      home_page_blocks: {
+        Row: {
+          block_type: string
+          collection_id: string | null
+          created_at: string
+          display_order: number
+          font_size: string | null
+          id: string
+          is_active: boolean
+          items_count: number | null
+          show_all_collections: boolean | null
+          text_content: string | null
+          title: string | null
+          title_alignment: string
+          updated_at: string
+        }
+        Insert: {
+          block_type: string
+          collection_id?: string | null
+          created_at?: string
+          display_order?: number
+          font_size?: string | null
+          id?: string
+          is_active?: boolean
+          items_count?: number | null
+          show_all_collections?: boolean | null
+          text_content?: string | null
+          title?: string | null
+          title_alignment?: string
+          updated_at?: string
+        }
+        Update: {
+          block_type?: string
+          collection_id?: string | null
+          created_at?: string
+          display_order?: number
+          font_size?: string | null
+          id?: string
+          is_active?: boolean
+          items_count?: number | null
+          show_all_collections?: boolean | null
+          text_content?: string | null
+          title?: string | null
+          title_alignment?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_page_blocks_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lookbook_items: {
         Row: {
           created_at: string

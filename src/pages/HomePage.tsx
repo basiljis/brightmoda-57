@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import EmailSubscriptionSection from "@/components/EmailSubscriptionSection";
 import HeroCarousel from "@/components/HeroCarousel";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
+import { BlockRenderer } from "@/components/home/BlockRenderer";
 
 function MerinoSection({ blocks = [] as any[] }) {
   const by = (name: string) => blocks.find((b: any) => b.section_name === name)?.content_value || '';
@@ -60,6 +61,7 @@ const HomePage = () => {
   const featuredProducts = products.slice(0, 4);
   const [merinoBlocks, setMerinoBlocks] = useState<any[]>([]);
   const [showMerinoSection, setShowMerinoSection] = useState(true);
+  const [homePageBlocks, setHomePageBlocks] = useState<any[]>([]);
   const { getGridClasses, getContainerClass } = useCatalogSettings();
 
   useEffect(() => {
@@ -70,6 +72,7 @@ const HomePage = () => {
     loadCategories();
     loadMerinoBlocks();
     loadMerinoSectionVisibility();
+    loadHomePageBlocks();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -151,6 +154,21 @@ const HomePage = () => {
       }
     } catch (e) {
       console.error('Error loading merino section visibility:', e);
+    }
+  };
+
+  const loadHomePageBlocks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('home_page_blocks')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setHomePageBlocks(data || []);
+    } catch (e) {
+      console.error('Error loading home page blocks:', e);
     }
   };
 
@@ -337,6 +355,11 @@ const HomePage = () => {
           </div>
         </section>
       )}
+
+      {/* Dynamic Home Page Blocks */}
+      {homePageBlocks.map((block) => (
+        <BlockRenderer key={block.id} block={block} products={products} />
+      ))}
 
       {/* Email Subscription Section */}
       <EmailSubscriptionSection />
