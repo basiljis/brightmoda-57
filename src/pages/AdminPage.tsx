@@ -30,6 +30,7 @@ import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import PageSyncStatus from '@/components/admin/PageSyncStatus';
 import HomePageSettings from '@/components/admin/HomePageSettings';
+import CatalogSettings from '@/components/admin/CatalogSettings';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -645,6 +646,13 @@ const AdminPage = () => {
             {activeTab === "content-home" && (
               <div className="space-y-6">
                 <HomePageSettings />
+              </div>
+            )}
+
+            {/* Content - Catalog Settings */}
+            {activeTab === "content-catalog" && (
+              <div className="space-y-6">
+                <CatalogSettings />
               </div>
             )}
 

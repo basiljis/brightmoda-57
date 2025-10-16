@@ -112,6 +112,54 @@ export type Database = {
           },
         ]
       }
+      catalog_display_settings: {
+        Row: {
+          card_rounding: string
+          card_spacing: string
+          cards_per_row_desktop: number
+          cards_per_row_mobile: number
+          cards_per_row_tablet: number
+          cart_position: string
+          created_at: string
+          favorite_icon_style: string
+          favorite_position: string
+          full_width_layout: boolean
+          id: string
+          show_hover_effects: boolean
+          updated_at: string
+        }
+        Insert: {
+          card_rounding?: string
+          card_spacing?: string
+          cards_per_row_desktop?: number
+          cards_per_row_mobile?: number
+          cards_per_row_tablet?: number
+          cart_position?: string
+          created_at?: string
+          favorite_icon_style?: string
+          favorite_position?: string
+          full_width_layout?: boolean
+          id?: string
+          show_hover_effects?: boolean
+          updated_at?: string
+        }
+        Update: {
+          card_rounding?: string
+          card_spacing?: string
+          cards_per_row_desktop?: number
+          cards_per_row_mobile?: number
+          cards_per_row_tablet?: number
+          cart_position?: string
+          created_at?: string
+          favorite_icon_style?: string
+          favorite_position?: string
+          full_width_layout?: boolean
+          id?: string
+          show_hover_effects?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string

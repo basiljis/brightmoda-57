@@ -60,6 +60,7 @@ const sections: AdminSection[] = [
       { value: "content-pages", label: "Контент страниц" },
       { value: "content-header", label: "Коллекции в шапке" },
       { value: "content-home", label: "Настройки главной" },
+      { value: "content-catalog", label: "Каталог" },
     ],
   },
   {
