@@ -286,22 +286,20 @@ export default function MenuManagement() {
       
       if (error) throw error;
 
-      // Create default page content only if not a submenu
-      if (!parentId) {
-        const { error: contentError } = await supabase
-          .from('page_content')
-          .insert({
-            page_name: pageName,
-            section_name: 'content',
-            content_type: 'html',
-            content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
-            display_order: 1,
-            is_active: true,
-            menu_location: 'none'
-          });
+      // Create default page content for all menu items (including submenus)
+      const { error: contentError } = await supabase
+        .from('page_content')
+        .insert({
+          page_name: pageName,
+          section_name: 'content',
+          content_type: 'html',
+          content_value: `<h1>${newItemName}</h1><p>Содержимое страницы...</p>`,
+          display_order: 1,
+          is_active: true,
+          menu_location: 'none'
+        });
 
-        if (contentError) throw contentError;
-      }
+      if (contentError) throw contentError;
       
       toast({ 
         title: 'Создано', 
