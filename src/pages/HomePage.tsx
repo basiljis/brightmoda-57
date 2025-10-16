@@ -81,7 +81,6 @@ const HomePage = () => {
       const { data, error } = await supabase
         .from('collections')
         .select('*')
-        .eq('show_on_homepage', true)
         .eq('is_active', true)
         .order('sort_order');
       
@@ -279,7 +278,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Collections */}
-      {collections.length > 0 && (
+      {collections.filter(c => c.show_on_homepage).length > 0 && (
         <section className="py-24 bg-muted/30">
           <div className={getContainerClass()}>
             <div className="text-center mb-16">
@@ -290,7 +289,7 @@ const HomePage = () => {
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {collections.map((collection) => (
+              {collections.filter(c => c.show_on_homepage).map((collection) => (
                 <Link key={collection.id} to={`/collections/${collection.slug}`} className="group">
                   <div className="aspect-[4/5] bg-muted rounded-lg overflow-hidden mb-4">
                     {collection.image_url ? (
@@ -358,7 +357,7 @@ const HomePage = () => {
 
       {/* Dynamic Home Page Blocks */}
       {homePageBlocks.map((block) => (
-        <BlockRenderer key={block.id} block={block} products={products} />
+        <BlockRenderer key={block.id} block={block} products={products} collections={collections} />
       ))}
 
       {/* Email Subscription Section */}

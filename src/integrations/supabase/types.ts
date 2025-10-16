@@ -503,6 +503,7 @@ export type Database = {
       home_page_blocks: {
         Row: {
           block_type: string
+          collection_card_style: string | null
           collection_id: string | null
           created_at: string
           display_order: number
@@ -521,6 +522,7 @@ export type Database = {
         }
         Insert: {
           block_type: string
+          collection_card_style?: string | null
           collection_id?: string | null
           created_at?: string
           display_order?: number
@@ -539,6 +541,7 @@ export type Database = {
         }
         Update: {
           block_type?: string
+          collection_card_style?: string | null
           collection_id?: string | null
           created_at?: string
           display_order?: number

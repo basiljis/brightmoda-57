@@ -5,7 +5,7 @@ import { useCatalogSettings } from '@/hooks/useCatalogSettings';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
@@ -17,11 +17,13 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
+  collection_card_style: string | null;
 }
 
 interface BlockRendererProps {
   block: HomePageBlock;
   products: any[];
+  collections?: any[];
 }
 
 const getFontSizeClass = (size: string | null) => {
@@ -42,7 +44,7 @@ const getTitleAlignmentClass = (alignment: string) => {
   }
 };
 
-export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
+export const BlockRenderer = ({ block, products, collections = [] }: BlockRendererProps) => {
   const { getGridClasses, getContainerClass } = useCatalogSettings();
   const [visibleCount, setVisibleCount] = useState(block.items_count || 4);
 
@@ -115,6 +117,42 @@ export const BlockRenderer = ({ block, products }: BlockRendererProps) => {
               </Button>
             </div>
           )}
+        </div>
+      </section>
+    );
+  }
+
+  if (block.block_type === 'collection_card' && block.collection_id) {
+    const collection = collections.find(c => c.id === block.collection_id);
+    
+    if (!collection) return null;
+
+    return (
+      <section className="py-12">
+        <div className={getContainerClass()}>
+          {block.title && (
+            <h2 className={`text-3xl font-light mb-8 tracking-wide ${titleAlignClass}`}>
+              {block.title}
+            </h2>
+          )}
+          
+          <a 
+            href={`/catalog?collection=${collection.id}`}
+            className="block group relative overflow-hidden rounded-lg aspect-[16/9] bg-muted hover:shadow-xl transition-all duration-300"
+          >
+            {collection.image_url && (
+              <img 
+                src={collection.image_url} 
+                alt={collection.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center p-8">
+              <h3 className="text-white text-4xl font-light tracking-widest uppercase">
+                {collection.name}
+              </h3>
+            </div>
+          </a>
         </div>
       </section>
     );

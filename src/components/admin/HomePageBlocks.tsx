@@ -15,7 +15,7 @@ import RichTextEditor from './RichTextEditor';
 
 interface HomePageBlock {
   id: string;
-  block_type: 'catalog' | 'catalog_filtered' | 'text';
+  block_type: 'catalog' | 'catalog_filtered' | 'text' | 'collection_card';
   title: string | null;
   title_alignment: 'left' | 'center' | 'right';
   display_order: number;
@@ -27,6 +27,7 @@ interface HomePageBlock {
   font_size: 'small' | 'medium' | 'large' | 'xlarge' | null;
   show_more_button: boolean | null;
   show_more_text: string | null;
+  collection_card_style: string | null;
 }
 
 interface Collection {
@@ -54,6 +55,7 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
       case 'catalog': return 'Каталог';
       case 'catalog_filtered': return 'Каталог с фильтром';
       case 'text': return 'Текстовый блок';
+      case 'collection_card': return 'Карточка коллекции';
       default: return type;
     }
   };
@@ -100,6 +102,29 @@ function SortableBlock({ block, collections, onUpdate, onDelete }: SortableBlock
               </Select>
             </div>
           </div>
+
+          {block.block_type === 'collection_card' && (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Коллекция</Label>
+                <Select
+                  value={block.collection_id || ''}
+                  onValueChange={(value) => onUpdate(block.id, { collection_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите коллекцию" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
           {(block.block_type === 'catalog' || block.block_type === 'catalog_filtered') && (
             <div className="space-y-3">
@@ -213,7 +238,7 @@ const HomePageBlocks = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text'>('catalog');
+  const [newBlockType, setNewBlockType] = useState<'catalog' | 'catalog_filtered' | 'text' | 'collection_card'>('catalog');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -402,6 +427,7 @@ const HomePageBlocks = () => {
                     <SelectItem value="catalog">Каталог</SelectItem>
                     <SelectItem value="catalog_filtered">Каталог с фильтром по коллекции</SelectItem>
                     <SelectItem value="text">Текстовый блок</SelectItem>
+                    <SelectItem value="collection_card">Карточка коллекции</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
