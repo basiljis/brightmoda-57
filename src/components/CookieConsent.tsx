@@ -60,7 +60,7 @@ export const CookieConsent = () => {
     : "bottom-0 left-0 right-0";
 
   return (
-    <div className={`fixed ${positionClasses} z-50 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg`}>
+    <div className={`fixed ${positionClasses} z-50 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg pb-20 md:pb-0`}>
       <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex-1 text-sm">
           {settings.title && (
