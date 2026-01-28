@@ -777,7 +777,7 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           page_path: string
           page_title: string | null
           referrer: string | null
@@ -791,7 +791,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           page_path: string
           page_title?: string | null
           referrer?: string | null
@@ -805,7 +805,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           page_path?: string
           page_title?: string | null
           referrer?: string | null
@@ -1404,14 +1404,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      update_analytics_summary: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      get_current_user_role: { Args: never; Returns: string }
+      update_analytics_summary: { Args: never; Returns: undefined }
       upsert_email_subscription: {
         Args: { p_email: string; p_user_id?: string }
         Returns: string

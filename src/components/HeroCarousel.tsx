@@ -74,7 +74,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
               {collections.map((collection) => (
                 <CarouselItem key={collection.id}>
                   <div className="relative group cursor-pointer h-screen">
-                    <Link to={collection.link_url} className="absolute inset-0 z-10" />
+                    <Link to={collection.link_url} className="absolute inset-0 z-10" aria-label={`Перейти к ${collection.title}`} />
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                       style={{ backgroundImage: `url(${collection.image_url})` }}
@@ -101,6 +101,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                   size="icon"
                   className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 text-white"
                   onClick={() => api?.scrollPrev()}
+                  aria-label="Предыдущий слайд"
                 >
                   <ChevronLeft className="h-8 w-8" />
                 </Button>
@@ -109,6 +110,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                   size="icon"
                   className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 text-white"
                   onClick={() => api?.scrollNext()}
+                  aria-label="Следующий слайд"
                 >
                   <ChevronRight className="h-8 w-8" />
                 </Button>
@@ -121,6 +123,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                         index === current ? 'bg-white w-8' : 'bg-white/50'
                       }`}
                       onClick={() => api?.scrollTo(index)}
+                      aria-label={`Перейти к слайду ${index + 1}`}
                     />
                   ))}
                 </div>
@@ -129,7 +132,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
           </Carousel>
         ) : (
           <div className="relative group cursor-pointer h-screen">
-            <Link to={collections[0].link_url} className="absolute inset-0 z-10" />
+            <Link to={collections[0].link_url} className="absolute inset-0 z-10" aria-label={`Перейти к ${collections[0].title}`} />
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
               style={{ backgroundImage: `url(${collections[0].image_url})` }}
@@ -157,7 +160,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
         <div className="grid md:grid-cols-2 h-full">
           {collections.map((collection) => (
             <div key={collection.id} className="relative group cursor-pointer">
-              <Link to={collection.link_url} className="absolute inset-0 z-10" />
+              <Link to={collection.link_url} className="absolute inset-0 z-10" aria-label={`Перейти к ${collection.title}`} />
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url(${collection.image_url})` }}
@@ -195,7 +198,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                 <div className="grid md:grid-cols-2 h-screen">
                   {/* Left Collection */}
                   <div className="relative group cursor-pointer">
-                    <Link to={leftCollection.link_url} className="absolute inset-0 z-10" />
+                    <Link to={leftCollection.link_url} className="absolute inset-0 z-10" aria-label={`Перейти к ${leftCollection.title}`} />
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                       style={{ backgroundImage: `url(${leftCollection.image_url})` }}
@@ -215,7 +218,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                   {/* Right Collection */}
                   {rightCollection && (
                     <div className="relative group cursor-pointer">
-                      <Link to={rightCollection.link_url} className="absolute inset-0 z-10" />
+                      <Link to={rightCollection.link_url} className="absolute inset-0 z-10" aria-label={`Перейти к ${rightCollection.title}`} />
                       <div
                         className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                         style={{ backgroundImage: `url(${rightCollection.image_url})` }}
@@ -243,6 +246,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
           size="icon"
           className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 text-white"
           onClick={() => api?.scrollPrev()}
+          aria-label="Предыдущий слайд"
         >
           <ChevronLeft className="h-8 w-8" />
         </Button>
@@ -251,6 +255,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
           size="icon"
           className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 text-white"
           onClick={() => api?.scrollNext()}
+          aria-label="Следующий слайд"
         >
           <ChevronRight className="h-8 w-8" />
         </Button>
@@ -263,6 +268,7 @@ const HeroCarousel = ({ collections }: HeroCarouselProps) => {
                 index === current ? 'bg-white w-8' : 'bg-white/50'
               }`}
               onClick={() => api?.scrollTo(index)}
+              aria-label={`Перейти к слайду ${index + 1}`}
             />
           ))}
         </div>

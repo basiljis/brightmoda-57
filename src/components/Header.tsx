@@ -208,7 +208,7 @@ const Header = () => {
             {isMobile && (
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" aria-label="Открыть меню">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
@@ -536,6 +536,7 @@ const Header = () => {
                     size="sm" 
                     className="hidden sm:flex"
                     onClick={() => setIsSearchOpen(true)}
+                    aria-label="Поиск"
                   >
                     <Search className="h-4 w-4" />
                   </Button>
@@ -547,8 +548,8 @@ const Header = () => {
                 <>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Link to="/favorites">
-                        <Button variant="ghost" size="sm" className="relative">
+                      <Link to="/favorites" aria-label="Избранное">
+                        <Button variant="ghost" size="sm" className="relative" aria-label="Избранное">
                           <Heart className="h-4 w-4" />
                           {favorites.length > 0 && (
                             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -564,8 +565,8 @@ const Header = () => {
                     <>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Link to="/profile">
-                            <Button variant="ghost" size="sm">
+                          <Link to="/profile" aria-label="Профиль">
+                            <Button variant="ghost" size="sm" aria-label="Профиль">
                               <User className="h-4 w-4" />
                             </Button>
                           </Link>
@@ -573,23 +574,23 @@ const Header = () => {
                         <TooltipContent>Профиль</TooltipContent>
                       </Tooltip>
                       {isAdmin && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link to="/admin">
-                              <Button variant="ghost" size="sm">
-                                <Settings className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent>Админка</TooltipContent>
-                        </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link to="/admin" aria-label="Админка">
+                            <Button variant="ghost" size="sm" aria-label="Админка">
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Админка</TooltipContent>
+                      </Tooltip>
                       )}
                     </>
                   ) : (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Link to="/auth">
-                          <Button variant="ghost" size="sm">
+                        <Link to="/auth" aria-label="Войти">
+                          <Button variant="ghost" size="sm" aria-label="Войти">
                             <User className="h-4 w-4" />
                           </Button>
                         </Link>
@@ -599,8 +600,8 @@ const Header = () => {
                   )}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Link to="/cart">
-                        <Button variant="ghost" size="sm" className="relative">
+                      <Link to="/cart" aria-label="Корзина">
+                        <Button variant="ghost" size="sm" className="relative" aria-label="Корзина">
                           <ShoppingBag className="h-4 w-4" />
                           {cartCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -663,8 +664,8 @@ const Header = () => {
 
       {/* Floating Contact button (bottom-right) */}
       {contactPlatform && contactUrl && (
-        <a href={contactUrl} target="_blank" rel="noopener noreferrer" className={`fixed ${isMobile ? 'bottom-20' : 'bottom-6'} right-6 z-50`}>
-          <Button variant="default" size="icon" className="h-14 w-14 rounded-full shadow-lg">
+        <a href={contactUrl} target="_blank" rel="noopener noreferrer" className={`fixed ${isMobile ? 'bottom-20' : 'bottom-6'} right-6 z-50`} aria-label="Связаться с нами">
+          <Button variant="default" size="icon" className="h-14 w-14 rounded-full shadow-lg" aria-label="Связаться с нами">
             {contactIconMode === 'custom' && contactCustomIcon ? (
               <img src={contactCustomIcon} alt="Связаться" className="h-6 w-6 object-contain" />
             ) : contactIconMode === 'default' ? (

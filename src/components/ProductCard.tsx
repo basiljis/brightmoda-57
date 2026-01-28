@@ -197,6 +197,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   onClick={handleAddToCart}
                   className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-none font-light tracking-wider uppercase text-sm"
                   size="lg"
+                  aria-label="Добавить в корзину"
                 >
                   {settings.cart_button_type === 'text' ? 'Добавить в корзину' : <ShoppingCart className="h-4 w-4" />}
                 </Button>
@@ -259,6 +260,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   className={`${settings.cart_button_type === 'icon' ? 'w-auto px-4' : 'w-[calc(100%-1rem)]'} bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()} ${shouldShowOnHover ? (isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2') : 'opacity-100 translate-y-0'}`}
                   variant="outline"
                   size={getButtonSize()}
+                  aria-label="Добавить в корзину"
                 >
                   <ShoppingCart className={`h-4 w-4 ${settings.cart_button_type === 'text' ? 'mr-2' : ''}`} />
                   {settings.cart_button_type === 'text' && 'Добавить в корзину'}
@@ -273,6 +275,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             variant="ghost"
             onClick={handleToggleFavorite}
             className={`absolute ${getFavoritePositionClass()} z-10 ${shouldShowOnHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-opacity p-2 bg-background/80 backdrop-blur-sm`}
+            aria-label={isFavorited(String(product.id)) ? 'Удалить из избранного' : 'Добавить в избранное'}
           >
             <Heart 
               className={`h-4 w-4 transition-colors ${
@@ -295,6 +298,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className={`${settings.cart_button_type === 'icon' ? 'w-auto px-4' : 'w-full'} bg-background text-foreground border border-border hover:bg-foreground hover:text-background transition-all duration-200 ${getRoundingClass()}`}
             variant="outline"
             size={getButtonSize()}
+            aria-label="Добавить в корзину"
           >
             <ShoppingCart className={`h-4 w-4 ${settings.cart_button_type === 'text' ? 'mr-2' : ''}`} />
             {settings.cart_button_type === 'text' && 'Добавить в корзину'}
