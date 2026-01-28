@@ -118,6 +118,7 @@ export const BlockRenderer = ({ block, products, collections = [] }: BlockRender
                   variant="outline"
                   size={block.show_more_button_size === 'small' ? 'sm' : block.show_more_button_size === 'large' ? 'lg' : 'default'}
                   className="rounded-full border-foreground text-foreground hover:bg-foreground hover:text-background"
+                  aria-label={`Показать еще ${remainingCount} товаров`}
                 >
                   <ChevronDown className="h-5 w-5" />
                 </Button>

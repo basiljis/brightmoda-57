@@ -76,7 +76,7 @@ const HomePage = () => {
           // Fallback to static collections if no dynamic data
           <div className="grid md:grid-cols-2 h-full">
             <div className="relative group cursor-pointer">
-              <Link to="/catalog" className="absolute inset-0 z-10"></Link>
+              <Link to="/catalog?category=men" className="absolute inset-0 z-10" aria-label="Перейти в мужской каталог"></Link>
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url(${menCollection})` }}
@@ -94,7 +94,7 @@ const HomePage = () => {
             </div>
 
             <div className="relative group cursor-pointer">
-              <Link to="/catalog" className="absolute inset-0 z-10"></Link>
+              <Link to="/catalog?category=women" className="absolute inset-0 z-10" aria-label="Перейти в женский каталог"></Link>
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url(${womenCollection})` }}
