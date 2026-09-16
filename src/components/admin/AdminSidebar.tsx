@@ -74,6 +74,7 @@ const sections: AdminSection[] = [
     icon: Settings,
     subItems: [
       { value: "settings-site", label: "Настройки сайта" },
+      { value: "settings-tracking", label: "Отслеживание посещений" },
       { value: "settings-seo", label: "SEO" },
       { value: "settings-fonts", label: "Шрифты" },
       { value: "settings-email", label: "Email" },
