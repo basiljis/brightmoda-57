@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.github
+.lovable
+.vscode
+*.log
+*.tsbuildinfo
+/tmp
+supabase/.temp
