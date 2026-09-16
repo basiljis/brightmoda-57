@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Grid, List, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
+import { useGeoStatus } from "@/hooks/useAnalytics";
 import {
   Sheet,
   SheetContent,
@@ -27,6 +28,7 @@ const CatalogPage = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { getGridClasses, getContainerClass } = useCatalogSettings();
+  const geoUnavailable = useGeoStatus();
   
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -224,6 +226,13 @@ const CatalogPage = () => {
              ""}
           </p>
         </div>
+
+        {geoUnavailable && (
+          <div className="mb-6 rounded-lg border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+            Определение региона временно недоступно. На работу каталога это не влияет.
+          </div>
+        )}
+
 
         {/* Filters & Search */}
         <div className="bg-card p-6 rounded-lg shadow-soft mb-8">

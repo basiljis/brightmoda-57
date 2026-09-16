@@ -1204,6 +1204,7 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          analytics_tracking_enabled: boolean
           cookie_consent_button_text: string | null
           cookie_consent_enabled: boolean | null
           cookie_consent_position: string | null
@@ -1223,6 +1224,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          analytics_tracking_enabled?: boolean
           cookie_consent_button_text?: string | null
           cookie_consent_enabled?: boolean | null
           cookie_consent_position?: string | null
@@ -1242,6 +1244,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          analytics_tracking_enabled?: boolean
           cookie_consent_button_text?: string | null
           cookie_consent_enabled?: boolean | null
           cookie_consent_position?: string | null
