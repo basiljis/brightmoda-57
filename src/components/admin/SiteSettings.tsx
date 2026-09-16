@@ -61,7 +61,7 @@ const SiteSettings = () => {
           logo_dark_url: data.logo_dark_url || '',
           footer_logo_url: data.footer_logo_url || '',
           footer_logo_dark_url: data.footer_logo_dark_url || '',
-          copyright_text: data.copyright_text || '© 2024 BRIGHT. Все права защищены.',
+          copyright_text: data.copyright_text || '© 2024 Shoplet. Все права защищены.',
           footer_description: data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.',
           cookie_consent_enabled: data.cookie_consent_enabled ?? true,
           cookie_consent_title: data.cookie_consent_title || 'Использование файлов cookie',

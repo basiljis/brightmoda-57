@@ -53,7 +53,7 @@ const LookbookPage = () => {
             LOOKBOOK
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Коллекция образов и стилевых решений от BRIGHT
+            Коллекция образов и стилевых решений от Shoplet
           </p>
         </div>
 

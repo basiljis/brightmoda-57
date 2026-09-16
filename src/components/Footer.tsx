@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
 import { Instagram, Facebook, Send, Youtube, Music } from "lucide-react";
-import logo from "@/assets/logo.png";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
 
 interface Category {
@@ -36,9 +35,9 @@ const Footer = () => {
   const [aboutSections, setAboutSections] = useState<PageContent[]>([]);
   const [supportSections, setSupportSections] = useState<PageContent[]>([]);
   const [footerMenuItems, setFooterMenuItems] = useState<PageContent[]>([]);
-  const [footerLogoUrl, setFooterLogoUrl] = useState(logo);
-  const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState(logo);
-  const [copyrightText, setCopyrightText] = useState('© 2024 BRIGHT. Все права защищены.');
+  const [footerLogoUrl, setFooterLogoUrl] = useState('');
+  const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState('');
+  const [copyrightText, setCopyrightText] = useState('© 2024 Shoplet. Все права защищены.');
   const [footerDescription, setFooterDescription] = useState('Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
   const [socialLinks, setSocialLinks] = useState<{[key: string]: string}>({});
   const { getContainerClass } = useCatalogSettings();
@@ -61,9 +60,9 @@ const Footer = () => {
         (payload) => {
           if (payload.new && typeof payload.new === 'object') {
             const newData = payload.new as any;
-            setFooterLogoUrl(newData.footer_logo_url || newData.logo_url || logo);
-            setFooterLogoDarkUrl(newData.footer_logo_dark_url || newData.logo_dark_url || logo);
-            setCopyrightText(newData.copyright_text || '© 2024 BRIGHT. Все права защищены.');
+            setFooterLogoUrl(newData.footer_logo_url || newData.logo_url || '');
+            setFooterLogoDarkUrl(newData.footer_logo_dark_url || newData.logo_dark_url || '');
+            setCopyrightText(newData.copyright_text || '© 2024 Shoplet. Все права защищены.');
             setFooterDescription(newData.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
             setSocialLinks((newData.social_links as { [key: string]: string }) || {});
           }
@@ -86,9 +85,9 @@ const Footer = () => {
         .single();
 
       if (!error && data) {
-        setFooterLogoUrl(data.footer_logo_url || data.logo_url || logo);
-        setFooterLogoDarkUrl(data.footer_logo_dark_url || data.logo_dark_url || logo);
-        setCopyrightText(data.copyright_text || '© 2024 BRIGHT. Все права защищены.');
+        setFooterLogoUrl(data.footer_logo_url || data.logo_url || '');
+        setFooterLogoDarkUrl(data.footer_logo_dark_url || data.logo_dark_url || '');
+        setCopyrightText(data.copyright_text || '© 2024 Shoplet. Все права защищены.');
         setFooterDescription(data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
         setSocialLinks((data.social_links as {[key: string]: string}) || {});
       }
@@ -226,14 +225,14 @@ const Footer = () => {
               {isFooterLogoReady ? (
                 <img 
                   src={currentFooterLogo} 
-                  alt="BRIGHT" 
+                  alt="Shoplet" 
                   className="h-8 w-auto"
                   width={120}
                   height={32}
                   loading="eager"
                 />
               ) : (
-                <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+                <span className="text-xl font-semibold tracking-wide">Shoplet</span>
               )}
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">

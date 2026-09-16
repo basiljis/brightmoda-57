@@ -49,7 +49,7 @@ const FooterSettings = () => {
       
       if (data) {
         setSettings({
-          copyright_text: data.copyright_text || '© 2024 BRIGHT. Все права защищены.',
+          copyright_text: data.copyright_text || '© 2024 Shoplet. Все права защищены.',
           footer_description: data.footer_description || 'Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.',
           social_links: {
             instagram: (data.social_links as any)?.instagram || '',
@@ -193,7 +193,7 @@ const FooterSettings = () => {
               id="copyright_text"
               value={settings.copyright_text}
               onChange={(e) => setSettings(prev => ({...prev, copyright_text: e.target.value}))}
-              placeholder="© 2024 BRIGHT. Все права защищены."
+              placeholder="© 2024 Shoplet. Все права защищены."
               disabled={loading}
             />
           </div>

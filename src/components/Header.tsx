@@ -17,7 +17,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FullWidthMegaMenu } from "@/components/FullWidthMegaMenu";
-import logo from "@/assets/logo.png";
 import { products } from "@/data/products";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart"; 
@@ -37,8 +36,8 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogMenuOpen, setIsCatalogMenuOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState(logo);
-  const [logoDarkUrl, setLogoDarkUrl] = useState(logo);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoDarkUrl, setLogoDarkUrl] = useState('');
   const [contactPlatform, setContactPlatform] = useState<string | null>(null);
   const [contactUrl, setContactUrl] = useState<string | null>(null);
   const [contactIconMode, setContactIconMode] = useState<string>('auto');
@@ -216,9 +215,9 @@ const Header = () => {
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b">
                       {isLogoReady ? (
-                        <img src={currentLogo} alt="BRIGHT" className="h-8 w-auto" width={120} height={32} loading="eager" />
+                        <img src={currentLogo} alt="Shoplet" className="h-8 w-auto" width={120} height={32} loading="eager" />
                       ) : (
-                        <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+                        <span className="text-xl font-semibold tracking-wide">Shoplet</span>
                       )}
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -322,14 +321,14 @@ const Header = () => {
               {isLogoReady ? (
                 <img 
                   src={currentLogo} 
-                  alt="BRIGHT" 
+                  alt="Shoplet" 
                   className="h-8 w-auto"
                   width={120}
                   height={32}
                   loading="eager"
                 />
               ) : (
-                <div className="h-8 w-[120px] bg-transparent" aria-hidden />
+                <span className="text-xl font-semibold tracking-wide">Shoplet</span>
               )}
             </Link>
 
