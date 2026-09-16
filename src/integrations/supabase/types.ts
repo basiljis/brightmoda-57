@@ -1804,6 +1804,7 @@ export type Database = {
     }
     Functions: {
       can_edit_tenant: { Args: { _tenant_id: string }; Returns: boolean }
+      can_manage_tenant: { Args: { _tenant_id: string }; Returns: boolean }
       create_tenant: { Args: { _name: string; _slug: string }; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
       is_tenant_member: { Args: { _tenant_id: string }; Returns: boolean }
