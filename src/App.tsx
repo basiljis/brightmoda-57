@@ -30,6 +30,11 @@ import CartPage from "./pages/CartPage";
 import NotFound from "./pages/NotFound";
 import DynamicPage from "./pages/DynamicPage";
 import { ScrollToTop } from "./components/ScrollToTop";
+import ProjectsPage from "./pages/ProjectsPage";
+import { TenantProvider, resolveTenant } from "@/hooks/useTenant";
+import { TrialBanner } from "@/components/TrialBanner";
+import type { TenantRecord } from "@/lib/tenant";
+import { slugCandidateFromPath } from "@/lib/tenant";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +42,15 @@ const App = () => {
   const [faviconReady, setFaviconReady] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
   const [minDelayDone, setMinDelayDone] = useState(false);
+  const [tenant, setTenant] = useState<TenantRecord | null>(null);
+  const [tenantReady, setTenantReady] = useState(false);
+
+  // Определяем проект (магазин) по адресу до загрузки остальных данных
+  useEffect(() => {
+    resolveTenant(window.location.pathname)
+      .then(setTenant)
+      .finally(() => setTenantReady(true));
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setMinDelayDone(true), 400);
