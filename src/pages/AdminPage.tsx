@@ -28,6 +28,7 @@ import FontSettings from '@/components/admin/FontSettings';
 import YandexPaymentSettings from '@/components/admin/YandexPaymentSettings';
 import HiddenSectionsManager from '@/components/admin/HiddenSectionsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import TrackingSettings from '@/components/admin/TrackingSettings';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
 import FooterSettings from '@/components/admin/FooterSettings';
@@ -716,6 +717,12 @@ const AdminPage = () => {
               </div>
             )}
 
+            {/* Settings - Tracking */}
+            {activeTab === "settings-tracking" && (
+              <div className="space-y-6">
+                <TrackingSettings />
+              </div>
+            )}
 
             {/* Settings - SEO */}
             {activeTab === "settings-seo" && (
