@@ -1020,6 +1020,63 @@ export type Database = {
           },
         ]
       }
+      platform_admins: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      platform_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_percent: number
+          id: string
+          is_active: boolean
+          months: number
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          months?: number
+          name: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          months?: number
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_color_images: {
         Row: {
           color_id: string
@@ -1665,6 +1722,72 @@ export type Database = {
           },
         ]
       }
+      tenant_payments: {
+        Row: {
+          amount: number
+          comment: string | null
+          created_at: string
+          discount_percent: number
+          id: string
+          method: string | null
+          months: number
+          paid_until: string | null
+          plan_id: string | null
+          status: string
+          tenant_id: string
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          comment?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          method?: string | null
+          months?: number
+          paid_until?: string | null
+          plan_id?: string | null
+          status?: string
+          tenant_id: string
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          comment?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          method?: string | null
+          months?: number
+          paid_until?: string | null
+          plan_id?: string | null
+          status?: string
+          tenant_id?: string
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "platform_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
@@ -1805,8 +1928,13 @@ export type Database = {
     Functions: {
       can_edit_tenant: { Args: { _tenant_id: string }; Returns: boolean }
       can_manage_tenant: { Args: { _tenant_id: string }; Returns: boolean }
+      confirm_tenant_payment: {
+        Args: { _payment_id: string }
+        Returns: undefined
+      }
       create_tenant: { Args: { _name: string; _slug: string }; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
+      is_platform_admin: { Args: never; Returns: boolean }
       is_tenant_member: { Args: { _tenant_id: string }; Returns: boolean }
       set_tenant_domain: {
         Args: { _domain: string; _registrar: string; _tenant_id: string }

@@ -33,7 +33,7 @@ export const RESERVED_SLUGS = new Set<string>([
   'admin', 'auth', 'cart', 'catalog', 'product', 'products', 'profile', 'projects',
   'favorites', 'collections', 'lookbook', 'about', 'contacts', 'reset-password',
   'privacy-policy', 'terms-of-use', 'public-offer', 'shipping-payment',
-  'returns-exchange', 'api', 'assets', 'static', 'www', 'app',
+  'returns-exchange', 'superadmin', 'billing', 'api', 'assets', 'static', 'www', 'app',
 ]);
 
 let activeTenant: TenantRecord | null = null;

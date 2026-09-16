@@ -31,6 +31,7 @@ import NotFound from "./pages/NotFound";
 import DynamicPage from "./pages/DynamicPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 import ProjectsPage from "./pages/ProjectsPage";
+import SuperAdminPage from "./pages/SuperAdminPage";
 import { TenantProvider, resolveTenant } from "@/hooks/useTenant";
 import { TrialBanner } from "@/components/TrialBanner";
 import type { TenantRecord } from "@/lib/tenant";
@@ -227,6 +228,7 @@ const App = () => {
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/superadmin" element={<SuperAdminPage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />
