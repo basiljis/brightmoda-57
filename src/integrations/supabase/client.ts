@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
+import { getActiveTenantId, TENANT_TABLES } from '@/lib/tenant';
 
 const SUPABASE_URL = "https://kpimhnlvjndbvwlozeow.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwaW1obmx2am5kYnZ3bG96ZW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzODE3MzEsImV4cCI6MjA3Mzk1NzczMX0.qD56is9cgmJc2NTzmb61_YsE6yGCeVcSiHzT5JUphf0";
