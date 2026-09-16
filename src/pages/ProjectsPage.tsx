@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { normalizeSlug, RESERVED_SLUGS, TenantRecord, TENANT_SELECT } from "@/lib/tenant";
 import CustomDomainCard from "@/components/CustomDomainCard";
+import SubscriptionCard from "@/components/SubscriptionCard";
 
 const ProjectsPage = () => {
   const { user } = useAuth();
@@ -139,6 +140,7 @@ const ProjectsPage = () => {
                 </Button>
                 </div>
                 <CustomDomainCard project={p} onSaved={loadProjects} />
+                <SubscriptionCard project={p} />
               </CardContent>
             </Card>
           );
