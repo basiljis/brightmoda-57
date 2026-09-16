@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -13,36 +13,125 @@ const getSessionId = () => {
   return sessionId;
 };
 
+type Geo = { city: string | null; region: string | null; country: string | null };
+const EMPTY_GEO: Geo = { city: null, region: null, country: null };
+
+/* ---------- Geolocation status (shared across the app) ---------- */
+let geoUnavailable = false;
+const geoListeners = new Set<(value: boolean) => void>();
+
+const setGeoUnavailable = (value: boolean) => {
+  if (geoUnavailable === value) return;
+  geoUnavailable = value;
+  geoListeners.forEach((listener) => listener(value));
+};
+
+export const useGeoStatus = () => {
+  const [unavailable, setUnavailable] = useState(geoUnavailable);
+  useEffect(() => {
+    geoListeners.add(setUnavailable);
+    setUnavailable(geoUnavailable);
+    return () => {
+      geoListeners.delete(setUnavailable);
+    };
+  }, []);
+  return unavailable;
+};
+
+/* ---------- Geolocation with caching (avoids rate limit 429) ---------- */
+let geoPromise: Promise<Geo> | null = null;
+
+const getGeolocation = async (): Promise<Geo> => {
+  const cached = sessionStorage.getItem('analytics_geo');
+  if (cached) {
+    try {
+      return JSON.parse(cached) as Geo;
+    } catch {
+      /* ignore malformed cache */
+    }
+  }
+
+  if (!geoPromise) {
+    geoPromise = (async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (!response.ok) {
+          // 429 = too many requests, region detection temporarily unavailable
+          setGeoUnavailable(true);
+          return EMPTY_GEO;
+        }
+        const data = await response.json();
+        if (data?.error) {
+          setGeoUnavailable(true);
+          return EMPTY_GEO;
+        }
+        const geo: Geo = {
+          city: data.city || null,
+          region: data.region || null,
+          country: data.country_name || null,
+        };
+        sessionStorage.setItem('analytics_geo', JSON.stringify(geo));
+        setGeoUnavailable(false);
+        return geo;
+      } catch {
+        setGeoUnavailable(true);
+        return EMPTY_GEO;
+      } finally {
+        // allow a later retry in the same session
+        setTimeout(() => {
+          geoPromise = null;
+        }, 60_000);
+      }
+    })();
+  }
+
+  return geoPromise;
+};
+
+/* ---------- Tracking enabled flag ---------- */
+let trackingEnabledPromise: Promise<boolean> | null = null;
+
+const isTrackingEnabled = async (): Promise<boolean> => {
+  if (!trackingEnabledPromise) {
+    trackingEnabledPromise = (async () => {
+      try {
+        const { data } = await supabase
+          .from('site_settings')
+          .select('analytics_tracking_enabled')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return (data as any)?.analytics_tracking_enabled ?? true;
+      } catch {
+        return true;
+      }
+    })();
+  }
+  return trackingEnabledPromise;
+};
+
+/* ---------- Page view de-duplication ---------- */
+const trackedPaths = new Set<string>();
+
 export const useAnalytics = () => {
   const location = useLocation();
   const { user } = useAuth();
   const sessionId = getSessionId();
 
-  // Get geolocation data
-  const getGeolocation = async () => {
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          city: data.city || null,
-          region: data.region || null,
-          country: data.country_name || null
-        };
-      }
-    } catch (error) {
-      console.error('Failed to fetch geolocation:', error);
-    }
-    return { city: null, region: null, country: null };
-  };
-
   // Track page view
   const trackPageView = useCallback(async (pagePath?: string, pageTitle?: string) => {
     try {
+      if (!(await isTrackingEnabled())) return;
+
       const path = pagePath || location.pathname;
       const title = pageTitle || document.title;
+
+      // The hook is used in several components at once — record each page once
+      if (trackedPaths.has(path)) return;
+      trackedPaths.add(path);
+
       const geo = await getGeolocation();
-      
+
       await supabase.from('page_views').insert({
         user_id: user?.id || null,
         page_path: path,
@@ -55,7 +144,7 @@ export const useAnalytics = () => {
         country: geo.country
       });
     } catch (error) {
-      console.error('Failed to track page view:', error);
+      // never block the page because of analytics
     }
   }, [location.pathname, user?.id, sessionId]);
 
@@ -67,6 +156,8 @@ export const useAnalytics = () => {
     metadata?: Record<string, any>
   ) => {
     try {
+      if (!(await isTrackingEnabled())) return;
+
       await supabase.from('user_actions').insert({
         user_id: user?.id || null,
         action_type: actionType,
@@ -76,7 +167,7 @@ export const useAnalytics = () => {
         session_id: sessionId
       });
     } catch (error) {
-      console.error('Failed to track action:', error);
+      // never block the UI because of analytics
     }
   }, [user?.id, sessionId]);
 
