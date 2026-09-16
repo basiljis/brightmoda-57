@@ -28,6 +28,7 @@ const CatalogPage = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { getGridClasses, getContainerClass } = useCatalogSettings();
+  const geoUnavailable = useGeoStatus();
   
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
