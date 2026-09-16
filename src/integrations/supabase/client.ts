@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
+import { getActiveTenantId, TENANT_TABLES } from '@/lib/tenant';
 
 const SUPABASE_URL = "https://kpimhnlvjndbvwlozeow.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwaW1obmx2am5kYnZ3bG96ZW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzODE3MzEsImV4cCI6MjA3Mzk1NzczMX0.qD56is9cgmJc2NTzmb61_YsE6yGCeVcSiHzT5JUphf0";
@@ -16,3 +17,35 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+
+// --- Мультитенантность -------------------------------------------------
+// Все запросы к таблицам проекта автоматически ограничиваются текущим проектом,
+// а новые записи получают его идентификатор.
+const originalFrom = supabase.from.bind(supabase);
+
+const withTenant = (values: any, tenantId: string) =>
+  Array.isArray(values)
+    ? values.map((row) => ({ tenant_id: tenantId, ...row }))
+    : { tenant_id: tenantId, ...values };
+
+(supabase as any).from = (table: string) => {
+  const builder: any = originalFrom(table as any);
+  const tenantId = getActiveTenantId();
+  if (!tenantId || !TENANT_TABLES.has(table)) return builder;
+
+  return new Proxy(builder, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+
+      if (prop === 'select' || prop === 'update' || prop === 'delete') {
+        return (...args: any[]) => value.apply(target, args).eq('tenant_id', tenantId);
+      }
+      if (prop === 'insert' || prop === 'upsert') {
+        return (values: any, ...rest: any[]) =>
+          value.apply(target, [withTenant(values, tenantId), ...rest]);
+      }
+      return value.bind(target);
+    },
+  });
+};
