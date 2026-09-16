@@ -4,8 +4,14 @@ import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
 import { getActiveTenantId, TENANT_TABLES } from '@/lib/tenant';
 
-const SUPABASE_URL = "https://kpimhnlvjndbvwlozeow.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwaW1obmx2am5kYnZ3bG96ZW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzODE3MzEsImV4cCI6MjA3Mzk1NzczMX0.qD56is9cgmJc2NTzmb61_YsE6yGCeVcSiHzT5JUphf0";
+// В продакшене (РФ) запросы идут через собственный прокси api.shoplet.pro,
+// адрес задаётся переменной окружения VITE_SUPABASE_URL при сборке.
+const SUPABASE_URL =
+  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ??
+  "https://kpimhnlvjndbvwlozeow.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY =
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwaW1obmx2am5kYnZ3bG96ZW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzODE3MzEsImV4cCI6MjA3Mzk1NzczMX0.qD56is9cgmJc2NTzmb61_YsE6yGCeVcSiHzT5JUphf0";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
