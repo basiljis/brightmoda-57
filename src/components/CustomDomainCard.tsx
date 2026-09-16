@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
-import { DOMAIN_TARGET_IP, REGISTRARS, getRegistrar } from "@/lib/domain-registrars";
+import {
+  DOMAIN_TARGET_IP,
+  REGISTRARS,
+  getRegistrar,
+  COMMON_DNS_STEPS,
+  COMMON_VERIFY_STEPS,
+  COMMON_SSL_STEPS,
+} from "@/lib/domain-registrars";
 import { TenantRecord } from "@/lib/tenant";
 
 const statusLabel: Record<string, string> = {
