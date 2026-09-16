@@ -129,16 +129,44 @@ const CustomDomainCard = ({
                 <p className="mb-1 font-medium">Запись TXT, имя «_shoplet», значение:</p>
                 <CopyValue value={txtValue} />
               </div>
-              {guide.site && (
-                <a href={guide.site} target="_blank" rel="noreferrer" className="inline-block underline">
-                  Открыть сайт регистратора
-                </a>
-              )}
-              <p className="text-muted-foreground">
-                Обновление DNS занимает от 15 минут до 24 часов. После этого сайт откроется
-                по вашему адресу, а защищённое соединение (https) включится автоматически.
-              </p>
             </div>
+
+            <div className="mt-4 space-y-4 text-sm">
+              <div>
+                <p className="mb-1 font-medium">DNS-записи — что должно получиться</p>
+                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                  {COMMON_DNS_STEPS.map((s, i) => <li key={i}>{s}</li>)}
+                  {(guide.dns ?? []).map((s, i) => <li key={`g-${i}`}>{s}</li>)}
+                </ul>
+              </div>
+
+              <div>
+                <p className="mb-1 font-medium">Подтверждение домена</p>
+                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                  {(guide.verify ?? []).map((s, i) => <li key={`v-${i}`}>{s}</li>)}
+                  {COMMON_VERIFY_STEPS.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              </div>
+
+              <div>
+                <p className="mb-1 font-medium">SSL-сертификат (https)</p>
+                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                  {(guide.ssl ?? []).map((s, i) => <li key={`s-${i}`}>{s}</li>)}
+                  {COMMON_SSL_STEPS.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              </div>
+            </div>
+
+            {guide.site && (
+              <a
+                href={guide.site}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-block text-sm underline"
+              >
+                Открыть сайт регистратора
+              </a>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
