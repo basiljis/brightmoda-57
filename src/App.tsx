@@ -268,6 +268,7 @@ const App = () => {
             <Footer />
           </div>
         </BrowserRouter>
+        </TenantProvider>
       </AuthProvider>
     </TooltipProvider>
     </ThemeProvider>
