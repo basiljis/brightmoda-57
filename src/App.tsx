@@ -195,20 +195,28 @@ const App = () => {
     loadFonts();
   }, []);
 
-  const isAppReady = faviconReady && fontsReady && minDelayDone;
+  const isAppReady = faviconReady && fontsReady && minDelayDone && tenantReady;
+
+  // Если проект открыт по адресу /nameproject — все ссылки работают внутри него
+  const pathSlug = slugCandidateFromPath(window.location.pathname);
+  const basename = tenant && pathSlug === tenant.slug ? `/${tenant.slug}` : undefined;
+
+  if (!tenantReady) return <Preloader />;
 
   return (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <AuthProvider>
+        <TenantProvider initialTenant={tenant}>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename={basename}>
             <ScrollToTop />
             <CookieConsent />
             {!isAppReady && <Preloader />}
             <div className="min-h-screen bg-background flex flex-col" style={{ visibility: isAppReady ? 'visible' : 'hidden' }}>
+              <TrialBanner />
               <Header />
               <main className="flex-1">
                 <Routes>
@@ -218,6 +226,7 @@ const App = () => {
                 <Route path="/favorites" element={<FavoritesPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />
