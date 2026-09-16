@@ -3,7 +3,7 @@ import CartItems from '@/components/profile/CartItems';
 
 const CartPage = () => {
   useEffect(() => {
-    document.title = 'Корзина - BRIGHT';
+    document.title = 'Корзина - Shoplet';
   }, []);
 
   return (

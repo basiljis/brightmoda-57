@@ -169,7 +169,7 @@ const EmailSettings = () => {
             <Label htmlFor="from_name">Имя отправителя</Label>
             <Input
               id="from_name"
-              placeholder="BRIGHT"
+              placeholder="Shoplet"
               value={settings.from_name}
               onChange={(e) => handleInputChange('from_name', e.target.value)}
             />
