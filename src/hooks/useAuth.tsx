@@ -62,8 +62,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .select('role')
         .eq('user_id', userId)
         .single();
-      
-      setIsAdmin(data?.role === 'admin');
+
+      // Доступ к админке: владелец/администратор текущего проекта.
+      const tenantId = getActiveTenantId();
+      let tenantAdmin = false;
+      if (tenantId) {
+        const { data: membership } = await supabase
+          .from('tenant_members')
+          .select('role')
+          .eq('tenant_id', tenantId)
+          .eq('user_id', userId)
+          .maybeSingle();
+        tenantAdmin = membership?.role === 'owner' || membership?.role === 'admin';
+      }
+
+      setIsAdmin(tenantAdmin || (!tenantId && data?.role === 'admin'));
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
