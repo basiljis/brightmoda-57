@@ -9,7 +9,13 @@
 - Страница `/projects` — создание и список своих проектов.
 - Баннер пробного периода и режим «только просмотр» после его окончания.
 
+## Готово (этап 2)
+- Свой домен проекта: поля `custom_domain`, `domain_status`, `domain_registrar`, `domain_verify_token`, функция `set_tenant_domain`.
+- Определение проекта по домену (приоритет над `/nameproject`).
+- Инструкции по DNS для российских регистраторов (REG.RU, RU-CENTER, Timeweb, Beget, SprintHost, Hostland, R01, Webnames, 2domains, Jino, Masterhost, Yandex Cloud, иные).
+
 ## Осталось
+- [ ] Автопроверка DNS/TXT домена и перевод статуса в «Подключён», выпуск SSL (нужна настройка хостинга).
 - [ ] Поддомены `nameproject.shoplet.pro`: wildcard DNS (*.shoplet.pro) + хостинг с wildcard-SSL. Требуется действие владельца домена.
 - [ ] Онбординг нового проекта: базовые категории/настройки/страницы при создании.
 - [ ] Приглашение сотрудников в проект (роли admin/staff) в интерфейсе.

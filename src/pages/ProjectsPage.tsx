@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { normalizeSlug, RESERVED_SLUGS, TenantRecord } from "@/lib/tenant";
+import { normalizeSlug, RESERVED_SLUGS, TenantRecord, TENANT_SELECT } from "@/lib/tenant";
+import CustomDomainCard from "@/components/CustomDomainCard";
 
 const ProjectsPage = () => {
   const { user } = useAuth();
@@ -20,7 +21,7 @@ const ProjectsPage = () => {
     if (!user) return;
     const { data } = await supabase
       .from("tenants")
-      .select("id, slug, name, owner_id, status, trial_ends_at")
+      .select(TENANT_SELECT)
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false });
     setProjects((data as TenantRecord[]) ?? []);
@@ -120,7 +121,8 @@ const ProjectsPage = () => {
           );
           return (
             <Card key={p.id}>
-              <CardContent className="flex flex-wrap items-center justify-between gap-4 py-5">
+              <CardContent className="py-5">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="font-medium">{p.name}</p>
                   <p className="text-sm text-muted-foreground">/{p.slug}</p>
@@ -133,8 +135,10 @@ const ProjectsPage = () => {
                   </p>
                 </div>
                 <Button asChild variant="outline">
-                  <a href={`/${p.slug}`}>Открыть</a>
+                  <a href={p.custom_domain ? `https://${p.custom_domain}` : `/${p.slug}`}>Открыть</a>
                 </Button>
+                </div>
+                <CustomDomainCard project={p} onSaved={loadProjects} />
               </CardContent>
             </Card>
           );

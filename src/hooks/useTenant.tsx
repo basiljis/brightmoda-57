@@ -7,6 +7,7 @@ import {
   setActiveTenant,
   slugCandidateFromPath,
   trialDaysLeft,
+  TENANT_SELECT,
 } from "@/lib/tenant";
 
 type TenantContextValue = {
@@ -29,12 +30,26 @@ export const useTenant = () => useContext(TenantContext);
 
 /** Находит проект по первому сегменту адреса, иначе — проект по умолчанию. */
 export const resolveTenant = async (pathname: string): Promise<TenantRecord | null> => {
+  // 1. Собственный домен магазина имеет приоритет над адресом вида /nameproject.
+  const host = window.location.hostname.toLowerCase().replace(/^www\./, "");
+  if (!/(^|\.)lovable\.app$/.test(host) && host !== "localhost" && !/^\d+(\.\d+){3}$/.test(host)) {
+    const { data: byDomain } = await supabase
+      .from("tenants")
+      .select(TENANT_SELECT)
+      .eq("custom_domain", host)
+      .maybeSingle();
+    if (byDomain) {
+      setActiveTenant(byDomain as TenantRecord);
+      return byDomain as TenantRecord;
+    }
+  }
+
   const slug = slugCandidateFromPath(pathname);
   const targetSlug = slug ?? "shoplet";
 
   const { data } = await supabase
     .from("tenants")
-    .select("id, slug, name, owner_id, status, trial_ends_at")
+    .select(TENANT_SELECT)
     .eq("slug", targetSlug)
     .maybeSingle();
 
@@ -47,7 +62,7 @@ export const resolveTenant = async (pathname: string): Promise<TenantRecord | nu
     // Неизвестный сегмент — это обычная страница проекта по умолчанию.
     const { data: fallback } = await supabase
       .from("tenants")
-      .select("id, slug, name, owner_id, status, trial_ends_at")
+      .select(TENANT_SELECT)
       .eq("slug", "shoplet")
       .maybeSingle();
     setActiveTenant((fallback as TenantRecord) ?? null);
@@ -75,7 +90,7 @@ export const TenantProvider = ({
     if (!tenant) return;
     const { data } = await supabase
       .from("tenants")
-      .select("id, slug, name, owner_id, status, trial_ends_at")
+      .select(TENANT_SELECT)
       .eq("id", tenant.id)
       .maybeSingle();
     if (data) {

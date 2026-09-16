@@ -1668,6 +1668,10 @@ export type Database = {
       tenants: {
         Row: {
           created_at: string
+          custom_domain: string | null
+          domain_registrar: string | null
+          domain_status: string
+          domain_verify_token: string
           id: string
           name: string
           owner_id: string
@@ -1678,6 +1682,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_domain?: string | null
+          domain_registrar?: string | null
+          domain_status?: string
+          domain_verify_token?: string
           id?: string
           name: string
           owner_id: string
@@ -1688,6 +1696,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_domain?: string | null
+          domain_registrar?: string | null
+          domain_status?: string
+          domain_verify_token?: string
           id?: string
           name?: string
           owner_id?: string
@@ -1795,6 +1807,10 @@ export type Database = {
       create_tenant: { Args: { _name: string; _slug: string }; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
       is_tenant_member: { Args: { _tenant_id: string }; Returns: boolean }
+      set_tenant_domain: {
+        Args: { _domain: string; _registrar: string; _tenant_id: string }
+        Returns: undefined
+      }
       tenant_is_active: { Args: { _tenant_id: string }; Returns: boolean }
       update_analytics_summary: { Args: never; Returns: undefined }
       upsert_email_subscription: {

@@ -7,7 +7,14 @@ export type TenantRecord = {
   owner_id: string;
   status: string;
   trial_ends_at: string;
+  custom_domain?: string | null;
+  domain_status?: string | null;
+  domain_registrar?: string | null;
+  domain_verify_token?: string | null;
 };
+
+export const TENANT_SELECT =
+  "id, slug, name, owner_id, status, trial_ends_at, custom_domain, domain_status, domain_registrar, domain_verify_token";
 
 // Таблицы, данные которых принадлежат конкретному проекту.
 export const TENANT_TABLES = new Set<string>([
