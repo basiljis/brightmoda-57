@@ -42,6 +42,7 @@ type Tenant = {
   status: string;
   trial_ends_at: string;
   custom_domain: string | null;
+  domain_status: string | null;
   created_at: string;
 };
 
