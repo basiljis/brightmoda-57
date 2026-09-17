@@ -60,13 +60,13 @@ const App = () => {
 
   // Load favicon on app initialization
   useEffect(() => {
+    if (!tenantReady || !tenant) return;
     const loadFavicon = async () => {
       try {
         const { data, error } = await supabase
           .from('site_settings')
           .select('favicon_url')
-          .order('updated_at', { ascending: false })
-          .limit(1)
+          .eq('tenant_id', tenant.id)
           .maybeSingle();
         
         if (error || !data || !data.favicon_url) return;
@@ -93,7 +93,7 @@ const App = () => {
     // Set up real-time listener for favicon updates
     const channel = supabase.channel('site_settings_favicon_changes')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'site_settings' }, 
+        { event: '*', schema: 'public', table: 'site_settings', filter: `tenant_id=eq.${tenant.id}` }, 
         (payload) => {
           if (payload.new && typeof payload.new === 'object') {
             const newData = payload.new as any;
@@ -116,15 +116,17 @@ const App = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenant?.id, tenantReady]);
 
   // Load fonts on app initialization
   useEffect(() => {
+    if (!tenantReady || !tenant) return;
     const loadFonts = async () => {
       try {
         const { data, error } = await supabase
           .from('seo_settings')
           .select('font_headings, font_body, font_accent, font_weights, custom_fonts_css')
+          .eq('tenant_id', tenant.id)
           .eq('page_name', 'home')
           .eq('is_active', true)
           .maybeSingle();
@@ -194,7 +196,7 @@ const App = () => {
     };
 
     loadFonts();
-  }, []);
+  }, [tenant?.id, tenantReady]);
 
   const isAppReady = faviconReady && fontsReady && minDelayDone && tenantReady;
 

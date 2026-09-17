@@ -50,7 +50,7 @@ export const useCatalogSettings = () => {
       const { data, error } = await supabase
         .from('catalog_display_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       

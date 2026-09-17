@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import FileUploadField from './FileUploadField';
+import { getActiveTenantId } from '@/lib/tenant';
 
 const SiteSettings = () => {
   const { toast } = useToast();
@@ -48,9 +49,7 @@ const SiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       
@@ -91,8 +90,11 @@ const SiteSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       // Одна запись настроек на магазин: обновляем её по tenant_id
       const { error } = await supabase.from('site_settings').upsert({
+        tenant_id: tenantId,
         favicon_url: settings.favicon_url,
         logo_url: settings.logo_url,
         logo_dark_url: settings.logo_dark_url,

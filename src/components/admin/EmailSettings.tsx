@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { getActiveTenantId } from '@/lib/tenant';
 
 interface EmailSettings {
   id?: string;
@@ -54,19 +55,12 @@ const EmailSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      let query;
-      if (settings.id) {
-        query = supabase
-          .from('email_settings')
-          .update(settings)
-          .eq('id', settings.id);
-      } else {
-        query = supabase
-          .from('email_settings')
-          .insert(settings);
-      }
-
-      const { error } = await query;
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
+      const { id: _id, ...values } = settings;
+      const { error } = await supabase
+        .from('email_settings')
+        .upsert({ ...values, tenant_id: tenantId }, { onConflict: 'tenant_id' });
       if (error) throw error;
 
       toast.success('Настройки сохранены');

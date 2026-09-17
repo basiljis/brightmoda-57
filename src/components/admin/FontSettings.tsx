@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Type, Plus, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getActiveTenantId } from '@/lib/tenant';
 
 interface FontSettings {
   font_headings: string;
@@ -98,10 +99,13 @@ const FontSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const { error } = await supabase
         .from('seo_settings')
         .upsert({
           page_name: 'home',
+          tenant_id: tenantId,
           font_headings: settings.font_headings,
           font_body: settings.font_body,
           font_accent: settings.font_accent,
@@ -109,7 +113,7 @@ const FontSettings = () => {
           custom_fonts_css: settings.custom_fonts_css,
           is_active: true
         }, {
-          onConflict: 'page_name'
+          onConflict: 'tenant_id,page_name'
         });
 
       if (error) throw error;

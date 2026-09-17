@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Plus, Edit, Trash2, BarChart3, Globe } from 'lucide-react';
+import { getActiveTenantId } from '@/lib/tenant';
 
 interface SEOSetting {
   id: string;
@@ -205,9 +206,12 @@ const SEOSettings = () => {
 
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const dataToSave = {
         ...currentSetting,
-        page_name: currentSetting.page_name!, // Type assertion since we check above
+        tenant_id: tenantId,
+        page_name: currentSetting.page_name,
         schema_markup: typeof currentSetting.schema_markup === 'string' 
           ? JSON.parse(currentSetting.schema_markup || '{}')
           : currentSetting.schema_markup || {},
@@ -216,7 +220,7 @@ const SEOSettings = () => {
           : currentSetting.additional_meta_tags || {}
       };
 
-      const { error } = await supabase.from('seo_settings').upsert(dataToSave);
+      const { error } = await supabase.from('seo_settings').upsert(dataToSave as any, { onConflict: 'tenant_id,page_name' });
 
       if (error) throw error;
 

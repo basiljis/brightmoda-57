@@ -23,6 +23,7 @@ import { useCart } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
 import { supabase } from "@/integrations/supabase/client";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
+import { useTenant } from "@/hooks/useTenant";
 
 const Header = () => {
   const location = useLocation();
@@ -75,17 +76,19 @@ const Header = () => {
   const isMobile = useIsMobile();
   const featuredProducts = products.filter(product => product.isFeatured).slice(0, 3);
   const { getContainerClass } = useCatalogSettings();
+  const { tenant } = useTenant();
 
   const currentLogo = theme === 'dark' && logoDarkUrl ? logoDarkUrl : logoUrl;
   const isLogoReady = Boolean(currentLogo && typeof currentLogo === 'string' && currentLogo.length > 0);
 
   useEffect(() => {
+    if (!tenant) return;
     loadData();
     
     // Set up a listener for logo updates in real-time
     const channel = supabase.channel('site_settings_changes')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'site_settings' }, 
+        { event: '*', schema: 'public', table: 'site_settings', filter: `tenant_id=eq.${tenant.id}` }, 
         (payload) => {
           if (payload.new && typeof payload.new === 'object') {
             const newData = payload.new as any;
@@ -99,7 +102,7 @@ const Header = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenant?.id]);
 
   const loadData = async () => {
     try {
@@ -107,8 +110,7 @@ const Header = () => {
       const { data: siteData, error: siteError } = await supabase
         .from('site_settings')
         .select('logo_url, logo_dark_url, social_links')
-        .order('updated_at', { ascending: false })
-        .limit(1)
+        .eq('tenant_id', tenant?.id ?? '')
         .maybeSingle();
       
       if (!siteError && siteData) {
@@ -126,8 +128,7 @@ const Header = () => {
       const { data: menuSettingsData, error: menuSettingsError } = await supabase
         .from('header_menu_settings')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('tenant_id', tenant?.id ?? '')
         .maybeSingle();
       
       if (!menuSettingsError && menuSettingsData) {

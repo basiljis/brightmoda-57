@@ -20,7 +20,7 @@ export type Database = {
           id: string
           is_visible: boolean
           section_name: string
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
           user_id: string
         }
@@ -29,7 +29,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           section_name: string
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
           user_id: string
         }
@@ -38,7 +38,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           section_name?: string
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
           user_id?: string
         }
@@ -163,7 +163,7 @@ export type Database = {
           id: string
           show_hover_effects: boolean
           show_image_zoom_on_hover: boolean
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -184,7 +184,7 @@ export type Database = {
           id?: string
           show_hover_effects?: boolean
           show_image_zoom_on_hover?: boolean
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -205,7 +205,7 @@ export type Database = {
           id?: string
           show_hover_effects?: boolean
           show_image_zoom_on_hover?: boolean
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -417,7 +417,7 @@ export type Database = {
           default_city_code: number | null
           default_city_name: string | null
           id: string
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -427,7 +427,7 @@ export type Database = {
           default_city_code?: number | null
           default_city_name?: string | null
           id?: string
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -437,7 +437,7 @@ export type Database = {
           default_city_code?: number | null
           default_city_name?: string | null
           id?: string
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -461,7 +461,7 @@ export type Database = {
           smtp_password: string | null
           smtp_port: number | null
           smtp_username: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -474,7 +474,7 @@ export type Database = {
           smtp_password?: string | null
           smtp_port?: number | null
           smtp_username?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -487,7 +487,7 @@ export type Database = {
           smtp_password?: string | null
           smtp_port?: number | null
           smtp_username?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -664,7 +664,7 @@ export type Database = {
           show_collections_right: boolean
           show_featured_products: boolean
           show_products_right: boolean
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -684,7 +684,7 @@ export type Database = {
           show_collections_right?: boolean
           show_featured_products?: boolean
           show_products_right?: boolean
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -704,7 +704,7 @@ export type Database = {
           show_collections_right?: boolean
           show_featured_products?: boolean
           show_products_right?: boolean
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1451,7 +1451,7 @@ export type Database = {
           page_name: string
           robots: string | null
           schema_markup: Json | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
           yandex_metrica_id: string | null
           yandex_webmaster_verification: string | null
@@ -1480,7 +1480,7 @@ export type Database = {
           page_name: string
           robots?: string | null
           schema_markup?: Json | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
           yandex_metrica_id?: string | null
           yandex_webmaster_verification?: string | null
@@ -1509,7 +1509,7 @@ export type Database = {
           page_name?: string
           robots?: string | null
           schema_markup?: Json | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
           yandex_metrica_id?: string | null
           yandex_webmaster_verification?: string | null
@@ -1543,7 +1543,7 @@ export type Database = {
           logo_dark_url: string | null
           logo_url: string | null
           social_links: Json | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -1564,7 +1564,7 @@ export type Database = {
           logo_dark_url?: string | null
           logo_url?: string | null
           social_links?: Json | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -1585,7 +1585,7 @@ export type Database = {
           logo_dark_url?: string | null
           logo_url?: string | null
           social_links?: Json | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1884,7 +1884,7 @@ export type Database = {
           is_enabled: boolean
           secret_key: string | null
           shop_id: string | null
-          tenant_id: string | null
+          tenant_id: string
           test_mode: boolean
           updated_at: string
           webhook_url: string | null
@@ -1895,7 +1895,7 @@ export type Database = {
           is_enabled?: boolean
           secret_key?: string | null
           shop_id?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           test_mode?: boolean
           updated_at?: string
           webhook_url?: string | null
@@ -1906,7 +1906,7 @@ export type Database = {
           is_enabled?: boolean
           secret_key?: string | null
           shop_id?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           test_mode?: boolean
           updated_at?: string
           webhook_url?: string | null

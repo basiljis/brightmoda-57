@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getActiveTenantId } from '@/lib/tenant';
 
 interface YandexPaymentSettings {
   id?: string;
@@ -78,14 +79,18 @@ const YandexPaymentSettings = () => {
 
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
+      const { id: _id, ...values } = settings;
       const { error } = await supabase
         .from('yandex_payment_settings')
         .upsert({
-          ...settings,
+          ...values,
+          tenant_id: tenantId,
           shop_id: settings.shop_id.trim(),
           secret_key: settings.secret_key.trim(),
           webhook_url: settings.webhook_url.trim()
-        });
+        }, { onConflict: 'tenant_id' });
 
       if (error) throw error;
 
