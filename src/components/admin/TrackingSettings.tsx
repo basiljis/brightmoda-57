@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, ShoppingCart, Heart, Users, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getActiveTenantId } from '@/lib/tenant';
 
 const TrackingSettings = () => {
   const { toast } = useToast();
@@ -24,8 +25,6 @@ const TrackingSettings = () => {
     const { data } = await supabase
       .from('site_settings')
       .select('id, analytics_tracking_enabled')
-      .order('updated_at', { ascending: false })
-      .limit(1)
       .maybeSingle();
 
     if (data) {
@@ -77,11 +76,11 @@ const TrackingSettings = () => {
   const handleToggle = async (value: boolean) => {
     setEnabled(value);
     try {
-      if (!settingsId) throw new Error('no settings row');
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const { error } = await supabase
         .from('site_settings')
-        .update({ analytics_tracking_enabled: value } as any)
-        .eq('id', settingsId);
+        .upsert({ tenant_id: tenantId, analytics_tracking_enabled: value }, { onConflict: 'tenant_id' });
       if (error) throw error;
       toast({
         title: value ? 'Отслеживание включено' : 'Отслеживание выключено',

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
+import { getActiveTenantId } from '@/lib/tenant';
 
 const FooterSettings = () => {
   const { toast } = useToast();
@@ -41,9 +42,7 @@ const FooterSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       
@@ -104,7 +103,10 @@ const FooterSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const { error } = await supabase.from('site_settings').upsert({
+        tenant_id: tenantId,
         copyright_text: settings.copyright_text,
         footer_description: settings.footer_description,
         social_links: settings.social_links,

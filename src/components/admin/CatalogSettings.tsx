@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
+import { getActiveTenantId } from '@/lib/tenant';
 
 const CatalogSettings = () => {
   const { toast } = useToast();
@@ -38,7 +39,7 @@ const CatalogSettings = () => {
       const { data, error } = await supabase
         .from('catalog_display_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       
@@ -53,12 +54,14 @@ const CatalogSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const { error } = await supabase
         .from('catalog_display_settings')
         .upsert({
-          id: '00000000-0000-0000-0000-000000000001',
+          tenant_id: tenantId,
           ...settings,
-        });
+        }, { onConflict: 'tenant_id' });
 
       if (error) throw error;
 

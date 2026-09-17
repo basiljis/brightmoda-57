@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Save, Loader2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { getActiveTenantId } from '@/lib/tenant';
 
 interface HeaderMenuSettings {
   id: string;
@@ -97,8 +98,6 @@ export default function HeaderMenuSettings() {
       const { data, error } = await supabase
         .from('header_menu_settings')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
@@ -121,11 +120,13 @@ export default function HeaderMenuSettings() {
   const saveSettings = async () => {
     try {
       setSaving(true);
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
 
       const { error } = await supabase
         .from('header_menu_settings')
         .upsert({
-          id: settings.id || undefined,
+          tenant_id: tenantId,
           menu_style: settings.menu_style,
           show_featured_products: settings.show_featured_products,
           show_collections: settings.show_collections,
@@ -139,7 +140,7 @@ export default function HeaderMenuSettings() {
           selected_product_ids: settings.selected_product_ids || [],
           selected_category_ids: settings.selected_category_ids || [],
           selected_category_ids_right: settings.selected_category_ids_right || [],
-        });
+        }, { onConflict: 'tenant_id' });
 
       if (error) throw error;
 
