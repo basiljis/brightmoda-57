@@ -72,7 +72,7 @@ const SuperAdminPage = () => {
       supabase.from("tenant_payments").select("*").order("created_at", { ascending: false }),
       supabase
         .from("tenants")
-        .select("id, name, slug, status, trial_ends_at, custom_domain, created_at")
+        .select("id, name, slug, status, trial_ends_at, custom_domain, domain_status, created_at")
         .order("created_at", { ascending: false }),
       supabase
         .from("profiles")
