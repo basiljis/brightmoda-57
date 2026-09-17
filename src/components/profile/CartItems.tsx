@@ -143,6 +143,73 @@ const CartItems = () => {
     sum + (item.product.price * item.quantity), 0
   );
 
+  const submitOrder = async () => {
+    if (!user) {
+      toast({ title: 'Войдите в аккаунт', description: 'Чтобы оформить заказ, нужно войти', variant: 'destructive' });
+      return;
+    }
+    if (!form.recipient_name.trim() || !form.phone.trim() || !form.address.trim()) {
+      toast({ title: 'Заполните данные', description: 'Имя, телефон и адрес обязательны', variant: 'destructive' });
+      return;
+    }
+
+    setPlacing(true);
+    try {
+      const items = cartItems.map((item) => ({
+        product_id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        size: item.size ?? null,
+        color: item.color ?? null,
+        image: item.product.images?.[0] ?? null,
+      }));
+
+      const { data: order, error } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          items,
+          total_amount: totalAmount,
+          status: 'pending',
+          delivery_status: 'not_shipped',
+          delivery_info: {
+            recipient_name: form.recipient_name.trim(),
+            phone: form.phone.trim(),
+            city: form.city.trim(),
+            address: form.address.trim(),
+            comment: form.comment.trim(),
+          },
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+
+      await supabase.from('cart_items').delete().eq('user_id', user.id);
+      await supabase.from('user_actions').insert({
+        user_id: user.id,
+        action_type: 'checkout_completed',
+        entity_type: 'order',
+        entity_id: order?.id ?? null,
+        metadata: { total: totalAmount, items_count: items.length },
+      });
+
+      setCartItems([]);
+      setCheckoutOpen(false);
+      toast({ title: 'Заказ оформлен', description: 'Мы свяжемся с вами для подтверждения' });
+    } catch (e: any) {
+      console.error('Error placing order:', e);
+      toast({
+        title: 'Ошибка',
+        description: e?.message || 'Не удалось оформить заказ',
+        variant: 'destructive',
+      });
+    } finally {
+      setPlacing(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card>
