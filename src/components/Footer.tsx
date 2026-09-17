@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
 import { Instagram, Facebook, Send, Youtube, Music } from "lucide-react";
 import { useCatalogSettings } from "@/hooks/useCatalogSettings";
+import { useTenant } from "@/hooks/useTenant";
 
 interface Category {
   id: string;
@@ -41,11 +42,13 @@ const Footer = () => {
   const [footerDescription, setFooterDescription] = useState('Премиальная одежда из мериносовой шерсти. Качество, комфорт и стиль в каждом изделии.');
   const [socialLinks, setSocialLinks] = useState<{[key: string]: string}>({});
   const { getContainerClass } = useCatalogSettings();
+  const { tenant } = useTenant();
 
   const currentFooterLogo = theme === 'dark' && footerLogoDarkUrl ? footerLogoDarkUrl : footerLogoUrl;
   const isFooterLogoReady = Boolean(currentFooterLogo && typeof currentFooterLogo === 'string' && currentFooterLogo.length > 0);
 
   useEffect(() => {
+    if (!tenant) return;
     loadSiteSettings();
     loadCategories();
     loadSubcategories();
@@ -56,7 +59,7 @@ const Footer = () => {
     // Set up real-time listener for footer logo updates
     const channel = supabase.channel('footer_logo_changes')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'site_settings' }, 
+        { event: '*', schema: 'public', table: 'site_settings', filter: `tenant_id=eq.${tenant.id}` }, 
         (payload) => {
           if (payload.new && typeof payload.new === 'object') {
             const newData = payload.new as any;
@@ -73,16 +76,15 @@ const Footer = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenant?.id]);
 
   const loadSiteSettings = async () => {
     try {
       const { data, error } = await supabase
         .from('site_settings')
         .select('footer_logo_url, footer_logo_dark_url, logo_url, logo_dark_url, copyright_text, footer_description, social_links')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .eq('tenant_id', tenant?.id ?? '')
+        .maybeSingle();
 
       if (!error && data) {
         setFooterLogoUrl(data.footer_logo_url || data.logo_url || '');
