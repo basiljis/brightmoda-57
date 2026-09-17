@@ -91,16 +91,8 @@ const SiteSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Get the first record's ID to update it
-      const { data: existingSettings } = await supabase
-        .from('site_settings')
-        .select('id')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-
+      // Одна запись настроек на магазин: обновляем её по tenant_id
       const { error } = await supabase.from('site_settings').upsert({
-        id: existingSettings?.id,
         favicon_url: settings.favicon_url,
         logo_url: settings.logo_url,
         logo_dark_url: settings.logo_dark_url,
@@ -114,8 +106,9 @@ const SiteSettings = () => {
         cookie_consent_button_text: settings.cookie_consent_button_text,
         cookie_consent_position: settings.cookie_consent_position,
         cookie_consent_privacy_link: settings.cookie_consent_privacy_link,
-        social_links: settings.social_links
-      }).select();
+        social_links: settings.social_links,
+        updated_at: new Date().toISOString()
+      } as any, { onConflict: 'tenant_id' }).select();
 
       if (error) throw error;
 

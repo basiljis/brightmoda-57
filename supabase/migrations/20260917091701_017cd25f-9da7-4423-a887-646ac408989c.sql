@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS site_settings_tenant_unique ON public.site_settings (tenant_id);
