@@ -142,7 +142,16 @@ const OrderManagement = () => {
         {loading ? (
           <p className="text-muted-foreground py-8 text-center">Загрузка...</p>
         ) : filtered.length === 0 ? (
-          <p className="text-muted-foreground py-8 text-center">Заказов не найдено</p>
+          <div className="py-10 text-center space-y-1">
+            <p className="text-muted-foreground">
+              {orders.length === 0
+                ? 'В этом магазине пока нет заказов'
+                : 'По выбранному фильтру заказов не найдено'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Новые заказы появятся здесь автоматически после оформления покупки
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
