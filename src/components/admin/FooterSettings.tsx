@@ -237,12 +237,22 @@ const FooterSettings = () => {
                   placeholder="Введите текст условий использования..."
                 />
               </div>
-              <Button 
-                onClick={() => handleSavePageContent('terms_of_use', termsContent)}
-                disabled={loading}
-              >
-                {loading ? 'Сохранение...' : 'Сохранить условия использования'}
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => handleSavePageContent('terms_of_use', termsContent)}
+                  disabled={loading}
+                >
+                  {loading ? 'Сохранение...' : 'Сохранить условия использования'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => setTermsContent(TERMS_OF_USE_TEMPLATE)}
+                >
+                  Вставить шаблон
+                </Button>
+              </div>
             </TabsContent>
             
             <TabsContent value="privacy" className="space-y-4">
