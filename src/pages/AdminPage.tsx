@@ -35,6 +35,7 @@ import FooterSettings from '@/components/admin/FooterSettings';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { getActiveTenantId } from '@/lib/tenant';
 
 const AdminPage = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -132,13 +133,16 @@ const AdminPage = () => {
     const newVisibility = isCurrentlyHidden;
     
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId || !user?.id) throw new Error('Магазин или пользователь не выбран');
       const { error } = await supabase
         .from('admin_section_visibility')
         .upsert({
-          user_id: user?.id,
+          tenant_id: tenantId,
+          user_id: user.id,
           section_name: sectionName,
           is_visible: newVisibility
-        });
+        }, { onConflict: 'tenant_id,user_id,section_name' });
 
       if (error) throw error;
 
@@ -320,12 +324,15 @@ const AdminPage = () => {
     e.preventDefault();
     
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
       const { error } = await supabase.from('delivery_settings').upsert({
+        tenant_id: tenantId,
         cdek_client_id: deliverySettings.cdek_client_id,
         cdek_client_secret: deliverySettings.cdek_client_secret,
         default_city_code: deliverySettings.default_city_code,
         default_city_name: deliverySettings.default_city_name
-      });
+      }, { onConflict: 'tenant_id' });
 
       if (error) throw error;
 
