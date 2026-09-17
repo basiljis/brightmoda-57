@@ -264,12 +264,22 @@ const FooterSettings = () => {
                   placeholder="Введите текст политики конфиденциальности..."
                 />
               </div>
-              <Button 
-                onClick={() => handleSavePageContent('privacy_policy', privacyContent)}
-                disabled={loading}
-              >
-                {loading ? 'Сохранение...' : 'Сохранить политику конфиденциальности'}
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => handleSavePageContent('privacy_policy', privacyContent)}
+                  disabled={loading}
+                >
+                  {loading ? 'Сохранение...' : 'Сохранить политику конфиденциальности'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => setPrivacyContent(PRIVACY_POLICY_TEMPLATE)}
+                >
+                  Вставить шаблон
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
