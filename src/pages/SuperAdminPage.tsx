@@ -150,6 +150,20 @@ const SuperAdminPage = () => {
     loadAll();
   };
 
+  const saveDomain = async (id: string, domain: string, status: string) => {
+    const norm = domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    const { error } = await supabase
+      .from("tenants")
+      .update({
+        custom_domain: norm || null,
+        domain_status: norm ? status : "none",
+      })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Домен обновлён");
+    loadAll();
+  };
+
   const setTenantStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("tenants").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
