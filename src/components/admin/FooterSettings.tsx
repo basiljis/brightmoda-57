@@ -104,19 +104,12 @@ const FooterSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const { data: existingSettings } = await supabase
-        .from('site_settings')
-        .select('id')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-
       const { error } = await supabase.from('site_settings').upsert({
-        id: existingSettings?.id,
         copyright_text: settings.copyright_text,
         footer_description: settings.footer_description,
-        social_links: settings.social_links
-      }).select();
+        social_links: settings.social_links,
+        updated_at: new Date().toISOString()
+      } as any, { onConflict: 'tenant_id' }).select();
 
       if (error) throw error;
 
