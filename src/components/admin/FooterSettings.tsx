@@ -137,16 +137,21 @@ const FooterSettings = () => {
   const handleSavePageContent = async (pageName: 'terms_of_use' | 'privacy_policy', content: string) => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
+
       // Delete existing content for this page
       await supabase
         .from('page_content')
         .delete()
-        .eq('page_name', pageName);
+        .eq('page_name', pageName)
+        .eq('tenant_id', tenantId);
 
       // Insert new content
       const { error } = await supabase
         .from('page_content')
         .insert({
+          tenant_id: tenantId,
           page_name: pageName,
           section_name: 'main',
           content_type: 'html',
