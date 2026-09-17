@@ -204,6 +204,7 @@ const SuperAdminPage = () => {
           <TabsTrigger value="payments">Платежи</TabsTrigger>
           <TabsTrigger value="plans">Тарифы и скидки</TabsTrigger>
           <TabsTrigger value="tenants">Проекты</TabsTrigger>
+          <TabsTrigger value="domains">Домены</TabsTrigger>
           <TabsTrigger value="users">Пользователи</TabsTrigger>
         </TabsList>
 
