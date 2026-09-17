@@ -70,31 +70,33 @@ const FooterSettings = () => {
 
   const loadPageContent = async () => {
     try {
+      const tenantId = getActiveTenantId();
+
       // Load Terms of Use
-      const { data: termsData } = await supabase
+      let termsQuery = supabase
         .from('page_content')
         .select('*')
         .eq('page_name', 'terms_of_use')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
-      
-      if (termsData && termsData.length > 0) {
-        const content = termsData.map(item => item.content_value).join('\n');
-        setTermsContent(content);
-      }
+      if (tenantId) termsQuery = termsQuery.eq('tenant_id', tenantId);
+      const { data: termsData } = await termsQuery;
+
+      const terms = (termsData || []).map(item => item.content_value).join('\n').trim();
+      setTermsContent(terms || TERMS_OF_USE_TEMPLATE);
 
       // Load Privacy Policy
-      const { data: privacyData } = await supabase
+      let privacyQuery = supabase
         .from('page_content')
         .select('*')
         .eq('page_name', 'privacy_policy')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
-      
-      if (privacyData && privacyData.length > 0) {
-        const content = privacyData.map(item => item.content_value).join('\n');
-        setPrivacyContent(content);
-      }
+      if (tenantId) privacyQuery = privacyQuery.eq('tenant_id', tenantId);
+      const { data: privacyData } = await privacyQuery;
+
+      const privacy = (privacyData || []).map(item => item.content_value).join('\n').trim();
+      setPrivacyContent(privacy || PRIVACY_POLICY_TEMPLATE);
     } catch (error) {
       console.error('Error loading page content:', error);
     }
