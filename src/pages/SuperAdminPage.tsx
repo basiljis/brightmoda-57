@@ -395,6 +395,59 @@ const SuperAdminPage = () => {
           {tenants.length === 0 && <p className="text-muted-foreground">Проектов пока нет.</p>}
         </TabsContent>
 
+        <TabsContent value="domains" className="space-y-3">
+          {tenants.map((t, index) => (
+            <Card key={t.id}>
+              <CardContent className="grid gap-3 py-4 md:grid-cols-6 md:items-end">
+                <div className="md:col-span-2">
+                  <p className="font-medium">{t.name}</p>
+                  <p className="text-sm text-muted-foreground">/{t.slug}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <Label>Собственный домен</Label>
+                  <Input
+                    placeholder="example.ru"
+                    value={t.custom_domain ?? ""}
+                    onChange={(e) => {
+                      const next = [...tenants];
+                      next[index] = { ...t, custom_domain: e.target.value };
+                      setTenants(next);
+                    }}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={t.domain_status === "verified" ? "default" : "secondary"}
+                  >
+                    {t.domain_status === "verified"
+                      ? "Подтверждён"
+                      : t.domain_status === "pending"
+                      ? "Ожидает проверки"
+                      : "Не подключён"}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => saveDomain(t.id, t.custom_domain ?? "", "verified")}>
+                    Подтвердить
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => saveDomain(t.id, t.custom_domain ?? "", "pending")}
+                  >
+                    Сохранить
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => saveDomain(t.id, "", "none")}>
+                    Отключить
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {tenants.length === 0 && <p className="text-muted-foreground">Проектов пока нет.</p>}
+        </TabsContent>
+
+
         <TabsContent value="users" className="space-y-3">
           {profiles.map((p) => (
             <Card key={p.id}>
