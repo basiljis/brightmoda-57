@@ -32,6 +32,7 @@ import TrackingSettings from '@/components/admin/TrackingSettings';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
 import FooterSettings from '@/components/admin/FooterSettings';
+import OrderManagement from '@/components/admin/OrderManagement';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
