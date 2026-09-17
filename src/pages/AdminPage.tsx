@@ -32,6 +32,7 @@ import TrackingSettings from '@/components/admin/TrackingSettings';
 import HomePageBlocks from '@/components/admin/HomePageBlocks';
 import CatalogSettings from '@/components/admin/CatalogSettings';
 import FooterSettings from '@/components/admin/FooterSettings';
+import OrderManagement from '@/components/admin/OrderManagement';
 // removed: CollectionManagement is handled inside ReferenceManagement tabs
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -681,39 +682,7 @@ const AdminPage = () => {
             {/* Orders */}
             {activeTab === "orders" && (
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Заказы</CardTitle>
-                    <CardDescription>Список всех заказов</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {orders.map((order: any) => (
-                        <div key={order.id} className="p-4 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-semibold">Заказ #{order.id.slice(0, 8)}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-bold">{order.total_amount} руб.</p>
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {order.status === 'pending' ? 'В обработке' : 
-                                 order.status === 'completed' ? 'Выполнен' : order.status}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <OrderManagement />
               </div>
             )}
 
