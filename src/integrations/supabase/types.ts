@@ -859,35 +859,56 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_comment: string | null
           created_at: string
+          delivered_at: string | null
           delivery_info: Json | null
+          delivery_service: string | null
+          delivery_status: string
           id: string
           items: Json
+          shipped_at: string | null
           status: string | null
           tenant_id: string | null
           total_amount: number
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_comment?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_info?: Json | null
+          delivery_service?: string | null
+          delivery_status?: string
           id?: string
           items: Json
+          shipped_at?: string | null
           status?: string | null
           tenant_id?: string | null
           total_amount: number
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_comment?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_info?: Json | null
+          delivery_service?: string | null
+          delivery_status?: string
           id?: string
           items?: Json
+          shipped_at?: string | null
           status?: string | null
           tenant_id?: string | null
           total_amount?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
           user_id?: string
         }
