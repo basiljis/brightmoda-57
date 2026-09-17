@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
 import { getActiveTenantId } from '@/lib/tenant';
+import { TERMS_OF_USE_TEMPLATE, PRIVACY_POLICY_TEMPLATE } from '@/lib/legal-templates';
 
 const FooterSettings = () => {
   const { toast } = useToast();
