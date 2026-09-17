@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import RichTextEditor from './RichTextEditor';
 import { getActiveTenantId } from '@/lib/tenant';
+import { TERMS_OF_USE_TEMPLATE, PRIVACY_POLICY_TEMPLATE } from '@/lib/legal-templates';
 
 const FooterSettings = () => {
   const { toast } = useToast();
@@ -70,31 +71,33 @@ const FooterSettings = () => {
 
   const loadPageContent = async () => {
     try {
+      const tenantId = getActiveTenantId();
+
       // Load Terms of Use
-      const { data: termsData } = await supabase
+      let termsQuery = supabase
         .from('page_content')
         .select('*')
         .eq('page_name', 'terms_of_use')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
-      
-      if (termsData && termsData.length > 0) {
-        const content = termsData.map(item => item.content_value).join('\n');
-        setTermsContent(content);
-      }
+      if (tenantId) termsQuery = termsQuery.eq('tenant_id', tenantId);
+      const { data: termsData } = await termsQuery;
+
+      const terms = (termsData || []).map(item => item.content_value).join('\n').trim();
+      setTermsContent(terms || TERMS_OF_USE_TEMPLATE);
 
       // Load Privacy Policy
-      const { data: privacyData } = await supabase
+      let privacyQuery = supabase
         .from('page_content')
         .select('*')
         .eq('page_name', 'privacy_policy')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
-      
-      if (privacyData && privacyData.length > 0) {
-        const content = privacyData.map(item => item.content_value).join('\n');
-        setPrivacyContent(content);
-      }
+      if (tenantId) privacyQuery = privacyQuery.eq('tenant_id', tenantId);
+      const { data: privacyData } = await privacyQuery;
+
+      const privacy = (privacyData || []).map(item => item.content_value).join('\n').trim();
+      setPrivacyContent(privacy || PRIVACY_POLICY_TEMPLATE);
     } catch (error) {
       console.error('Error loading page content:', error);
     }
@@ -134,16 +137,21 @@ const FooterSettings = () => {
   const handleSavePageContent = async (pageName: 'terms_of_use' | 'privacy_policy', content: string) => {
     setLoading(true);
     try {
+      const tenantId = getActiveTenantId();
+      if (!tenantId) throw new Error('Магазин не выбран');
+
       // Delete existing content for this page
       await supabase
         .from('page_content')
         .delete()
-        .eq('page_name', pageName);
+        .eq('page_name', pageName)
+        .eq('tenant_id', tenantId);
 
       // Insert new content
       const { error } = await supabase
         .from('page_content')
         .insert({
+          tenant_id: tenantId,
           page_name: pageName,
           section_name: 'main',
           content_type: 'html',
@@ -229,12 +237,22 @@ const FooterSettings = () => {
                   placeholder="Введите текст условий использования..."
                 />
               </div>
-              <Button 
-                onClick={() => handleSavePageContent('terms_of_use', termsContent)}
-                disabled={loading}
-              >
-                {loading ? 'Сохранение...' : 'Сохранить условия использования'}
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => handleSavePageContent('terms_of_use', termsContent)}
+                  disabled={loading}
+                >
+                  {loading ? 'Сохранение...' : 'Сохранить условия использования'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => setTermsContent(TERMS_OF_USE_TEMPLATE)}
+                >
+                  Вставить шаблон
+                </Button>
+              </div>
             </TabsContent>
             
             <TabsContent value="privacy" className="space-y-4">
@@ -246,12 +264,22 @@ const FooterSettings = () => {
                   placeholder="Введите текст политики конфиденциальности..."
                 />
               </div>
-              <Button 
-                onClick={() => handleSavePageContent('privacy_policy', privacyContent)}
-                disabled={loading}
-              >
-                {loading ? 'Сохранение...' : 'Сохранить политику конфиденциальности'}
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={() => handleSavePageContent('privacy_policy', privacyContent)}
+                  disabled={loading}
+                >
+                  {loading ? 'Сохранение...' : 'Сохранить политику конфиденциальности'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => setPrivacyContent(PRIVACY_POLICY_TEMPLATE)}
+                >
+                  Вставить шаблон
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
