@@ -315,7 +315,7 @@ const CartItems = () => {
                   <span className="text-lg font-semibold">Итого:</span>
                   <span className="text-lg font-semibold">{totalAmount} ₽</span>
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => setCheckoutOpen(true)}>
                   Оформить заказ
                 </Button>
               </div>
