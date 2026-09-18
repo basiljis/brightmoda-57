@@ -15,7 +15,8 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
 COPY package*.json ./
 RUN npm config set fetch-retries 5 \
  && npm config set fetch-retry-maxtimeout 120000 \
- && npm ci --no-audit --no-fund
+ && npm config set production false \
+ && npm ci --include=dev --no-audit --no-fund
 
 COPY . .
 RUN npm run build
