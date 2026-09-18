@@ -186,9 +186,16 @@ const FooterSettings = () => {
           Управление текстами, ссылками и социальными сетями в подвале сайта
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Тексты подвала</h3>
+      <CardContent>
+        <Tabs defaultValue="texts" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="texts">Тексты подвала</TabsTrigger>
+            <TabsTrigger value="pages">Страницы</TabsTrigger>
+            <TabsTrigger value="socials">Социальные сети</TabsTrigger>
+          </TabsList>
+
+        <TabsContent value="texts" className="space-y-4">
+          
           
           <div className="space-y-2">
             <Label htmlFor="copyright_text">Текст копирайта</Label>
