@@ -30,6 +30,15 @@ const CartItems = () => {
   const { toast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [placing, setPlacing] = useState(false);
+  const [form, setForm] = useState({
+    recipient_name: '',
+    phone: '',
+    city: '',
+    address: '',
+    comment: '',
+  });
 
   useEffect(() => {
     if (user) {
