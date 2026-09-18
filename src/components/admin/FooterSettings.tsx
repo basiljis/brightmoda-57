@@ -440,13 +440,13 @@ const FooterSettings = () => {
               />
             </div>
           )}
-        </div>
-
-        <div className="pt-4">
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? 'Сохранение...' : 'Сохранить настройки'}
-          </Button>
-        </div>
+          <div className="pt-2">
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? 'Сохранение...' : 'Сохранить настройки'}
+            </Button>
+          </div>
+        </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
