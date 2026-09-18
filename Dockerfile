@@ -19,7 +19,7 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     NODE_OPTIONS=--max-old-space-size=4096
 
 COPY package*.json ./
-RUN npm ci --include=dev --omit=optional --no-audit --no-fund \
+RUN npm ci --include=dev --no-audit --no-fund \
  && test -x node_modules/.bin/vite \
  && node_modules/.bin/vite --version
 
