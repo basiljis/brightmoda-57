@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -186,9 +185,16 @@ const FooterSettings = () => {
           Управление текстами, ссылками и социальными сетями в подвале сайта
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Тексты подвала</h3>
+      <CardContent>
+        <Tabs defaultValue="texts" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="texts">Тексты подвала</TabsTrigger>
+            <TabsTrigger value="pages">Страницы</TabsTrigger>
+            <TabsTrigger value="socials">Социальные сети</TabsTrigger>
+          </TabsList>
+
+        <TabsContent value="texts" className="space-y-4">
+          
           
           <div className="space-y-2">
             <Label htmlFor="copyright_text">Текст копирайта</Label>
@@ -212,12 +218,14 @@ const FooterSettings = () => {
               rows={3}
             />
           </div>
-        </div>
+          <div className="pt-2">
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? 'Сохранение...' : 'Сохранить настройки'}
+            </Button>
+          </div>
+        </TabsContent>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Страницы</h3>
+        <TabsContent value="pages" className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Редактируйте содержимое страниц Условия использования и Политика конфиденциальности
           </p>
@@ -282,12 +290,9 @@ const FooterSettings = () => {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
+        </TabsContent>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Социальные сети</h3>
+        <TabsContent value="socials" className="space-y-4">
           <p className="text-sm text-muted-foreground">Введите полные URL-адреса. Оставьте пустым, если не используется.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -434,13 +439,13 @@ const FooterSettings = () => {
               />
             </div>
           )}
-        </div>
-
-        <div className="pt-4">
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? 'Сохранение...' : 'Сохранить настройки'}
-          </Button>
-        </div>
+          <div className="pt-2">
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? 'Сохранение...' : 'Сохранить настройки'}
+            </Button>
+          </div>
+        </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
