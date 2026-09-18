@@ -30,6 +30,15 @@ const CartItems = () => {
   const { toast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [placing, setPlacing] = useState(false);
+  const [form, setForm] = useState({
+    recipient_name: '',
+    phone: '',
+    city: '',
+    address: '',
+    comment: '',
+  });
 
   useEffect(() => {
     if (user) {
@@ -306,7 +315,7 @@ const CartItems = () => {
                   <span className="text-lg font-semibold">Итого:</span>
                   <span className="text-lg font-semibold">{totalAmount} ₽</span>
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => setCheckoutOpen(true)}>
                   Оформить заказ
                 </Button>
               </div>
@@ -325,6 +334,59 @@ const CartItems = () => {
           )}
         </div>
       </CardContent>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Оформление заказа</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Имя получателя *</Label>
+              <Input
+                value={form.recipient_name}
+                onChange={(e) => setForm({ ...form, recipient_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Телефон *</Label>
+              <Input
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="+7 900 000-00-00"
+              />
+            </div>
+            <div>
+              <Label>Город</Label>
+              <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            </div>
+            <div>
+              <Label>Адрес доставки *</Label>
+              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            </div>
+            <div>
+              <Label>Комментарий</Label>
+              <Textarea
+                value={form.comment}
+                onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-between border-t pt-3 font-semibold">
+              <span>К оплате:</span>
+              <span>{totalAmount} ₽</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCheckoutOpen(false)} disabled={placing}>
+              Отмена
+            </Button>
+            <Button onClick={submitOrder} disabled={placing}>
+              {placing ? 'Оформляем...' : 'Подтвердить заказ'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
