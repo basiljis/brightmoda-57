@@ -3,6 +3,12 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Timeweb may inject NODE_ENV=production for the whole build. The build stage
+# needs Vite, Tailwind and the React plugin from devDependencies.
+ENV NODE_ENV=development \
+    NPM_CONFIG_PRODUCTION=false \
+    NPM_CONFIG_OMIT=""
+
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_PUBLISHABLE_KEY
 ARG VITE_SUPABASE_PROJECT_ID
@@ -13,10 +19,9 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     NODE_OPTIONS=--max-old-space-size=4096
 
 COPY package*.json ./
-RUN npm config set fetch-retries 5 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set production false \
- && npm ci --include=dev --no-audit --no-fund
+RUN npm ci --include=dev --omit=optional --no-audit --no-fund \
+ && test -x node_modules/.bin/vite \
+ && node_modules/.bin/vite --version
 
 COPY . .
 RUN npm run build
