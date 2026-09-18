@@ -219,12 +219,14 @@ const FooterSettings = () => {
               rows={3}
             />
           </div>
-        </div>
+          <div className="pt-2">
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? 'Сохранение...' : 'Сохранить настройки'}
+            </Button>
+          </div>
+        </TabsContent>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Страницы</h3>
+        <TabsContent value="pages" className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Редактируйте содержимое страниц Условия использования и Политика конфиденциальности
           </p>
