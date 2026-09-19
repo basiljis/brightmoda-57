@@ -78,5 +78,5 @@ docker exec <edge_container> rm    /etc/nginx/flags/maintenance.enabled   # вы
 | Ошибка вместо заглушки | Внешний порт Timeweb должен указывать на 8082 (edge) |
 | CORS-ошибки | В `nginx.conf` для `api.` должны быть `proxy_hide_header Access-Control-*` |
 | 526 / 404 от прокси | Проверить `proxy_ssl_server_name on` и `Host` = домен Supabase |
-| Сборка падает по памяти | В `Dockerfile` уже задан `NODE_OPTIONS=--max-old-space-size=4096` |
+| Сборка падает по памяти | В `Dockerfile` задан безопасный для ограниченного сборщика `NODE_OPTIONS=--max-old-space-size=2048`; при тарифе с 4+ ГБ RAM можно увеличить до 3072 |
 | `npm error Exit handler never called!` | Увеличить `DEPENDENCY_CACHE_VERSION` и пересобрать; установка автоматически очищает npm-кэш и повторяется один раз |
