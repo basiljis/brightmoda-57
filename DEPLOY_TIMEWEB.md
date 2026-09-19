@@ -20,6 +20,7 @@
 VITE_SUPABASE_URL=https://api.shoplet.pro
 VITE_SUPABASE_PUBLISHABLE_KEY=<anon-ключ Supabase>
 VITE_SUPABASE_PROJECT_ID=kpimhnlvjndbvwlozeow
+DEPENDENCY_CACHE_VERSION=2026-09-19-1
 ```
 
 `service_role` ключ во фронтенд не попадает никогда — только в секреты Edge Functions.
@@ -38,6 +39,10 @@ VITE_SUPABASE_PROJECT_ID=kpimhnlvjndbvwlozeow
    - для магазинов на поддоменах: `A  *.shoplet.pro → <IP Timeweb>`
 7. SSL Let's Encrypt включить на **оба** домена: `shoplet.pro` и `api.shoplet.pro`.
 8. Deploy. Первая сборка 6–10 минут.
+
+Если Timeweb повторно использует старый слой установки зависимостей, увеличьте
+`DEPENDENCY_CACHE_VERSION` (например, до `2026-09-19-2`) и запустите Deploy ещё
+раз. Это принудительно пересоздаст слой `npm ci`; удалять lock-файл не нужно.
 
 ## Настройки Supabase Auth
 
@@ -74,3 +79,4 @@ docker exec <edge_container> rm    /etc/nginx/flags/maintenance.enabled   # вы
 | CORS-ошибки | В `nginx.conf` для `api.` должны быть `proxy_hide_header Access-Control-*` |
 | 526 / 404 от прокси | Проверить `proxy_ssl_server_name on` и `Host` = домен Supabase |
 | Сборка падает по памяти | В `Dockerfile` уже задан `NODE_OPTIONS=--max-old-space-size=4096` |
+| `npm error Exit handler never called!` | Увеличить `DEPENDENCY_CACHE_VERSION` и пересобрать; установка автоматически очищает npm-кэш и повторяется один раз |
